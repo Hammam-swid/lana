@@ -18,6 +18,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     ),
     secure: req.protocol === "https" ? true : undefined,
   });
+  user.password = undefined;
   res.status(200).json({
     status: "success",
     user,

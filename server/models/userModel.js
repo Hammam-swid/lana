@@ -1,4 +1,5 @@
 const mongoose = require("mongoose");
+const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
   name: {
@@ -15,6 +16,8 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "يجب إدخال كلمة مرور"],
+    minlength: [8, 'كلمة السر يجب أن تحتوي على 8 أحرف على الأقل'],
+    select: false,
   },
   role: {
     type: String,
@@ -35,6 +38,17 @@ const userSchema = new mongoose.Schema({
     default: "active",
     enum: ["active", "nonactive", "banned"],
   },
+});
+
+userSchema.pre("save", async function (next) {
+  try {
+    const newPassword = await bcrypt.hash(this.password, 12);
+    console.log(newPassword, this.password);
+    this.password = newPassword;
+    next();
+  } catch (err) {
+    next(err);
+  }
 });
 
 const User = mongoose.model("User", userSchema);
