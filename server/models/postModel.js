@@ -10,40 +10,54 @@ const postSchema = new mongoose.Schema({
     required: [true, "يجب أن يكون للمنشور مستخدم ناشر"],
   },
   content: String,
-  likes: [
+  reactions: [
     {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      unique: true,
-    },
-  ],
-  dislikes: [
-    {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
-      unique: true,
+      username: {
+        type: String,
+        unique: true,
+        required: [true, "يجب أن يكون التفاعل تابعاً لمستخدم"],
+      },
+      type: {
+        type: Number,
+        required: true,
+        enum: [-1, 1],
+      },
+      createdAt: {
+        type: Date,
+        default: Date.now(),
+      },
     },
   ],
   comments: [
     {
       user: {
-        type: mongoose.Schema.Types.ObjectId,
-        required: [true, "التعليق يجب أن يكون لمستخدم معين"],
+        username: {
+          type: String,
+          required: [true, "يجب أن يكون التعليق تابعاً لمستخدم"],
+        },
       },
       text: {
         type: String,
         required: [true, "يجب أن يحتوي التعليق على نص"],
       },
-      likes: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "User",
-        unique: true,
-      },
-      dislikes: {
-        type: [mongoose.Schema.Types.ObjectId],
-        ref: "User",
-        unique: true,
-      },
+      reactions: [
+        {
+          username: {
+            type: String,
+            unique: true,
+            required: [true, "يجب أن يكون التفاعل تابعاً لمستخدم"],
+          },
+          type: {
+            type: Number,
+            required: true,
+            enum: [-1, 1],
+          },
+          createdAt: {
+            type: Date,
+            default: Date.now(),
+          },
+        },
+      ],
     },
   ],
 });

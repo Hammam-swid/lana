@@ -21,7 +21,7 @@ mongoose
   .then(() => {
     server.listen(process.env.PORT, process.env.HOST, () => {
       console.log(
-        `the server is running http://${process.env.HOST}:${process.env.PORT}`
+        `the server is running on http://${process.env.HOST}:${process.env.PORT}`
       );
     });
   })

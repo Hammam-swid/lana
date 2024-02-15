@@ -16,7 +16,7 @@ const userSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "يجب إدخال كلمة مرور"],
-    minlength: [8, 'كلمة السر يجب أن تحتوي على 8 أحرف على الأقل'],
+    minlength: [8, "كلمة السر يجب أن تحتوي على 8 أحرف على الأقل"],
     select: false,
   },
   role: {
@@ -42,14 +42,25 @@ const userSchema = new mongoose.Schema({
 
 userSchema.pre("save", async function (next) {
   try {
+    if (!this.isModified(this.password)) next();
     const newPassword = await bcrypt.hash(this.password, 12);
-    console.log(newPassword, this.password);
     this.password = newPassword;
     next();
   } catch (err) {
     next(err);
   }
 });
+
+userSchema.methods.comparePassword = async function (
+  insertedPassword,
+  userPassword
+) {
+  console.log(insertedPassword, userPassword);
+  console.log(await bcrypt.compare(insertedPassword, userPassword));
+  return await bcrypt.compare(insertedPassword, userPassword, (err) => {
+    console.log(err);
+  });
+};
 
 const User = mongoose.model("User", userSchema);
 
