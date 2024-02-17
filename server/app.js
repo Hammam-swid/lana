@@ -26,4 +26,7 @@ app.use("/api/v1/users", userRouter);
 // app.use("/api/v1/reactions", reactionRouter);
 // app.use("/api/v1/notifications", notificationRouter);
 
+app.all("*", (req, res) => {
+  res.status(404).json({ status: "fail" });
+});
 module.exports = app;
