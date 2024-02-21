@@ -25,6 +25,10 @@ const userSchema = new mongoose.Schema({
     minlength: [8, "كلمة السر يجب أن تحتوي على 8 أحرف على الأقل"],
     select: false,
   },
+  passwordChangedAt: {
+    type: Date,
+    default: Date.now(),
+  },
   role: {
     type: String,
     enum: ["user", "supervisor", "admin"],
@@ -119,6 +123,14 @@ userSchema.methods.comparePassword = async function (
   return await bcrypt.compare(insertedPassword, userPassword, (err) => {
     console.log(err);
   });
+};
+
+userSchema.methods.isPasswordChangedAfter = function (JWTTimestamp) {
+  if (this.passwordChangedAt) {
+    const passTimestamp = parseInt(this.passwordChangedAt.getTime() / 1000, 10);
+    return passTimestamp > JWTTimestamp;
+  }
+  return false;
 };
 
 const User = mongoose.model("User", userSchema);

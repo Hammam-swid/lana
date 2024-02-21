@@ -1,5 +1,6 @@
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
+const { promisify } = require("util");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/AppError");
 
@@ -49,4 +50,41 @@ exports.login = catchAsync(async (req, res, next) => {
     token,
     data: { user },
   });
+});
+
+exports.protect = catchAsync(async (req, res, next) => {
+  let token;
+  if (
+    req.headers.authorization &&
+    req.headers.authorization.startsWith("Bearer")
+  ) {
+    token = req.headers.authorization.split(" ")[1];
+  } else if (req.cookies && req.cookies.jwt) {
+    token = req.cookies.jwt;
+  }
+  if (!token) {
+    return next(
+      new AppError(
+        "لم تقم بتسجيل الدخول. الرجاء تسجيل الدخول والمحاولة مرة أخرى",
+        401
+      )
+    );
+  }
+
+  const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+  const user = await User.findById(decode.id);
+  if (!user) {
+    return next(new AppError("هذا المستخدم غير موجود", 401));
+  }
+
+  if (user.isPasswordChangedAfter(decode.iat)) {
+    return next(
+      new AppError(
+        "لقد قمت بتغيير كلمة المرور مؤخراً. الرجاء تسجيل الدخول مرة أخرى",
+        401
+      )
+    );
+  }
+  req.user = user;
+  next();
 });
