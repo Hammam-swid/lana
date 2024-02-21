@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
 
 const userSchema = new mongoose.Schema({
-  name: {
+  fullName: {
     type: String,
     required: [true, "المستخدم يجب أن يكون له اسم"],
     trim: true,
@@ -12,6 +12,12 @@ const userSchema = new mongoose.Schema({
     unique: [true, "يجب أن يكون البريد الإلكتروني فريداً"],
     required: [true, "المستخدم يجب أن يكون له بريد إلكتروني"],
     trim: true,
+  },
+  username: {
+    type: String,
+    required: [true, "المستخدم يجب أن يكون له اسم مستخدم"],
+    trim: true,
+    unique: [true, "اسم المستخدم هذا موجود"],
   },
   password: {
     type: String,
@@ -38,6 +44,59 @@ const userSchema = new mongoose.Schema({
     default: "active",
     enum: ["active", "nonactive", "banned"],
   },
+  dateOfBirth: Date,
+  verified: Boolean,
+  followers: [
+    {
+      username: {
+        type: String,
+        unique: true,
+        required: true,
+      },
+      fullName: {
+        type: String,
+        required: true,
+      },
+      photoUrl: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
+  following: [
+    {
+      username: {
+        type: String,
+        unique: true,
+        required: true,
+      },
+      fullName: {
+        type: String,
+        required: true,
+      },
+      photoUrl: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
+  blockedUsers: [
+    {
+      username: {
+        type: String,
+        unique: true,
+        required: true,
+      },
+      fullName: {
+        type: String,
+        required: true,
+      },
+      photoUrl: {
+        type: String,
+        required: true,
+      },
+    },
+  ],
 });
 
 userSchema.pre("save", async function (next) {

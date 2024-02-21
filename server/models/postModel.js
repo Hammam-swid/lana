@@ -9,7 +9,16 @@ const postSchema = new mongoose.Schema({
     },
     required: [true, "يجب أن يكون للمنشور مستخدم ناشر"],
   },
-  content: String,
+  content: {
+    type: String,
+    required: true,
+  },
+  photos: [String],
+  createdAt: {
+    type: Date,
+    default: Date.now(),
+  },
+  updatedAt: Date,
   reactions: [
     {
       username: {
