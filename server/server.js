@@ -13,11 +13,17 @@ const server = http.createServer(app);
 exports.io = new Server(server, {
   cors: {
     methods: ["GET", "POST"],
+    origin: "http://localhost:5173",
   },
 });
 
+const DB = process.env.MONGO_URL.replace(
+  "<PASSWORD>",
+  process.env.MONGO_PASSWORD
+);
+
 mongoose
-  .connect(process.env.MONGO_URL)
+  .connect(DB)
   .then(() => {
     server.listen(process.env.PORT, process.env.HOST, () => {
       console.log(
