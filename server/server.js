@@ -10,12 +10,14 @@ dotenv.config({
 
 const server = http.createServer(app);
 
-exports.io = new Server(server, {
+const io = new Server(server, {
   cors: {
     methods: ["GET", "POST"],
     origin: "http://localhost:5173",
   },
 });
+
+app.set('socket.io', io)
 
 const DB = process.env.MONGO_URL.replace(
   "<PASSWORD>",

@@ -130,7 +130,7 @@ userSchema.methods.comparePassword = async function (
   return await bcrypt.compare(insertedPassword, userPassword, (err) => {
     console.log(err);
   });
-};
+};  
 
 userSchema.methods.isPasswordChangedAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {

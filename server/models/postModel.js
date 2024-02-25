@@ -3,8 +3,8 @@ const mongoose = require("mongoose");
 const postSchema = new mongoose.Schema({
   user: {
     type: {
-      name: String,
-      userName: String,
+      fullName: String,
+      username: String,
       photo: String,
     },
     required: [true, "يجب أن يكون للمنشور مستخدم ناشر"],
@@ -12,13 +12,14 @@ const postSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
-  },
-  photos: [String],
+  }, 
+  pictures: [String],
   createdAt: {
     type: Date,
     default: Date.now(),
   },
   updatedAt: Date,
+  categories: [String],
   reactions: [
     {
       username: {
