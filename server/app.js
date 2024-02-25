@@ -1,6 +1,7 @@
 // استدعاء المكاتب الخارجية
 const express = require("express");
 const cors = require("cors");
+const globalErrorHandler = require("./controllers/errorController");
 
 const app = express();
 
@@ -29,4 +30,6 @@ app.use("/api/v1/users", userRouter);
 app.all("*", (req, res) => {
   res.status(404).json({ status: "fail" });
 });
+
+app.use(globalErrorHandler);
 module.exports = app;
