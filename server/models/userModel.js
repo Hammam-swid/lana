@@ -49,7 +49,14 @@ const userSchema = new mongoose.Schema({
     enum: ["active", "nonactive", "banned"],
   },
   dateOfBirth: Date,
-  verified: Boolean,
+  gender:{
+    type: String,
+    enum: ['male', 'female']
+  },
+  verified: {
+    type: Boolean,
+    default: false
+  },
   followers: [
     {
       username: {

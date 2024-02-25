@@ -40,21 +40,21 @@ exports.scanPost = catchAsync(async (req, res, next) => {
     },
     {
       category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-      threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE
-    }
+      threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
+    },
   ];
   const prompt = `what are the categories for this content: '${content}' : in the response separate between the categories by comma`;
   const result = await textModel.generateContent(prompt);
   const response = await result.response;
   let text = response.text();
-  text = text.split(",");
+  text = text.split(", ");
   if (photos) {
     const visionModel = genAI.getGenerativeModel({
       model: "gemini-pro-vision",
     });
   }
   res.status(201).json({
-    text,
+    categories: text,
   });
 });
 
