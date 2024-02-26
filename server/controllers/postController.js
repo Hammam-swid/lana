@@ -6,7 +6,21 @@ const {
   HarmCategory,
   HarmBlockThreshold,
 } = require("@google/generative-ai");
-// const dotenv = require()
+const multer = require("multer");
+
+const multerStorage = multer.memoryStorage();
+const multerFilter = (req, file, cb) => {
+  if (file.mimetype.startsWith("image")) {
+    cb(null, true);
+  }
+};
+
+const upload = multer({
+  storage: multerStorage,
+  fileFilter: multerFilter,
+});
+
+exports.uploadPostImages = upload.fields([{ name: "pictures", maxCount: 4 }]);
 
 exports.getPosts = async (req, res, next) => {
   try {
@@ -28,6 +42,7 @@ exports.getPosts = async (req, res, next) => {
 };
 
 exports.scanPost = catchAsync(async (req, res, next) => {
+  console.log(req.body);
   const { content, pictures } = req.body;
   if (!content) {
     return next(new AppError("يجب أن يحتوي المنشور على محتوى نصي", 400));
@@ -71,7 +86,10 @@ exports.scanPost = catchAsync(async (req, res, next) => {
     visionModel.safetySettings = safetySettings;
     const result = await visionModel.generateContent();
   }
-  next();
+  res.status(200).json({
+    status: "success",
+  });
+  // next();
 });
 
 exports.createPost = catchAsync(async (req, res, next) => {

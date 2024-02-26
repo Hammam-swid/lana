@@ -24,7 +24,6 @@ const postSchema = new mongoose.Schema({
     {
       username: {
         type: String,
-        unique: true,
         required: [true, "يجب أن يكون التفاعل تابعاً لمستخدم"],
       },
       type: {
@@ -54,7 +53,6 @@ const postSchema = new mongoose.Schema({
         {
           username: {
             type: String,
-            unique: true,
             required: [true, "يجب أن يكون التفاعل تابعاً لمستخدم"],
           },
           type: {
