@@ -33,7 +33,7 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!email || !password) {
     next(new AppError("الرجاء إدخال البريد الإلكتروني وكلمة المرور", 400));
   }
-  const user = await User.findOne({ email }).select("+password");
+  const user = await User.findOne({ email, state: 'active' }).select("+password");
   if (!user || !(await user.comparePassword(password, user.password))) {
     next(new AppError("البريد الإلكتروني أو كلمة المرور غير صحيحة", 404));
   }

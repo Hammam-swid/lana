@@ -47,8 +47,10 @@ exports.scanPost = catchAsync(async (req, res, next) => {
   if (!content) {
     return next(new AppError("يجب أن يحتوي المنشور على محتوى نصي", 400));
   }
+  // إنشاء اتصال مع نموذج ذكاء اصطناعي خاص بالتعامل مع النصوص
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
   const textModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+  // تعديل خصائص الحماية
   const safetySettings = [
     {
       category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
@@ -56,7 +58,7 @@ exports.scanPost = catchAsync(async (req, res, next) => {
     },
     {
       category: HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-      threshold: HarmBlockThreshold.BLOCK_NONE,
+      threshold: HarmBlockThreshold.BLOCK_LOW_AND_ABOVE,
     },
     {
       category: HarmCategory.HARM_CATEGORY_HARASSMENT,
@@ -72,6 +74,7 @@ exports.scanPost = catchAsync(async (req, res, next) => {
     },
   ];
   textModel.safetySettings = safetySettings;
+  // إرسال الأوامر للذكاء الاصطناعي
   const prompt = `what are the categories for this content: '${content}' : in the response separate between the categories by ', '`;
   const result = await textModel.generateContent(prompt);
   const response = await result.response;
@@ -85,6 +88,7 @@ exports.scanPost = catchAsync(async (req, res, next) => {
         mimeType: file.mimetype,
       },
     }));
+    // إنشاء اتصال مع نموذج ذكاء اصطناعي خاص بالتعامل مع الصور
     const visionModel = genAI.getGenerativeModel({
       model: "gemini-pro-vision",
     });
@@ -94,6 +98,7 @@ exports.scanPost = catchAsync(async (req, res, next) => {
     const result = await visionModel.generateContent([prompt, ...bufferImages]);
     const response = await result.response;
     imagesCategories = response.text().split(", ");
+    // تخزين الصور في الطلب لتمريره للدالة التالية وتخزينها على الخادم أيضاً
     req.body.images = [];
     const imagesPromises = req.files.images.map(async (image, i) => {
       const filename = `posts-${req.user.id}-${Date.now()}-${i + 1}.${
@@ -128,4 +133,35 @@ exports.createPost = catchAsync(async (req, res, next) => {
     status: "success",
     post,
   });
+});
+
+exports.getPost = catchAsync(async (req, res, next) => {
+  const { postId } = req.params;
+  const post = await Post.findById(postId);
+  if (!post) {
+    return next(new AppError("هذا المنشور غير موجود", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    post,
+  });
+});
+
+exports.deletePost = catchAsync(async (req, res, next) => {
+  const { postId } = req.params;
+  const post = await Post.findById(postId);
+  if (!post) {
+    return next(new AppError("هذا المنشور غير موجود", 404));
+  }
+  if (
+    req.user.username !== post.user.username &&
+    req.user.role !== "admin" &&
+    req.user.role !== "supervisor"
+  ) {
+    return next(new AppError("ليس لديك الصلاحية لحذف هذا المنشور", 403));
+  }
+  await Post.findByIdAndDelete(post._id);
+  res.status(204).json({
+    status: "success"
+  })
 });
