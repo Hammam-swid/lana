@@ -28,4 +28,4 @@ exports.getUser = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.uploadUserPhoto = upload.single('photo') 
+exports.uploadUserPhoto = upload.single("photo");

@@ -1,8 +1,10 @@
+const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
 const User = require("../models/userModel");
 const { promisify } = require("util");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/AppError");
+const Email = require("../utils/email");
 
 const createToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, {
@@ -11,7 +13,35 @@ const createToken = (payload) => {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
-  const user = await User.create(req.body);
+  const { fullName, email, username, password } = req.body;
+  const verificationCode = crypto.randomInt(0, 999999);
+  const user = await User.create({
+    fullName,
+    email,
+    password,
+    username,
+    verificationCode,
+  });
+  await new Email(user).sendConfirmSignup();
+  res.status(201).json({
+    status: "success",
+    message: "تم إرسال رمز التحقق إلى البريد الإلكتروني",
+    email,
+  });
+});
+
+exports.verifySignup = catchAsync(async (req, res, next) => {
+  const { email, verificationCode } = req.body;
+  const user = await User.findOne({ email, verificationCode });
+  if (!user) {
+    return next(new AppError("رمز التحقق غير صحيح", 400));
+  }
+  if (user.state === "banned") {
+    return next(new AppError("هذا المستخدم تم حظره من استخدام المنصة", 403));
+  }
+  user.state = "active";
+  user.verificationCode = undefined;
+  await user.save();
   const token = createToken({ id: user._id });
   res.cookie("jwt", token, {
     httpOnly: true,
@@ -20,8 +50,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     ),
     secure: req.protocol === "https" ? true : undefined,
   });
-  user.password = undefined;
-  res.status(201).json({
+  res.status(200).json({
     status: "success",
     token,
     user,
@@ -33,7 +62,9 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!email || !password) {
     next(new AppError("الرجاء إدخال البريد الإلكتروني وكلمة المرور", 400));
   }
-  const user = await User.findOne({ email, state: 'active' }).select("+password");
+  const user = await User.findOne({ email, state: "active" }).select(
+    "+password"
+  );
   if (!user || !(await user.comparePassword(password, user.password))) {
     next(new AppError("البريد الإلكتروني أو كلمة المرور غير صحيحة", 404));
   }

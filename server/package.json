@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "nodemon server.js",
-    "start:prod": "SET NODE_ENV=production&nodemon server.js"
+    "start:prod": "SET NODE_ENV=production&nodemon server.js",
+    "debug": "ndb server.js"
   },
   "author": "Hammam-Swaid and Omar-Gana",
   "license": "ISC",
@@ -21,15 +22,19 @@
     "express-rate-limit": "^7.1.5",
     "helmet": "^7.1.0",
     "hpp": "^0.2.3",
+    "html-to-text": "^9.0.5",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.1.2",
     "morgan": "^1.10.0",
     "multer": "^1.4.5-lts.1",
+    "nodemailer": "^6.9.11",
+    "pug": "^3.0.2",
     "sharp": "^0.33.2",
     "socket.io": "^4.7.4",
     "xss-clean": "^0.1.4"
   },
   "devDependencies": {
+    "ndb": "^1.1.5",
     "nodemon": "^3.0.3"
   }
 }

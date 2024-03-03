@@ -45,23 +45,23 @@ const userSchema = new mongoose.Schema({
   updatedAt: Date,
   state: {
     type: String,
-    default: "active",
+    default: "nonactive",
     enum: ["active", "nonactive", "banned"],
   },
   dateOfBirth: Date,
-  gender:{
+  gender: {
     type: String,
-    enum: ['male', 'female']
+    enum: ["male", "female"],
   },
   verified: {
     type: Boolean,
-    default: false
+    default: false,
   },
+  verificationCode: Number,
   followers: [
     {
       username: {
         type: String,
-        unique: true,
         required: true,
       },
       fullName: {
@@ -78,7 +78,6 @@ const userSchema = new mongoose.Schema({
     {
       username: {
         type: String,
-        unique: true,
         required: true,
       },
       fullName: {
@@ -95,7 +94,6 @@ const userSchema = new mongoose.Schema({
     {
       username: {
         type: String,
-        unique: true,
         required: true,
       },
       fullName: {
@@ -110,11 +108,16 @@ const userSchema = new mongoose.Schema({
   ],
 });
 
+userSchema.pre("save", function (next) {
+  const usernamePattern = /^(?=.*[a-zA-Z])(?=.*[0-9])[a-zA-Z0-9]+$/;
+
+  next();
+});
+
 userSchema.pre("save", async function (next) {
   try {
-    if (!this.isModified(this.password)) next();
-    const newPassword = await bcrypt.hash(this.password, 12);
-    this.password = newPassword;
+    if (!this.isModified('password')) return next();
+    this.password = await bcrypt.hash(this.password, 12);
     next();
   } catch (err) {
     next(err);
@@ -130,7 +133,7 @@ userSchema.methods.comparePassword = async function (
   return await bcrypt.compare(insertedPassword, userPassword, (err) => {
     console.log(err);
   });
-};  
+};
 
 userSchema.methods.isPasswordChangedAfter = function (JWTTimestamp) {
   if (this.passwordChangedAt) {
