@@ -14,13 +14,14 @@ const createToken = (payload) => {
 
 exports.signup = catchAsync(async (req, res, next) => {
   const { fullName, email, username, password } = req.body;
-  const verificationCode = crypto.randomInt(0, 999999);
+  const verificationCode = crypto.randomInt(100000, 999999);
   const user = await User.create({
     fullName,
     email,
     password,
     username,
     verificationCode,
+    verificationCodeEx: Date.now() + 5 * 60 * 1000,
   });
   await new Email(user).sendConfirmSignup();
   res.status(201).json({
@@ -32,7 +33,11 @@ exports.signup = catchAsync(async (req, res, next) => {
 
 exports.verifySignup = catchAsync(async (req, res, next) => {
   const { email, verificationCode } = req.body;
-  const user = await User.findOne({ email, verificationCode });
+  const user = await User.findOne({
+    email,
+    verificationCode,
+    verificationCodeEx: { $gt: Date.now() },
+  });
   if (!user) {
     return next(new AppError("رمز التحقق غير صحيح", 400));
   }
@@ -41,6 +46,7 @@ exports.verifySignup = catchAsync(async (req, res, next) => {
   }
   user.state = "active";
   user.verificationCode = undefined;
+  user.verificationCodeEx = undefined;
   await user.save();
   const token = createToken({ id: user._id });
   res.cookie("jwt", token, {

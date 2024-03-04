@@ -58,6 +58,7 @@ const userSchema = new mongoose.Schema({
     default: false,
   },
   verificationCode: Number,
+  verificationCodeEx: Date,
   followers: [
     {
       username: {
