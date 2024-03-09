@@ -13,13 +13,14 @@ const createToken = (payload) => {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
-  const { fullName, email, username, password } = req.body;
+  const { fullName, email, username, password, gender } = req.body;
   const verificationCode = crypto.randomInt(100000, 999999);
   const user = await User.create({
     fullName,
     email,
     password,
     username,
+    gender,
     verificationCode,
     verificationCodeEx: Date.now() + 5 * 60 * 1000,
   });
@@ -56,6 +57,7 @@ exports.verifySignup = catchAsync(async (req, res, next) => {
     ),
     secure: req.protocol === "https" ? true : undefined,
   });
+  user.password = undefined;
   res.status(200).json({
     status: "success",
     token,
@@ -86,6 +88,48 @@ exports.login = catchAsync(async (req, res, next) => {
     status: "success",
     token,
     data: { user },
+  });
+});
+
+exports.forgotPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new AppError("البريد الإلكتروني غير صحيح", 404));
+  }
+  const resetToken = user.createResetPasswordToken();
+  await user.save({ validateBeforeSave: false });
+
+  const resetURL = `${req.protocol}://localhost:5173/resetPassword/${resetToken}`;
+  await new Email(user, resetURL).sendResetPassword();
+  res.status(200).json({
+    status: "success",
+    message: "تم إرسال رسالة إلى البريد الإلكتروني",
+  });
+});
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  const { resetToken } = req.params;
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  const user = await User.find({
+    resetPasswordToken: hashedToken,
+    resetPasswordTokenExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(
+      new AppError("الرمز الذي أرسلته غير صحيح أو منتهي الصلاحية", 400)
+    );
+  }
+  user.password = req.body.password;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordTokenExpires = undefined;
+  await user.save();
+  res.status(200).json({
+    status: "success",
+    message: "تم تغيير كلمة السر بنجاح",
   });
 });
 
