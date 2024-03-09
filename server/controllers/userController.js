@@ -33,7 +33,7 @@ exports.uploadUserPhoto = upload.single("photo");
 exports.updateMe = catchAsync(async (req, res, next) => {
   const { fullName, photo } = req.body;
   photo = photo || "default.jpg";
-  const user = await User.findByIdAndUpdate({ fullName, photo });
+  const user = await User.findByIdAndUpdate({ fullName, photo, updatedAt: Date.now() });
   res.status(200).json({
     status: 'success',
     user
