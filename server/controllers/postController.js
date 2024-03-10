@@ -92,7 +92,7 @@ exports.scanPost = catchAsync(async (req, res, next) => {
     const visionModel = genAI.getGenerativeModel({
       model: "gemini-pro-vision",
     });
-    console.log(bufferImages);
+    // console.log(bufferImages);
     const prompt = `what are the categories for this Images : in the response separate between the categories by ', '`;
     visionModel.safetySettings = safetySettings;
     const result = await visionModel.generateContent([prompt, ...bufferImages]);
@@ -162,6 +162,71 @@ exports.deletePost = catchAsync(async (req, res, next) => {
   }
   await Post.findByIdAndDelete(post._id);
   res.status(204).json({
-    status: "success"
-  })
+    status: "success",
+  });
+});
+
+exports.likePost = catchAsync(async (req, res, next) => {
+  const { postId } = req.params;
+  const post = await Post.findById(postId);
+  if (!post) {
+    return next(new AppError("هذا المنشور غير موجود", 404));
+  }
+  let reactionIndex;
+  if (
+    post.reactions.find((ele, index) => {
+      if (ele.username === req.user.username) {
+        reactionIndex = index;
+        return true;
+      }
+      return false;
+    })
+  ) {
+    if (post.reactions[reactionIndex].type === -1) {
+      post.reactions[reactionIndex].type = 1;
+    }
+  }else{
+    post.reactions.push({
+      type: 1,
+      username: req.user.username,
+      createdAt: Date.now(),
+    });
+  }
+  await post.save();
+  res.json({
+    status: "success",
+    post
+  });
+});
+
+exports.dislikePost = catchAsync(async (req, res, next) => {
+  const { postId } = req.params;
+  const post = await Post.findById(postId);
+  if (!post) {
+    return next(new AppError("هذا المنشور غير موجود", 404));
+  }
+  let reactionIndex;
+  if (
+    post.reactions.find((ele, index) => {
+      if (ele.username === req.user.username) {
+        reactionIndex = index;
+        return true;
+      }
+      return false;
+    })
+  ) {
+    if (post.reactions[reactionIndex].type === 1) {
+      post.reactions[reactionIndex].type = -1;
+    }
+  }else{
+    post.reactions.push({
+      type: -1,
+      username: req.user.username,
+      createdAt: Date.now(),
+    });
+  }
+  await post.save();
+  res.json({
+    status: "success",
+  });
 });
