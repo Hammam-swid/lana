@@ -6,6 +6,7 @@ const {
   uploadPostImages,
   likePost,
   dislikePost,
+  cancelReaction,
 } = require("../controllers/postController");
 const { protect } = require("../controllers/authController");
 
@@ -25,5 +26,6 @@ router
 
 router.route("/:postId/like").patch(protect, likePost);
 router.route("/:postId/dislike").patch(protect, dislikePost);
+router.route("/:postId/cancelReaction").patch(protect, cancelReaction);
 
 module.exports = router;

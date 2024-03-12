@@ -68,13 +68,17 @@ exports.verifySignup = catchAsync(async (req, res, next) => {
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
   if (!email || !password) {
-    next(new AppError("الرجاء إدخال البريد الإلكتروني وكلمة المرور", 400));
+    return next(
+      new AppError("الرجاء إدخال البريد الإلكتروني وكلمة المرور", 400)
+    );
   }
   const user = await User.findOne({ email, state: "active" }).select(
     "+password"
   );
   if (!user || !(await user.comparePassword(password, user.password))) {
-    next(new AppError("البريد الإلكتروني أو كلمة المرور غير صحيحة", 404));
+    return next(
+      new AppError("البريد الإلكتروني أو كلمة المرور غير صحيحة", 404)
+    );
   }
   const token = createToken({ id: user._id });
   res.cookie("jwt", token, {

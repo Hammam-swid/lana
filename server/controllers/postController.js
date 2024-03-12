@@ -185,7 +185,7 @@ exports.likePost = catchAsync(async (req, res, next) => {
     if (post.reactions[reactionIndex].type === -1) {
       post.reactions[reactionIndex].type = 1;
     }
-  }else{
+  } else {
     post.reactions.push({
       type: 1,
       username: req.user.username,
@@ -193,9 +193,9 @@ exports.likePost = catchAsync(async (req, res, next) => {
     });
   }
   await post.save();
-  res.json({
+  res.status(201).json({
     status: "success",
-    post
+    post,
   });
 });
 
@@ -218,7 +218,7 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
     if (post.reactions[reactionIndex].type === 1) {
       post.reactions[reactionIndex].type = -1;
     }
-  }else{
+  } else {
     post.reactions.push({
       type: -1,
       username: req.user.username,
@@ -226,7 +226,33 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
     });
   }
   await post.save();
-  res.json({
+  res.status(201).json({
     status: "success",
+    post,
   });
+});
+
+exports.cancelReaction = catchAsync(async (req, res, next) => {
+  const { postId } = req.params;
+  const post = await Post.findById(postId);
+  if (!post) {
+    return next(new AppError("هذا المنشور غير موجود", 404));
+  }
+  let reactionIndex;
+  if (
+    post.reactions.find((ele, index) => {
+      if (ele.username === req.user.username) {
+        reactionIndex = index;
+        return true;
+      }
+      return false;
+    })
+  ) {
+    post.reactions.splice(reactionIndex, 1);
+    await post.save();
+    return res.status(203).json({
+      status: "success",
+    });
+  }
+  next(new AppError("هذا المستخدم لم يتفاعل مع هذا المنشور", 404));
 });

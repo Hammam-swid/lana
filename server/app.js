@@ -17,7 +17,6 @@ const globalErrorHandler = require("./controllers/errorController");
 const postRouter = require("./routes/postRoutes");
 const userRouter = require("./routes/userRoutes");
 // import commentRouter from "./routes/commentRoutes";
-// import reactionRouter from "./routes/reactionRoutes";
 // import notificationRouter from "./routes/notificationRoutes";
 
 app.use(helmet());
@@ -49,7 +48,6 @@ const limiter = rateLimit({
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/users", userRouter);
 // app.use("/api/v1/comments", commentRouter);
-// app.use("/api/v1/reactions", reactionRouter);
 // app.use("/api/v1/notifications", notificationRouter);
 
 app.all("*", (req, res) => {

@@ -132,11 +132,7 @@ userSchema.methods.comparePassword = async function (
   insertedPassword,
   userPassword
 ) {
-  console.log(insertedPassword, userPassword);
-  console.log(await bcrypt.compare(insertedPassword, userPassword));
-  return await bcrypt.compare(insertedPassword, userPassword, (err) => {
-    console.log(err);
-  });
+  return await bcrypt.compare(insertedPassword, userPassword);
 };
 
 userSchema.methods.isPasswordChangedAfter = function (JWTTimestamp) {
