@@ -80,3 +80,53 @@ exports.completeDeactivateMe = catchAsync(async (req, res, next) => {
     status: "success",
   });
 });
+
+exports.followUser = catchAsync(async (req, res, next) => {
+  const { userId } = req.params;
+  const followingUser = await User.findById(userId);
+  if (!followingUser) {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  if (
+    req.user.following.find((user) => user.username === followingUser.username)
+  ) {
+    return next(new AppError("هذا المستخدم متابَع بالفعل", 400));
+  }
+  req.user.following.push({
+    username: followingUser.username,
+    fullName: followingUser.fullName,
+    photo: followingUser.photo,
+  });
+  followingUser.followers.push({
+    username: req.user.username,
+    fullName: req.user.fullName,
+    photo: req.user.photo,
+  });
+  await req.user.save();
+  await followingUser.save();
+  res.status(201).json({
+    status: "success",
+    user: req.user,
+  });
+});
+
+exports.unFollowUser = catchAsync(async (req, res, next) => {
+  const { userId } = req.params;
+  const followingUser = await User.findById(userId);
+  if (!followingUser) {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  if (
+    !req.user.following.find((user) => user.username === followingUser.username)
+  ) {
+    return next(new AppError("هذا المستخدم غير متابَع بالفعل", 400));
+  }
+  req.user.following.filter((user) => user.username !== followingUser.username);
+  followingUser.followers.filter((user) => user.username !== req.user.username);
+  await req.user.save();
+  await followingUser.save();
+  res.status(201).json({
+    status: "success",
+    user: req.user,
+  });
+});

@@ -13,6 +13,8 @@ const {
   updateMe,
   deactivateMe,
   completeDeactivateMe,
+  followUser,
+  unFollowUser,
 } = require("../controllers/userController");
 const Email = require("../utils/email");
 const AppError = require("../utils/AppError");
@@ -31,5 +33,6 @@ router.patch("/updateMe", uploadUserPhoto, updateMe);
 router.post("/deactivateMe", deactivateMe);
 router.patch("/completeDeactivateMe", completeDeactivateMe);
 router.route("/:userId").get(getUser);
+router.route("/:userId/follow").post(followUser).delete(unFollowUser);
 
 module.exports = router;

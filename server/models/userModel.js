@@ -72,7 +72,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
-      photoUrl: {
+      photo: {
         type: String,
         required: true,
       },
@@ -88,7 +88,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
-      photoUrl: {
+      photo: {
         type: String,
         required: true,
       },
@@ -104,7 +104,7 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
       },
-      photoUrl: {
+      photo: {
         type: String,
         required: true,
       },
