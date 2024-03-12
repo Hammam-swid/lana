@@ -1,15 +1,29 @@
+import {
+  Route,
+  RouterProvider,
+  createBrowserRouter,
+  createRoutesFromElements,
+  redirect,
+} from "react-router-dom";
+import LoginPage from "./pages/LoginPage";
+import SignupPage from "./pages/SignupPage";
+import MainLayout from "./pages/MainLayout";
+import HomePage from "./pages/HomePage";
 function App() {
-  return (
+  const routes = createRoutesFromElements(
     <>
-      <h1 className="text-8xl font-bold  flex items-center justify-center">
-        السلام عليكم
-      </h1>
-      <svg
-        className="animate-spin bg-slate-800 w-10 h-10 mr-3 rounded-full ring"
-        viewBox="0 0 24 24"
-      ></svg>
+      <Route path="/login" element={<LoginPage />} />
+      <Route
+        path="/signup"
+        element={<SignupPage />}
+      />
+      <Route path="/" element={<MainLayout />} loader={() => redirect('/login')}>
+        <Route index element={<HomePage />} />
+      </Route>
     </>
   );
+  const router = createBrowserRouter(routes);
+  return <RouterProvider router={router} />;
 }
 
 export default App;
