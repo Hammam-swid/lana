@@ -157,7 +157,8 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 
   const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  const user = await User.findById(decode.id);
+  const user = await User.findById(decode.id).setQuery({ state: "active" });
+  console.log(user);
   if (!user) {
     return next(new AppError("هذا المستخدم غير موجود", 401));
   }
@@ -182,3 +183,18 @@ exports.restrictTo = (...roles) => {
     next();
   };
 };
+
+exports.updatePassword = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.user._id).select("+password");
+  if (!(await user.comparePassword(req.body.currentPassword, user.password))) {
+    return next(new AppError("كلمة المرور القديمة غير صحيحة", 400));
+  }
+  user.password = req.body.password;
+  await user.save();
+  const token = createToken({ id: user._id });
+  res.status(201).json({
+    status: "success",
+    token,
+    user,
+  });
+});

@@ -11,6 +11,8 @@ const {
   getUser,
   uploadUserPhoto,
   updateMe,
+  deactivateMe,
+  completeDeactivateMe,
 } = require("../controllers/userController");
 const Email = require("../utils/email");
 const AppError = require("../utils/AppError");
@@ -26,6 +28,8 @@ router.patch("/resetPassword/:resetToken", resetPassword);
 
 router.use(protect);
 router.patch("/updateMe", uploadUserPhoto, updateMe);
+router.post("/deactivateMe", deactivateMe);
+router.patch("/completeDeactivateMe", completeDeactivateMe);
 router.route("/:userId").get(getUser);
 
 module.exports = router;
