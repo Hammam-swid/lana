@@ -12,7 +12,7 @@ const postSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
-  }, 
+  },
   images: [String],
   createdAt: {
     type: Date,
@@ -27,9 +27,9 @@ const postSchema = new mongoose.Schema({
         required: [true, "يجب أن يكون التفاعل تابعاً لمستخدم"],
       },
       type: {
-        type: Number,
+        type: String,
         required: true,
-        enum: [-1, 1],
+        enum: ["like", "dislike"],
       },
       createdAt: {
         type: Date,
@@ -56,9 +56,9 @@ const postSchema = new mongoose.Schema({
             required: [true, "يجب أن يكون التفاعل تابعاً لمستخدم"],
           },
           type: {
-            type: Number,
+            type: String,
             required: true,
-            enum: [-1, 1],
+            enum: ["like", "dislike"],
           },
           createdAt: {
             type: Date,

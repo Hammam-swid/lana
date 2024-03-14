@@ -1,4 +1,5 @@
 const Post = require("../models/postModel");
+const Notification = require("../models/notificationModel");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/AppError");
 const {
@@ -182,8 +183,11 @@ exports.likePost = catchAsync(async (req, res, next) => {
       return false;
     })
   ) {
-    if (post.reactions[reactionIndex].type === -1) {
-      post.reactions[reactionIndex].type = 1;
+    console.log(post.reactions[reactionIndex]);
+    if (post.reactions[reactionIndex].type === "dislike") {
+      post.reactions[reactionIndex].type = "like";
+    } else {
+      return next(new AppError("لقد قمت بالإعجاب بهذا المنشور من قبل", 400));
     }
   } else {
     post.reactions.push({
@@ -197,9 +201,19 @@ exports.likePost = catchAsync(async (req, res, next) => {
     status: "success",
     post,
   });
+  const notification = await Notification.create({
+    message: `قام ${req.user.fullName} بالإعجاب بمنشورك`,
+    senderUsername: req.user.username,
+    recipientUsername: post.user.username,
+    returnUrl: `http://localhost:5173/post/${post.id}`,
+    type: "like",
+  });
+  const io = req.app.get("socket.io");
+  io.to({username: notification.recipientUsername}).emit("notification", notification);
 });
 
 exports.dislikePost = catchAsync(async (req, res, next) => {
+  console.log(req.app.get("socket.io"));
   const { postId } = req.params;
   const post = await Post.findById(postId);
   if (!post) {
@@ -215,8 +229,13 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
       return false;
     })
   ) {
-    if (post.reactions[reactionIndex].type === 1) {
-      post.reactions[reactionIndex].type = -1;
+    console.log(post.reactions[reactionIndex]);
+    if (post.reactions[reactionIndex].type === "like") {
+      post.reactions[reactionIndex].type = "dislike";
+    } else {
+      return next(
+        new AppError("لقد قمت بعدم الإعجاب بهذا المنشور من قبل", 400)
+      );
     }
   } else {
     post.reactions.push({

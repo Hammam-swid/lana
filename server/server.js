@@ -18,8 +18,10 @@ const io = new Server(server, {
 });
 
 io.on("connection", (socket) => {
-  console.log(socket.id);
-  socket.emit("welcome", "hello");
+  console.log(socket.handshake.auth);
+  socket.on('notification', notification => {
+    
+  })
 });
 app.set("socket.io", io);
 

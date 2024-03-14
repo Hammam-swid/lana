@@ -1,13 +1,13 @@
 const mongoose = require("mongoose");
 
 const notificationSchema = new mongoose.Schema({
-  recipientId: {
-    type: mongoose.Schema.Types.ObjectId,
+  recipientUsername: {
+    type: String,
     ref: "User",
     require: [true, "يجب أن يكون للإشعار مستلم"],
   },
-  senderId: {
-    type: mongoose.Schema.Types.ObjectId,
+  senderUsername: {
+    type: String,
     ref: "User",
     require: [true, "يجب أن يكون للإشعار مرسل"],
   },
@@ -23,7 +23,8 @@ const notificationSchema = new mongoose.Schema({
     type: Date,
     default: Date.now(),
   },
-  seen: Boolean,
+  type: String,
+  seen: { type: Boolean, default: false },
 });
 
 const Notification = mongoose.model("Notification", notificationSchema);
