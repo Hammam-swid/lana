@@ -1,9 +1,12 @@
 import { useState } from "react";
 import { Form, Link, useNavigate } from "react-router-dom";
+import { useDispatch } from "react-redux";
 import axios from "axios";
+import { setLogin } from "../store/authSlice";
 
 function LoginPage() {
   const nav = useNavigate();
+  const dispatch = useDispatch();
   const [formState, setFormState] = useState("idle");
   async function login(e) {
     try {
@@ -19,6 +22,9 @@ function LoginPage() {
       });
       console.log(data.data.status);
       if (data.data.status === "success") {
+        const { token } = data.data;
+        const { user } = data.data.data;
+        dispatch(setLogin({ token, user }));
         return nav("/");
       }
       setFormState("idle");
