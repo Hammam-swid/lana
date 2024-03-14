@@ -19,10 +19,9 @@ const userRouter = require("./routes/userRoutes");
 // import commentRouter from "./routes/commentRoutes";
 // import notificationRouter from "./routes/notificationRoutes";
 
-app.use(helmet());
+app.use(helmet({ crossOriginResourcePolicy: true }));
 
 if (process.env.NODE_ENV === "development") app.use(morgan("dev"));
-
 
 // استخدام وسيط لتحويل جسم الطلب لصيغة =>
 // => JSON

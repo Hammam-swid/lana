@@ -17,7 +17,11 @@ const io = new Server(server, {
   },
 });
 
-app.set('socket.io', io)
+io.on("connection", (socket) => {
+  console.log(socket.id);
+  socket.emit("welcome", "hello");
+});
+app.set("socket.io", io);
 
 const DB = process.env.MONGO_URL.replace(
   "<PASSWORD>",

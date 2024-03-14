@@ -157,8 +157,7 @@ exports.protect = catchAsync(async (req, res, next) => {
   }
 
   const decode = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-  const user = await User.findById(decode.id).setQuery({ state: "active" });
-  console.log(user);
+  const user = await User.findOne({_id: decode.id, state: 'active'});
   if (!user) {
     return next(new AppError("هذا المستخدم غير موجود", 401));
   }
