@@ -183,7 +183,6 @@ exports.likePost = catchAsync(async (req, res, next) => {
       return false;
     })
   ) {
-    console.log(post.reactions[reactionIndex]);
     if (post.reactions[reactionIndex].type === "dislike") {
       post.reactions[reactionIndex].type = "like";
     } else {
@@ -209,7 +208,12 @@ exports.likePost = catchAsync(async (req, res, next) => {
     type: "like",
   });
   const io = req.app.get("socket.io");
-  io.to({username: notification.recipientUsername}).emit("notification", notification);
+  const socketClients = req.app.get("socket-clients");
+  io.to(
+    socketClients
+      .filter((client) => client.username === notification.recipientUsername)
+      .map((client) => client.id)
+  ).emit("notification", notification);
 });
 
 exports.dislikePost = catchAsync(async (req, res, next) => {
@@ -229,7 +233,6 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
       return false;
     })
   ) {
-    console.log(post.reactions[reactionIndex]);
     if (post.reactions[reactionIndex].type === "like") {
       post.reactions[reactionIndex].type = "dislike";
     } else {

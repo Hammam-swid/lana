@@ -17,11 +17,22 @@ const io = new Server(server, {
   },
 });
 
+app.set("socket-clients", []);
+
 io.on("connection", (socket) => {
-  console.log(socket.handshake.auth);
-  socket.on('notification', notification => {
-    
-  })
+  socket.on("userLoggedIn", (username) => {
+    const socketClients = app.get("socket-clients");
+    socketClients.push({ id: socket.id, username });
+    app.set("socket-clients", socketClients);
+    console.log(socketClients);
+  });
+  socket.on("disconnect", () => {
+    const socketClients = app.get("socket-clients");
+    app.set(
+      "socket-clients",
+      socketClients.filter((client) => client.id !== socket.id)
+    );
+  });
 });
 app.set("socket.io", io);
 
