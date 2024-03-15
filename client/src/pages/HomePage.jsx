@@ -6,7 +6,7 @@ function HomePage() {
   return (
     <>
       <h1 className="text-7xl font-light mb-10">الصفحة الرئيسية</h1>
-      <h2 className="text-4xl">{user?.fullName}</h2>
+      <h2 className="text-4xl h-96">{user?.fullName}</h2>
     </>
   );
 }
