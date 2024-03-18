@@ -7,6 +7,7 @@ const {
   likePost,
   dislikePost,
   cancelReaction,
+  deletePost,
 } = require("../controllers/postController");
 const { protect } = require("../controllers/authController");
 
@@ -22,7 +23,7 @@ router
   .post(protect, uploadPostImages, scanPost, createPost);
 
 // DELETE api.lana.com/api/v1/posts/38959jekof23982r2
-// router.route("/:postId").get(getOnePost).patch(updatePost).delete(deletePost);
+router.route("/:postId").delete(protect, deletePost);//.get(getOnePost).patch(updatePost)
 
 router.route("/:postId/like").patch(protect, likePost);
 router.route("/:postId/dislike").patch(protect, dislikePost);

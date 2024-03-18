@@ -190,7 +190,7 @@ exports.likePost = catchAsync(async (req, res, next) => {
     }
   } else {
     post.reactions.push({
-      type: 1,
+      type: 'like',
       username: req.user.username,
       createdAt: Date.now(),
     });
@@ -210,7 +210,7 @@ exports.likePost = catchAsync(async (req, res, next) => {
   const io = req.app.get("socket.io");
   const socketClients = req.app.get("socket-clients");
   io.to(
-    socketClients
+    ...socketClients
       .filter((client) => client.username === notification.recipientUsername)
       .map((client) => client.id)
   ).emit("notification", notification);
@@ -242,7 +242,7 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
     }
   } else {
     post.reactions.push({
-      type: -1,
+      type: 'dislike',
       username: req.user.username,
       createdAt: Date.now(),
     });
@@ -274,6 +274,7 @@ exports.cancelReaction = catchAsync(async (req, res, next) => {
     await post.save();
     return res.status(203).json({
       status: "success",
+      post
     });
   }
   next(new AppError("هذا المستخدم لم يتفاعل مع هذا المنشور", 404));

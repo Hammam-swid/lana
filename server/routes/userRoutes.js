@@ -32,7 +32,7 @@ router.use(protect);
 router.patch("/updateMe", uploadUserPhoto, updateMe);
 router.post("/deactivateMe", deactivateMe);
 router.patch("/completeDeactivateMe", completeDeactivateMe);
-router.route("/:userId").get(getUser);
+router.route("/:username").get(getUser);
 router.route("/:userId/follow").post(followUser).delete(unFollowUser);
 
 module.exports = router;

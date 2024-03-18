@@ -56,7 +56,7 @@ function LoginPage() {
           dir="ltr"
           className="border-green-500 outline-none border-2 p-3 rounded-lg dark:bg-slate-900 dark:text-green-100 invalid:border-red-400 peer"
         />
-        <p className="text-red-400 mt-[-15px] peer-invalid:block hidden">
+        <p className="text-red-400 mt-[-15px] peer-invalid:visible invisible">
           الرجاء إدخال البريد الإلكتروني بشكل صحيح
         </p>
         <label htmlFor="password" className="dark:text-green-100">

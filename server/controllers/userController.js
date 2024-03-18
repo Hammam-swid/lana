@@ -4,6 +4,7 @@ const User = require("../models/userModel");
 const AppError = require("../utils/AppError");
 const catchAsync = require("../utils/catchAsync");
 const Email = require("../utils/email");
+const Post = require("../models/postModel");
 
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
@@ -19,14 +20,16 @@ const upload = multer({
 });
 
 exports.getUser = catchAsync(async (req, res, next) => {
-  const { userId } = req.params;
-  const user = await User.findById(userId, { state: "active" });
+  const { username } = req.params;
+  const user = await User.findOne({ username, state: "active" });
   if (!user) {
     return next(new AppError("هذا المستخدم غير موجود", 404));
   }
+  const posts = await Post.find({ user: { username } });
   res.status(200).json({
     status: "success",
     user,
+    posts,
   });
 });
 

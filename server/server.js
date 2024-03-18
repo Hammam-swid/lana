@@ -24,7 +24,6 @@ io.on("connection", (socket) => {
     const socketClients = app.get("socket-clients");
     socketClients.push({ id: socket.id, username });
     app.set("socket-clients", socketClients);
-    console.log(socketClients);
   });
   socket.on("disconnect", () => {
     const socketClients = app.get("socket-clients");
