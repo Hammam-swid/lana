@@ -44,6 +44,7 @@ function Post(props) {
           </div>
           <h3 className="font-bold">{post.user.fullName}</h3>
         </Link>
+        <p>{post.createdAt}</p>
         <button
           className="text-xl"
           onClick={() => setPostOptions((prev) => !prev)}
@@ -111,7 +112,7 @@ function Post(props) {
               const res = await axios({
                 headers: { Authorization: `Bearer ${token}` },
                 method: "PATCH",
-                url: `http://localhost:3000/api/v1/posts/${props.id}/${route}`,
+                url: `http://localhost:3000/api/v1/posts/${post._id}/${route}`,
               });
               if (res.data.status === "success") setPost(res.data.post);
             } catch (error) {
@@ -150,7 +151,7 @@ function Post(props) {
               const res = await axios({
                 headers: { Authorization: `Bearer ${token}` },
                 method: "PATCH",
-                url: `http://localhost:3000/api/v1/posts/${props.id}/${route}`,
+                url: `http://localhost:3000/api/v1/posts/${post._id}/${route}`,
               });
               if (res.data.status === "success") setPost(res.data.post);
             } catch (err) {

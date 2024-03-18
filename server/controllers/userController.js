@@ -25,7 +25,7 @@ exports.getUser = catchAsync(async (req, res, next) => {
   if (!user) {
     return next(new AppError("هذا المستخدم غير موجود", 404));
   }
-  const posts = await Post.find({ user: { username } });
+  const posts = await Post.find({ "user.username": username }).sort('-createdAt');
   res.status(200).json({
     status: "success",
     user,

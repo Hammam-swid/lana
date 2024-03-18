@@ -77,9 +77,9 @@ function App() {
                 method: "GET",
                 headers: { Authorization: `Bearer ${state.token}` },
               });
-              return res.data.user;
+              return res.data;
             };
-            return defer({ user: getUser() });
+            return defer({ data: getUser() });
           }}
         />
         <Route
