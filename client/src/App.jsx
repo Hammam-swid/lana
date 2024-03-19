@@ -34,6 +34,11 @@ function App() {
           return null;
         }}
       />
+      <Route path="/forgot-password" element={<h1>هل نسيت كلمة المرور</h1>} />
+      <Route
+        path="/reset-password/:resetToken"
+        element={<h1>صفحة استعادة كلمة المرور</h1>}
+      />
       <Route
         path="/"
         element={<MainLayout />}

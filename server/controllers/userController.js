@@ -25,7 +25,9 @@ exports.getUser = catchAsync(async (req, res, next) => {
   if (!user) {
     return next(new AppError("هذا المستخدم غير موجود", 404));
   }
-  const posts = await Post.find({ "user.username": username }).sort('-createdAt');
+  const posts = await Post.find({ "user.username": username }).sort(
+    "-createdAt"
+  );
   res.status(200).json({
     status: "success",
     user,
@@ -86,6 +88,9 @@ exports.completeDeactivateMe = catchAsync(async (req, res, next) => {
 
 exports.followUser = catchAsync(async (req, res, next) => {
   const { userId } = req.params;
+  if (userId === req.user._id) {
+    return next(new AppError("لا يمكنك متابعة حسابك", 400));
+  }
   const followingUser = await User.findById(userId);
   if (!followingUser) {
     return next(new AppError("هذا المستخدم غير موجود", 404));
@@ -109,6 +114,7 @@ exports.followUser = catchAsync(async (req, res, next) => {
   await followingUser.save();
   res.status(201).json({
     status: "success",
+    message: "user followed",
     user: req.user,
   });
 });
@@ -124,12 +130,19 @@ exports.unFollowUser = catchAsync(async (req, res, next) => {
   ) {
     return next(new AppError("هذا المستخدم غير متابَع بالفعل", 400));
   }
-  req.user.following.filter((user) => user.username !== followingUser.username);
-  followingUser.followers.filter((user) => user.username !== req.user.username);
-  await req.user.save();
+  const newFollowers = req.user.following.filter(
+    (user) => user.username !== followingUser.username
+  );
+  followingUser.followers = followingUser.followers.filter(
+    (user) => user.username !== req.user.username
+  );
+  const user = await User.findById(req.user._id);
+  user.following = newFollowers;
+  await user.save();
   await followingUser.save();
-  res.status(201).json({
+  res.status(200).json({
     status: "success",
-    user: req.user,
+    message: "user un followed",
+    user,
   });
 });

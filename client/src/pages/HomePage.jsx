@@ -3,7 +3,11 @@ import { Suspense, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLoaderData, Await } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faImage } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCircleNotch,
+  faImage,
+  faPaperPlane,
+} from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 function HomePage() {
   const user = useSelector((state) => state.user);
@@ -76,11 +80,13 @@ function HomePage() {
               accept=".png,.jpg,.bmp"
             />
           </div>
-          <button>ارسال</button>
+          <button className="text-green-500 text-xl absolute">
+            <FontAwesomeIcon icon={faPaperPlane} flip="horizontal" />
+          </button>
         </form>
       </div>
-      <div className="flex flex-col sm:flex-row-reverse gap-5 bg-slate-200 dark:bg-slate-950">
-        <div className="md:w-1/3 p-6">
+      <div className="flex flex-col md:flex-row-reverse gap-5 items-center md:items-start bg-slate-200 dark:bg-slate-950">
+        <div className="md:w-1/3 p-6 md:mt-[-120px] self-start sm:self-center md:self-start">
           <h2 className="font-bold text-3xl mb-5">المتابَعون</h2>
           <ul>
             {user.following.length > 0 ? (
@@ -94,11 +100,14 @@ function HomePage() {
             )}
           </ul>
         </div>
-        <main className="sm:w-1/2 md:w-2/5 bg-slate-200 dark:bg-slate-950 p-3">
+        <main className="sm:w-2/3 xl:w-2/5 bg-slate-200 dark:bg-slate-950 p-3">
           <Suspense
             fallback={
-              <div className="h-screen flex justify-center">
-                <div className="w-20 h-20 border-8 border-white animate-spin border-r-green-500 rounded-full mt-20"></div>
+              <div className="h-screen flex justify-center text-green-500 text-8xl">
+                <FontAwesomeIcon
+                  icon={faCircleNotch}
+                  className="animate-spin"
+                />
               </div>
             }
           >

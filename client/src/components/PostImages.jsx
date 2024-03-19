@@ -1,7 +1,11 @@
 /* eslint-disable react/prop-types */
 import { useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowLeft, faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faArrowLeft,
+  faArrowRight,
+  faCircle,
+} from "@fortawesome/free-solid-svg-icons";
 
 function PostImages(props) {
   const [showedImage, setShowedImage] = useState(0);
@@ -38,6 +42,17 @@ function PostImages(props) {
             <FontAwesomeIcon icon={faArrowLeft} />
           </button>
         )}
+      </div>
+      <div className="text-center">
+        {props.images.map((image, index) => (
+          <FontAwesomeIcon
+            key={image}
+            icon={faCircle}
+            className={`text-[8px] mx-1 ${
+              showedImage === index && "text-green-500"
+            }`}
+          />
+        ))}
       </div>
     </div>
   );
