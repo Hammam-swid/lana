@@ -31,7 +31,7 @@ app.use(cookieParser());
 // استخدام وسيط لاستقبال الطلبات متعددة المصادر
 app.use(cors());
 
-app.use(express.static("public/assets/img"));
+app.use(express.static("public/assets/"));
 
 app.use(mongoSanitize());
 

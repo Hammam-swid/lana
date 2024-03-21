@@ -3,6 +3,7 @@
 ::-webkit-scrollbar {
   position: relative;
   left: 0;
+  height: 0;
   width: 5px;
 }
 ::-webkit-scrollbar-track {

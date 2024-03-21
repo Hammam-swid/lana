@@ -27,6 +27,8 @@ const notificationSchema = new mongoose.Schema({
   seen: { type: Boolean, default: false },
 });
 
+notificationSchema.index({ recipientUsername: 1 });
+
 const Notification = mongoose.model("Notification", notificationSchema);
 
 module.exports = Notification;

@@ -51,6 +51,7 @@ function App() {
         <Route
           index
           element={<HomePage />}
+          errorElement={<h1>حدث خطأ في تحميل الصفحة</h1>}
           loader={() => {
             const getPosts = async () => {
               const token = store.getState().token;
@@ -58,8 +59,9 @@ function App() {
                 const res = await axios({
                   headers: { Authorization: `Bearer ${token}` },
                   method: "GET",
-                  url: "http://localhost:3000/api/v1/posts",
+                  url: "/api/v1/posts",
                 });
+                console.log(res)
                 if (res.data.status === "success") {
                   return res.data.posts;
                 }
@@ -78,7 +80,7 @@ function App() {
             const state = store.getState();
             const getUser = async () => {
               const res = await axios({
-                url: `http://localhost:3000/api/v1/users/${params.username}`,
+                url: `/api/v1/users/${params.username}`,
                 method: "GET",
                 headers: { Authorization: `Bearer ${state.token}` },
               });

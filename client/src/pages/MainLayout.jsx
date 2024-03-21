@@ -5,24 +5,30 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 function MainLayout() {
   const user = useSelector((state) => state.user);
-  const [newNotification, setNewNotification] = useState(false)
+  const [newNotification, setNewNotification] = useState(false);
   useEffect(() => {
-    const socket = io("http://localhost:3000", {
+    const socket = io("/", {
       auth: { username: user.username },
     });
     socket.on("connect", () => {
+      console.log("hello");
       socket.emit("userLoggedIn", user.username);
       socket.on("notification", (notification) => {
-        setNewNotification(true)
+        setNewNotification(true);
         console.log(notification);
+        setTimeout(() => {
+          console.log('cancel not')
+          setNewNotification(false);
+        }, 5000);
       });
     });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   return (
     <>
       <Header notification={newNotification} />
       <Outlet />
+      {newNotification && <div>مرحبا</div>}
     </>
   );
 }

@@ -1,7 +1,7 @@
 import Post from "../components/Post";
 import { Suspense, useState } from "react";
 import { useSelector } from "react-redux";
-import { useLoaderData, Await } from "react-router-dom";
+import { useLoaderData, Await, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCircleNotch,
@@ -36,7 +36,7 @@ function HomePage() {
                 for (let image in e.target.elements.images.files)
                   data.append("images", image);
                 const res = await axios({
-                  url: `http://localhost:3000/api/v1/posts`,
+                  url: `/api/v1/posts`,
                   method: "POST",
                   headers: { Authorization: `Bearer ${token}` },
                   data,
@@ -86,13 +86,24 @@ function HomePage() {
         </form>
       </div>
       <div className="flex flex-col md:flex-row-reverse gap-5 items-center md:items-start bg-slate-200 dark:bg-slate-950">
-        <div className="md:w-1/3 p-6 md:mt-[-120px] self-start sm:self-center md:self-start">
+        <div className="md:w-1/3 p-6 md:mt-[-120px] self-start sm:self-center w-full overflow-x-scroll md:self-start">
           <h2 className="font-bold text-3xl mb-5">المتابَعون</h2>
-          <ul>
+          <ul className="flex gap-7 overflow-x-scroll  md:flex-col">
             {user.following.length > 0 ? (
               user.following.map((follower) => (
                 <li key={follower.username}>
-                  <h1>{follower.fullName}</h1>
+                  <Link
+                    to={`/profile/${follower.username}`}
+                    className="flex items-center gap-2 flex-col md:flex-row"
+                  >
+                    <div className="w-12 h-12 rounded-full overflow-hidden">
+                      <img
+                        src={`/img/users/${follower.photo}`}
+                        alt={`صورة ${follower.fullName}`}
+                      />
+                    </div>
+                    <p className="text-center font-bold">{follower.fullName}</p>
+                  </Link>
                 </li>
               ))
             ) : (

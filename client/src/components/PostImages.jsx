@@ -13,9 +13,8 @@ function PostImages(props) {
     <div className="">
       <div className="rounded-md overflow-hidden w-full max-h-[500px] relative group/image">
         <img
-          src={`http://localhost:3000/posts/${props.images[showedImage]}`}
+          src={`/img/posts/${props.images[showedImage]}`}
           alt={`صورة منشور ${props?.fullName}`}
-          crossOrigin="anonymous"
           className="object-cover"
         />
         {props?.images?.length > 1 && (

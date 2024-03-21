@@ -190,7 +190,7 @@ exports.likePost = catchAsync(async (req, res, next) => {
     }
   } else {
     post.reactions.push({
-      type: 'like',
+      type: "like",
       username: req.user.username,
       createdAt: Date.now(),
     });
@@ -200,20 +200,22 @@ exports.likePost = catchAsync(async (req, res, next) => {
     status: "success",
     post,
   });
-  const notification = await Notification.create({
-    message: `قام ${req.user.fullName} بالإعجاب بمنشورك`,
-    senderUsername: req.user.username,
-    recipientUsername: post.user.username,
-    returnUrl: `http://localhost:5173/post/${post.id}`,
-    type: "like",
-  });
-  const io = req.app.get("socket.io");
-  const socketClients = req.app.get("socket-clients");
-  io.to(
-    ...socketClients
-      .filter((client) => client.username === notification.recipientUsername)
-      .map((client) => client.id)
-  ).emit("notification", notification);
+  if (post.user.username !== req.user.username) {
+    const notification = await Notification.create({
+      message: `قام ${req.user.fullName} بالإعجاب بمنشورك`,
+      senderUsername: req.user.username,
+      recipientUsername: post.user.username,
+      returnUrl: `/post/${post.id}`,
+      type: "like",
+    });
+    const io = req.app.get("socket.io");
+    const socketClients = req.app.get("socket-clients");
+    io.to(
+      ...socketClients
+        .filter((client) => client.username === notification.recipientUsername)
+        .map((client) => client.id)
+    ).emit("notification", notification);
+  }
 });
 
 exports.dislikePost = catchAsync(async (req, res, next) => {
@@ -242,7 +244,7 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
     }
   } else {
     post.reactions.push({
-      type: 'dislike',
+      type: "dislike",
       username: req.user.username,
       createdAt: Date.now(),
     });
@@ -274,7 +276,7 @@ exports.cancelReaction = catchAsync(async (req, res, next) => {
     await post.save();
     return res.status(203).json({
       status: "success",
-      post
+      post,
     });
   }
   next(new AppError("هذا المستخدم لم يتفاعل مع هذا المنشور", 404));

@@ -4,7 +4,10 @@ import Post from "../components/Post";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheckCircle,
+  faCircleNotch,
+} from "@fortawesome/free-solid-svg-icons";
 import { updateUser } from "../store/authSlice";
 
 function ProfilePage() {
@@ -33,19 +36,23 @@ function ProfilePage() {
         <div className="flex items-center justify-center  flex-col sm:gap-5 mb-10">
           <div className="w-32 h-32 rounded-full overflow-hidden">
             <img
-              src={`http://localhost:3000/users/${user.photo}`}
+              src={`/img/users/${user.photo}`}
               alt={`صورة ${user.fullName}`}
-              crossOrigin="anonymous"
             />
           </div>
-          <h1 className="text-3xl">{user.fullName}</h1>
+          <h1 className="text-3xl">
+            {user.fullName}{" "}
+            {user.verified && (
+              <FontAwesomeIcon icon={faCheckCircle} className="text-xl text-green-500" />
+            )}
+          </h1>
           {thisUser.username !== params.username && (
             <button
               onClick={async () => {
                 try {
                   const res = await axios({
                     headers: { Authorization: `Bearer ${token}` },
-                    url: `http://localhost:3000/api/v1/users/${user._id}/follow`,
+                    url: `/api/v1/users/${user._id}/follow`,
                     method: isFollowed ? "DELETE" : "POST",
                   });
                   // console.log(res);

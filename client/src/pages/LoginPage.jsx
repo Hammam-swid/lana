@@ -3,11 +3,14 @@ import { Form, Link, useNavigate } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import axios from "axios";
 import { setLogin } from "../store/authSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 
 function LoginPage() {
   const nav = useNavigate();
   const dispatch = useDispatch();
   const [formState, setFormState] = useState("idle");
+  const [showPassword, setShowPassword] = useState(false);
   async function login(e) {
     try {
       setFormState("submitting");
@@ -16,7 +19,7 @@ function LoginPage() {
       const body = { email, password };
       console.log(body);
       const data = await axios({
-        url: "http://localhost:3000/api/v1/users/login",
+        url: "/api/v1/users/login",
         method: "POST",
         data: body,
       });
@@ -62,14 +65,28 @@ function LoginPage() {
         <label htmlFor="password" className="dark:text-green-100">
           كلمة المرور
         </label>
-        <input
-          type="password"
-          name="password"
-          id="password"
-          required
-          placeholder="أدخل كلمة المرور الخاصة بك هنا"
-          className="border-green-500 outline-none border-2 p-3 rounded-lg  dark:bg-slate-900 dark:text-green-100"
-        />
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            id="password"
+            required
+            minLength={8}
+            placeholder="أدخل كلمة المرور الخاصة بك هنا"
+            className="border-green-500 outline-none border-2 p-3 rounded-lg w-full  dark:bg-slate-900 dark:text-green-100"
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword((prev) => !prev)}
+            className="absolute end-5 top-1/2 -translate-y-1/2 text-gray-500"
+          >
+            {showPassword ? (
+              <FontAwesomeIcon icon={faEye} />
+            ) : (
+              <FontAwesomeIcon icon={faEyeSlash} />
+            )}
+          </button>
+        </div>
         <Link to="/forgot-password" className="text-green-500 underline w-fit">
           هل نسيت كلمة المرور؟
         </Link>

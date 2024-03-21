@@ -2,8 +2,6 @@ import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
-  faHome,
-  faFire,
   faArrowRightFromBracket,
   faMagnifyingGlass,
   faBell,
@@ -12,6 +10,8 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { setLogout } from "../store/authSlice";
 import { useEffect, useState } from "react";
+import NavBar from "./NavBar";
+import MobileNavBar from "./MobileNavBar";
 
 // eslint-disable-next-line react/prop-types
 function Header({ notification }) {
@@ -29,6 +29,10 @@ function Header({ notification }) {
       document.onscroll = undefined;
     }
   }, [popup]);
+
+  function updateOptions() {
+    setOptions((prvOption) => !prvOption);
+  }
   return (
     <>
       <header className=" min-h-20 w-screen sticky sm:top-0 bg-slate-100 shadow-md dark:bg-slate-900 z-10 flex justify-center sm:justify-between items-center py-2 px-6 sm:px-6 flex-wrap sm:flex-nowrap">
@@ -50,108 +54,9 @@ function Header({ notification }) {
             className="absolute left-2 text-2xl"
           />
         </div>
-        <nav className="sm:hidden w-full">
-          <ul className="flex text-2xl items-center justify-around w-full">
-            <li>
-              <NavLink
-                to={"/"}
-                className={({ isActive }) =>
-                  `p-1 px-2 duration-200 ${
-                    isActive
-                      ? "text-green-500 bg-green-100 dark:bg-green-950 rounded"
-                      : ""
-                  }`
-                }
-              >
-                <FontAwesomeIcon icon={faHome} />
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to={"/trending"}
-                className={({ isActive }) =>
-                  `p-1 px-2 duration-200 ${
-                    isActive
-                      ? "text-green-500 bg-green-100 dark:bg-green-950 rounded"
-                      : ""
-                  }`
-                }
-              >
-                <FontAwesomeIcon icon={faFire} />
-              </NavLink>
-            </li>
-            <li>
-              <button className="relative p-1">
-                {notification && (
-                  <span className="absolute right-[0.5px] top-[0.5px] w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
-                )}
-                <FontAwesomeIcon
-                  icon={faBell}
-                  className="text-2xl hover:text-green-500 duration-100"
-                />
-              </button>
-            </li>
-            <li>
-              <NavLink
-                to={`/profile/${user.username}`}
-                className={({ isActive }) =>
-                  `block w-10 overflow-hidden rounded-full ${
-                    isActive ? "border-2 border-green-500" : ""
-                  } `
-                }
-              >
-                <img
-                  crossOrigin="anonymous"
-                  src={`http://localhost:3000/users/${user.photo}`}
-                  alt={`صورة ${user.fullName}`}
-                />
-              </NavLink>
-            </li>
-            <li>
-              <button
-                className={`text-2xl hover:text-green-500 duration-100 px-2 rounded ${
-                  options && "text-green-500 dark:bg-green-900"
-                }`}
-                onClick={() => setOptions((prvOption) => !prvOption)}
-              >
-                <FontAwesomeIcon icon={faBars} />
-              </button>
-            </li>
-          </ul>
-        </nav>
-        <nav className="sm:flex justify-center w-2/5 hidden">
-          <ul className="flex gap-10 sm:gap-5 md:gap-20 hover:*:text-green-500 *:text-2xl">
-            <li>
-              <NavLink
-                onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-                to={"/"}
-                className={({ isActive }) =>
-                  `p-1 px-2 duration-200 ${
-                    isActive
-                      ? "text-green-500 bg-green-100 dark:bg-green-950 rounded"
-                      : ""
-                  }`
-                }
-              >
-                <FontAwesomeIcon icon={faHome} />
-              </NavLink>
-            </li>
-            <li>
-              <NavLink
-                to={"/trending"}
-                className={({ isActive }) =>
-                  `p-1 px-2 duration-200 ${
-                    isActive
-                      ? "text-green-500 bg-green-100 dark:bg-green-950 rounded"
-                      : ""
-                  }`
-                }
-              >
-                <FontAwesomeIcon icon={faFire} />
-              </NavLink>
-            </li>
-          </ul>
-        </nav>
+
+        <NavBar />
+        <MobileNavBar options={options} updateOptions={updateOptions} />
         <div className="hidden items-center sm:gap-5 gap-10 relative sm:flex">
           <button className="relative p-1">
             <span className="absolute right-[0.5px] top-[0.5px] w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
@@ -163,14 +68,13 @@ function Header({ notification }) {
           <NavLink
             to={`/profile/${user.username}`}
             className={({ isActive }) =>
-              `block w-10 h-10 overflow-hidden rounded-full ${
+              `block w-8 h-8 overflow-hidden rounded-full ${
                 isActive ? "border-2 border-green-500" : ""
               } `
             }
           >
             <img
-              crossOrigin="anonymous"
-              src={`http://localhost:3000/users/${user.photo}`}
+              src={`/img/users/${user.photo}`}
               alt={`صورة ${user.fullName}`}
             />
           </NavLink>
@@ -178,7 +82,7 @@ function Header({ notification }) {
             className={`text-2xl hover:text-green-500 duration-100 px-2 rounded ${
               options && "text-green-500 dark:bg-green-900"
             }`}
-            onClick={() => setOptions((prvOption) => !prvOption)}
+            onClick={updateOptions}
           >
             <FontAwesomeIcon icon={faBars} />
           </button>

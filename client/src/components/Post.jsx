@@ -11,6 +11,7 @@ import {
   faTrash,
   faFlag,
   faPen,
+  faEarthAfrica,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { useState } from "react";
@@ -37,14 +38,12 @@ function Post(props) {
         >
           <div className="w-10 h-10 rounded-full overflow-hidden">
             <img
-              crossOrigin="anonymous"
-              src={`http://localhost:3000/users/${post.user.photo}`}
+              src={`/img/users/${post.user.photo}`}
               alt={`صورة ${props?.user?.fullName}`}
             />
           </div>
           <h3 className="font-bold">{post.user.fullName}</h3>
         </Link>
-        <p>{post.createdAt}</p>
         <button
           className="text-xl"
           onClick={() => setPostOptions((prev) => !prev)}
@@ -63,7 +62,7 @@ function Post(props) {
                       console.log("delete");
                       try {
                         const res = await axios({
-                          url: `http://localhost:3000/api/v1/posts/${post._id}`,
+                          url: `/api/v1/posts/${post._id}`,
                           method: "DELETE",
                           headers: { Authorization: `Bearer ${token}` },
                         });
@@ -93,6 +92,16 @@ function Post(props) {
           </div>
         )}
       </div>
+      <p className="text-gray-500 -mt-5 ms-12">
+        <FontAwesomeIcon icon={faEarthAfrica} className="me-2 text-sm" />
+        {new Date(post.createdAt).toLocaleString("ar", {
+          weekday: "long",
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        })}
+        {/* {new Date(post.createdAt).getSeconds(0)} */}
+      </p>
       <h3>{post.content}</h3>
       {post.images?.length > 0 && (
         <PostImages images={post.images} fullName={post.user.fullName} />
@@ -112,7 +121,7 @@ function Post(props) {
               const res = await axios({
                 headers: { Authorization: `Bearer ${token}` },
                 method: "PATCH",
-                url: `http://localhost:3000/api/v1/posts/${post._id}/${route}`,
+                url: `/api/v1/posts/${post._id}/${route}`,
               });
               if (res.data.status === "success") setPost(res.data.post);
             } catch (error) {
@@ -151,7 +160,7 @@ function Post(props) {
               const res = await axios({
                 headers: { Authorization: `Bearer ${token}` },
                 method: "PATCH",
-                url: `http://localhost:3000/api/v1/posts/${post._id}/${route}`,
+                url: `/api/v1/posts/${post._id}/${route}`,
               });
               if (res.data.status === "success") setPost(res.data.post);
             } catch (err) {
