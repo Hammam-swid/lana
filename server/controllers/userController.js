@@ -25,13 +25,29 @@ exports.getUser = catchAsync(async (req, res, next) => {
   if (!user) {
     return next(new AppError("هذا المستخدم غير موجود", 404));
   }
-  const posts = await Post.find({ "user.username": username }).sort(
-    "-createdAt"
-  );
+  const posts = await Post.find({ user: user._id })
+    .populate("user", "username photo fullName")
+    .sort("-createdAt");
   res.status(200).json({
     status: "success",
     user,
     posts,
+  });
+});
+
+exports.checkUsernameExist = catchAsync(async (req, res, next) => {
+  const { username, email } = req.body;
+  let user = await User.findOne({ username });
+  if (user) {
+    return next(new AppError("اسم المستخدم هذا موجود بالفعل", 400));
+  }
+  user = await User.findOne({ email });
+  if (user) {
+    return next(new AppError("لا يمكنك استخدام هذا البريد الالكتروني", 400));
+  }
+  res.status(200).json({
+    status: "success",
+    message: "يمكنك استخدام اسم المستخدم هذا في الوقت الحالي",
   });
 });
 

@@ -10,8 +10,9 @@ import LoginPage from "./pages/LoginPage";
 import SignupPage from "./pages/SignupPage";
 import MainLayout from "./pages/MainLayout";
 import HomePage from "./pages/HomePage";
-import store from "./store";
 import ProfilePage from "./pages/ProfilePage";
+import PostPage from "./pages/PostPage";
+import store from "./store";
 import axios from "axios";
 function App() {
   const routes = createRoutesFromElements(
@@ -21,7 +22,7 @@ function App() {
         element={<LoginPage />}
         loader={() => {
           const state = store.getState();
-          if (state.token) return redirect("/");
+          if (state.token && state.user) return redirect("/");
           return null;
         }}
       />
@@ -30,7 +31,7 @@ function App() {
         element={<SignupPage />}
         loader={() => {
           const state = store.getState();
-          if (state.token) return redirect("/");
+          if (state.token && state.user) return redirect("/");
           return null;
         }}
       />
@@ -44,7 +45,7 @@ function App() {
         element={<MainLayout />}
         loader={() => {
           const state = store.getState();
-          if (!state.token) return redirect("/login");
+          if (!state.token || !state.user) return redirect("/login");
           return null;
         }}
       >
@@ -61,7 +62,7 @@ function App() {
                   method: "GET",
                   url: "/api/v1/posts",
                 });
-                console.log(res)
+                console.log(res);
                 if (res.data.status === "success") {
                   return res.data.posts;
                 }
@@ -87,6 +88,24 @@ function App() {
               return res.data;
             };
             return defer({ data: getUser() });
+          }}
+        />
+        <Route
+          path="post/:postId"
+          element={<PostPage />}
+          loader={({ params }) => {
+            const getPost = async () => {
+              try {
+                const res = await axios({
+                  method: "GET",
+                  url: `/api/v1/posts/${params.postId}`,
+                });
+                if (res.data.status === "success") return res.data.post;
+              } catch (error) {
+                return error;
+              }
+            };
+            return defer({ post: getPost() });
           }}
         />
         <Route

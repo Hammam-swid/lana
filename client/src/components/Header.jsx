@@ -59,7 +59,9 @@ function Header({ notification }) {
         <MobileNavBar options={options} updateOptions={updateOptions} />
         <div className="hidden items-center sm:gap-5 gap-10 relative sm:flex">
           <button className="relative p-1">
-            <span className="absolute right-[0.5px] top-[0.5px] w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+            {notification && (
+              <span className="absolute right-[0.5px] top-[0.5px] w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
+            )}
             <FontAwesomeIcon
               icon={faBell}
               className="text-2xl hover:text-green-500 duration-100"
@@ -90,7 +92,7 @@ function Header({ notification }) {
         {options && (
           <ul className="absolute left-2 top-full sm:mt-[-10px] rounded-md bg-slate-100 dark:bg-slate-800 p-3 w-52 *:flex *:justify-between *:py-4 *:px-2 *:rounded-sm *:font-bold *:cursor-pointer dark:hover:*:bg-slate-900">
             <li>
-              <label>الإعدادات</label>
+              <Link to={`profile/${user.username}/settings`}>الإعدادات</Link>
               <FontAwesomeIcon
                 className="text-2xl hover:text-green-500 duration-100 hover:animate-spin"
                 icon={faGear}

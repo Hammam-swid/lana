@@ -2,11 +2,8 @@ const mongoose = require("mongoose");
 
 const postSchema = new mongoose.Schema({
   user: {
-    type: {
-      fullName: String,
-      username: String,
-      photo: String,
-    },
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
     required: [true, "يجب أن يكون للمنشور مستخدم ناشر"],
   },
   content: {
@@ -40,10 +37,9 @@ const postSchema = new mongoose.Schema({
   comments: [
     {
       user: {
-        username: {
-          type: String,
-          required: [true, "يجب أن يكون التعليق تابعاً لمستخدم"],
-        },
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+        required: [true, "يجب أن يكون للتعليق مستخدم"],
       },
       text: {
         type: String,

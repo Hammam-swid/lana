@@ -1,5 +1,8 @@
 import Post from "../components/Post";
-import { Suspense, useState } from "react";
+import {
+  Suspense,
+  // useState
+} from "react";
 import { useSelector } from "react-redux";
 import { useLoaderData, Await, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -8,55 +11,69 @@ import {
   faImage,
   faPaperPlane,
 } from "@fortawesome/free-solid-svg-icons";
+import { useFormik } from "formik";
 import axios from "axios";
+import * as Yup from "yup";
+
 function HomePage() {
   const user = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
+  // const [posts, setPosts] = useState([]);
   const promisePosts = useLoaderData();
-  const [formData, setFormData] = useState({});
+  const formik = useFormik({
+    initialValues: { content: "", images: [], video: "" },
+    validationSchema: Yup.object({
+      content: Yup.string().required("يجب أن يكون للمنشور محتوى نصي"),
+    }),
+    onSubmit: async (values) => {
+      console.log(values);
+      const { content, images } = values;
+      try {
+        const formData = new FormData();
+        formData.append("content", content);
+        for (let i = 0; i < images.length; i++)
+          formData.append("images", images[i]);
+        const res = await axios({
+          method: "POST",
+          url: "/api/v1/posts",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+          data: formData,
+        });
+        console.log(res);
+        // setPosts((prevPosts) => prevPosts.unshift(res.data.post));
+      } catch (error) {
+        console.log(error);
+      }
+    },
+  });
+  // function removePost(postId) {
+  //   setPosts((prevPosts) =>
+  //     prevPosts.filter((post) => {
+  //       console.log(post._id !== postId);
+  //       return post._id !== postId;
+  //     })
+  //   );
+  // }
+  // function addPost(post) {
+  //   setPosts((prevPosts) => prevPosts.unshift(post));
+  // }
   const name = user.fullName.split(" ");
-  // useEffect(, []);
-  function handleChange(element) {
-    setFormData((prevData) => ({
-      ...prevData,
-      [element.name]: element.name === "images" ? element.files : element.value,
-    }));
-  }
   return (
     <>
-      <div className="max-w-[560px] mx-auto mt-5 p-6">
+      <div className="max-w-[30rem] mx-auto mt-5 p-6">
         <form
           className="rounded-md overflow-hidden"
-          onSubmit={(e) => {
-            e.preventDefault();
-            const createPost = async () => {
-              try {
-                const data = new FormData();
-                data.append("content", formData.content);
-                for (let image in e.target.elements.images.files)
-                  data.append("images", image);
-                const res = await axios({
-                  url: `/api/v1/posts`,
-                  method: "POST",
-                  headers: { Authorization: `Bearer ${token}` },
-                  data,
-                });
-                if (res.data.status === "success") {
-                  console.log("post created");
-                }
-              } catch (err) {
-                console.log(err);
-              }
-            };
-            createPost();
-          }}
+          onSubmit={formik.handleSubmit}
         >
           <input
             type="text"
             name="content"
-            value={formData.content}
-            onChange={(e) => handleChange(e.target)}
-            multiple
+            value={formik.values.content}
+            onChange={formik.handleChange}
+            onBlur={formik.handleBlur}
+            disabled={formik.isSubmitting}
             className="outline-none bg-slate-300 dark:bg-slate-800 w-full p-6 text-xl rounded-md"
             placeholder={`بم تفكر يا ${
               name.length === 3 ? `${name[0]} ${name[1]}` : name[0]
@@ -74,14 +91,28 @@ function HomePage() {
               type="file"
               className="hidden"
               name="images"
-              onChange={(e) => handleChange(e.target)}
-              value={formData.image}
+              multiple
+              disabled={formik.isSubmitting}
+              onChange={(e) => {
+                console.log(formik.errors);
+                formik.setFieldValue("images", e.target.files);
+              }}
+              onBlur={formik.handleBlur}
+              // value={formik.values.images}
               id="image"
-              accept=".png,.jpg,.bmp"
+              accept="image/*"
             />
           </div>
-          <button className="text-green-500 text-xl absolute">
-            <FontAwesomeIcon icon={faPaperPlane} flip="horizontal" />
+          <button
+            disabled={formik.isSubmitting}
+            className="text-green-500 text-xl absolute"
+            type="submit"
+          >
+            {formik.isSubmitting ? (
+              <FontAwesomeIcon icon={faCircleNotch} className="animate-spin" />
+            ) : (
+              <FontAwesomeIcon icon={faPaperPlane} flip="horizontal" />
+            )}
           </button>
         </form>
       </div>
@@ -111,7 +142,7 @@ function HomePage() {
             )}
           </ul>
         </div>
-        <main className="sm:w-2/3 xl:w-2/5 bg-slate-200 dark:bg-slate-950 p-3">
+        <main className="sm:w-2/3 xl:w-[45rem] bg-slate-200 dark:bg-slate-950 p-3">
           <Suspense
             fallback={
               <div className="h-screen flex justify-center text-green-500 text-8xl">
@@ -123,9 +154,10 @@ function HomePage() {
             }
           >
             <Await resolve={promisePosts.posts}>
-              {(posts) =>
-                posts.map((post) => <Post key={post._id} post={post} />)
-              }
+              {(data) => {
+                // setPosts(data);
+                return data.map((post) => <Post key={post._id} post={post} />);
+              }}
             </Await>
           </Suspense>
         </main>

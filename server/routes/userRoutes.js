@@ -15,6 +15,7 @@ const {
   completeDeactivateMe,
   followUser,
   unFollowUser,
+  checkUsernameExist,
 } = require("../controllers/userController");
 const Email = require("../utils/email");
 const AppError = require("../utils/AppError");
@@ -27,6 +28,7 @@ router.post("/login", login);
 
 router.post("/forgotPassword", forgotPassword);
 router.patch("/resetPassword/:resetToken", resetPassword);
+router.post("/checkUsername", checkUsernameExist);
 
 router.use(protect);
 router.patch("/updateMe", uploadUserPhoto, updateMe);

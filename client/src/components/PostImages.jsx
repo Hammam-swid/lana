@@ -11,11 +11,11 @@ function PostImages(props) {
   const [showedImage, setShowedImage] = useState(0);
   return (
     <div className="">
-      <div className="rounded-md overflow-hidden w-full max-h-[500px] relative group/image">
+      <div className="rounded-md overflow-hidden bg-slate-800  relative group/image">
         <img
           src={`/img/posts/${props.images[showedImage]}`}
           alt={`صورة منشور ${props?.fullName}`}
-          className="object-cover"
+          className="object-cover w-full h-[30rem]"
         />
         {props?.images?.length > 1 && (
           <button
@@ -43,15 +43,16 @@ function PostImages(props) {
         )}
       </div>
       <div className="text-center">
-        {props.images.map((image, index) => (
-          <FontAwesomeIcon
-            key={image}
-            icon={faCircle}
-            className={`text-[8px] mx-1 ${
-              showedImage === index && "text-green-500"
-            }`}
-          />
-        ))}
+        {props.images.length > 1 &&
+          props.images.map((image, index) => (
+            <FontAwesomeIcon
+              key={image}
+              icon={faCircle}
+              className={`text-[8px] mx-1 ${
+                showedImage === index && "text-green-500"
+              }`}
+            />
+          ))}
       </div>
     </div>
   );

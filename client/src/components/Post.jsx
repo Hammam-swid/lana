@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import PostImages from "./PostImages";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -16,11 +16,14 @@ import {
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import axios from "axios";
+import Comments from "./Comments";
 
 function Post(props) {
   const user = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
+  const nav = useNavigate();
   const [post, setPost] = useState(props.post);
+  const [comments, setComments] = useState(false);
   const [postOptions, setPostOptions] = useState(false);
   return (
     <div
@@ -29,6 +32,7 @@ function Post(props) {
         if (post._id === e.target.id)
           return postOptions && setPostOptions(false);
       }}
+      onDoubleClick={() => nav(`/post/${post._id}`)}
       className="bg-slate-100 shadow-md dark:bg-slate-900 rounded p-6 flex flex-col gap-5 my-5"
     >
       <div className="flex justify-between items-center relative">
@@ -67,6 +71,7 @@ function Post(props) {
                           headers: { Authorization: `Bearer ${token}` },
                         });
                         console.log(res);
+                        // props.removePost(post._id);
                       } catch (error) {
                         console.log(error);
                       }
@@ -162,6 +167,7 @@ function Post(props) {
                 method: "PATCH",
                 url: `/api/v1/posts/${post._id}/${route}`,
               });
+              console.log(res.data.post);
               if (res.data.status === "success") setPost(res.data.post);
             } catch (err) {
               console.log(err.message);
@@ -184,14 +190,21 @@ function Post(props) {
             }
           </span>
         </button>
-        <button>
+        <button onClick={() => setComments((prevComments) => !prevComments)}>
           <FontAwesomeIcon icon={faMessage} />
-          <span className="text-xl ms-2">{props?.comments?.length}</span>
+          <span className="text-xl ms-2">{post?.comments?.length}</span>
         </button>
-        <button>
+        <button
+          onClick={() =>
+            navigator.clipboard.writeText(
+              `http://localhost:5173/post/${post._id}`
+            )
+          }
+        >
           <FontAwesomeIcon icon={faShare} />
         </button>
       </div>
+      {comments && <Comments comments={post.comments} />}
     </div>
   );
 }

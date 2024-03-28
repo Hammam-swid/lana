@@ -28,11 +28,15 @@ exports.getPosts = async (req, res, next) => {
   try {
     // const io = req.app.get('socket.io');
     // console.log(io)
-    const posts = await Post.find();
+    const posts = await Post.find()
+      .sort("-createdAt")
+      .limit(5)
+      .populate("user", "username photo fullName state");
+
     res.status(200).json({
       status: "success",
       result: posts.length,
-      posts,
+      posts: posts.filter((post) => post.user.state === "active"),
     });
   } catch (err) {
     console.log(err);
@@ -118,13 +122,8 @@ exports.scanPost = catchAsync(async (req, res, next) => {
 
 exports.createPost = catchAsync(async (req, res, next) => {
   const { content, images } = req.body;
-  const user = {
-    fullName: req.user.fullName,
-    username: req.user.username,
-    photo: req.user.photo,
-  };
   const post = await Post.create({
-    user,
+    user: req.user._id,
     content,
     images,
     categories: req.categories,
@@ -132,13 +131,16 @@ exports.createPost = catchAsync(async (req, res, next) => {
 
   res.status(201).json({
     status: "success",
-    post,
+    post: await post.populate("user", "username fullName photo"),
   });
 });
 
 exports.getPost = catchAsync(async (req, res, next) => {
   const { postId } = req.params;
-  const post = await Post.findById(postId);
+  const post = await Post.findById(postId).populate(
+    "user",
+    "username photo fullName"
+  );
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
@@ -154,8 +156,9 @@ exports.deletePost = catchAsync(async (req, res, next) => {
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
+
   if (
-    req.user.username !== post.user.username &&
+    req.user.id !== post.user.toString() &&
     req.user.role !== "admin" &&
     req.user.role !== "supervisor"
   ) {
@@ -169,7 +172,7 @@ exports.deletePost = catchAsync(async (req, res, next) => {
 
 exports.likePost = catchAsync(async (req, res, next) => {
   const { postId } = req.params;
-  const post = await Post.findById(postId);
+  let post = await Post.findById(postId);
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
@@ -195,7 +198,7 @@ exports.likePost = catchAsync(async (req, res, next) => {
       createdAt: Date.now(),
     });
   }
-  await post.save();
+  post = await (await post.save()).populate("user", "username fullName photo");
   res.status(201).json({
     status: "success",
     post,
@@ -221,7 +224,7 @@ exports.likePost = catchAsync(async (req, res, next) => {
 exports.dislikePost = catchAsync(async (req, res, next) => {
   console.log(req.app.get("socket.io"));
   const { postId } = req.params;
-  const post = await Post.findById(postId);
+  let post = await Post.findById(postId);
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
@@ -249,7 +252,7 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
       createdAt: Date.now(),
     });
   }
-  await post.save();
+  post = await (await post.save()).populate("user", "username fullName photo");
   res.status(201).json({
     status: "success",
     post,
@@ -258,7 +261,7 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
 
 exports.cancelReaction = catchAsync(async (req, res, next) => {
   const { postId } = req.params;
-  const post = await Post.findById(postId);
+  let post = await Post.findById(postId);
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
@@ -273,7 +276,9 @@ exports.cancelReaction = catchAsync(async (req, res, next) => {
     })
   ) {
     post.reactions.splice(reactionIndex, 1);
-    await post.save();
+    post = await (
+      await post.save()
+    ).populate("user", "username fullName photo");
     return res.status(203).json({
       status: "success",
       post,
