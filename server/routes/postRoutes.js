@@ -9,8 +9,9 @@ const {
   cancelReaction,
   deletePost,
   getPost,
+  commentOnPost,
 } = require("../controllers/postController");
-const { protect } = require("../controllers/authController");
+const { protect, restrictTo } = require("../controllers/authController");
 
 // إنشاء موجه فرعي خاص بالمناشير
 const router = express.Router();
@@ -29,5 +30,12 @@ router.route("/:postId").delete(protect, deletePost).get(protect, getPost); //.p
 router.route("/:postId/like").patch(protect, likePost);
 router.route("/:postId/dislike").patch(protect, dislikePost);
 router.route("/:postId/cancelReaction").patch(protect, cancelReaction);
+
+router
+  .route("/:postId/comment")
+  .post(protect, restrictTo("user"), commentOnPost);
+// delete and update comment
+// router.route("/:postId/comment").patch(protect, commentOnPost);
+// router.route("/:postId/comment").patch(protect, commentOnPost);
 
 module.exports = router;

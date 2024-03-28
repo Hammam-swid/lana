@@ -31,7 +31,8 @@ exports.getPosts = async (req, res, next) => {
     const posts = await Post.find()
       .sort("-createdAt")
       .limit(5)
-      .populate("user", "username photo fullName state");
+      .populate("user", "username photo fullName state")
+      .populate("comments.user", "username photo fullName state");
 
     res.status(200).json({
       status: "success",
@@ -137,10 +138,9 @@ exports.createPost = catchAsync(async (req, res, next) => {
 
 exports.getPost = catchAsync(async (req, res, next) => {
   const { postId } = req.params;
-  const post = await Post.findById(postId).populate(
-    "user",
-    "username photo fullName"
-  );
+  const post = await Post.findById(postId)
+    .populate("user", "username photo fullName")
+    .populate("comments.user", "username photo fullName state");
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
@@ -285,4 +285,17 @@ exports.cancelReaction = catchAsync(async (req, res, next) => {
     });
   }
   next(new AppError("هذا المستخدم لم يتفاعل مع هذا المنشور", 404));
+});
+
+exports.commentOnPost = catchAsync(async (req, res, next) => {
+  const { text } = req.body;
+  const { postId } = req.params;
+  const post = await Post.findByIdAndUpdate(postId, {
+    $push: { comments: { user: req.user._id, text, createdAt: Date.now() } },
+  });
+
+  if (!post) {
+    return next(new AppError("هذا المنشور غير موجود", 404));
+  }
+  res.status(201).json({ status: "success", comments: post.comments });
 });
