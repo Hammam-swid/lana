@@ -1,6 +1,7 @@
 /* eslint-disable react/prop-types */
 import {
   faEllipsisH,
+  faFlag,
   // faEllipsisH,
   // faEllipsisVertical,
   faTrash,
@@ -11,7 +12,7 @@ import { useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-function Comment({ comment, removeComment, updateComment, postId }) {
+function Comment({ comment, removeComment, updateComment, postId, postUser }) {
   const token = useSelector((state) => state.token);
   const user = useSelector((state) => state.user);
   const [options, setOptions] = useState(false);
@@ -41,7 +42,10 @@ function Comment({ comment, removeComment, updateComment, postId }) {
         </button>
         {options && (
           <ul className="dark:bg-slate-800 absolute z-20 left-0 p-3 rounded-md dark:hover:*:bg-slate-900 *:p-2 *:rounded-md">
-            {comment.user.username === user.username && (
+            {comment.user.username === user.username ||
+            user.username === postUser.username ||
+            user.role === "admin" ||
+            user.role === "supervisor" ? (
               <li>
                 <button
                   onClick={async () => {
@@ -62,6 +66,13 @@ function Comment({ comment, removeComment, updateComment, postId }) {
                 >
                   <span>حذف التعليق</span>{" "}
                   <FontAwesomeIcon icon={faTrash} className="text-red-500" />
+                </button>
+              </li>
+            ) : (
+              <li>
+                <button>
+                  <span>الإبلاغ عن التعليق</span>
+                  <FontAwesomeIcon icon={faFlag} className="text-red-500" />
                 </button>
               </li>
             )}

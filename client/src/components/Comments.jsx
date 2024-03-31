@@ -62,6 +62,7 @@ function Comments(props) {
             key={comment._id}
             comment={comment}
             postId={props.postId}
+            postUser={props.postUser}
             removeComment={removeComment}
             updateComment={updateComment}
           />

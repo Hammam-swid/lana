@@ -212,6 +212,7 @@ function Post(props) {
         <Comments
           comments={post.comments}
           postId={post._id}
+          postUser={post.user}
           updateComments={updateComments}
         />
       )}
