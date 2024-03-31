@@ -7,11 +7,12 @@ import {
   faThumbsDown,
   faMessage,
   faShare,
-  faEllipsisVertical,
+  // faEllipsisVertical,
   faTrash,
   faFlag,
   faPen,
   faEarthAfrica,
+  faEllipsisH,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
 import { useState } from "react";
@@ -25,6 +26,9 @@ function Post(props) {
   const [post, setPost] = useState(props.post);
   const [comments, setComments] = useState(false);
   const [postOptions, setPostOptions] = useState(false);
+  const updateComments = (newComments) => {
+    setPost((prevPost) => ({ ...prevPost, comments: [...newComments] }));
+  };
   return (
     <div
       id={post._id}
@@ -52,10 +56,10 @@ function Post(props) {
           className="text-xl"
           onClick={() => setPostOptions((prev) => !prev)}
         >
-          <FontAwesomeIcon icon={faEllipsisVertical} />
+          <FontAwesomeIcon icon={faEllipsisH} />
         </button>
         {postOptions && (
-          <div className="absolute left-3 top-1/3 dark:bg-slate-800 p-3 w-48 rounded-md">
+          <div className="absolute left-5 top-1/3 dark:bg-slate-800 p-3 w-48 rounded-md">
             <ul className="*:flex *:justify-between *:items-center hover:*:dark:bg-slate-900 *:p-2 *:rounded-md">
               {user.role === "admin" ||
               user.role === "supervisor" ||
@@ -204,7 +208,13 @@ function Post(props) {
           <FontAwesomeIcon icon={faShare} />
         </button>
       </div>
-      {comments && <Comments comments={post.comments} />}
+      {comments && (
+        <Comments
+          comments={post.comments}
+          postId={post._id}
+          updateComments={updateComments}
+        />
+      )}
     </div>
   );
 }

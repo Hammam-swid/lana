@@ -290,12 +290,58 @@ exports.cancelReaction = catchAsync(async (req, res, next) => {
 exports.commentOnPost = catchAsync(async (req, res, next) => {
   const { text } = req.body;
   const { postId } = req.params;
-  const post = await Post.findByIdAndUpdate(postId, {
-    $push: { comments: { user: req.user._id, text, createdAt: Date.now() } },
-  });
+  const post = await Post.findOneAndUpdate(
+    { _id: postId },
+    {
+      $push: { comments: { user: req.user._id, text, createdAt: Date.now() } },
+    },
+    { new: true }
+  ).populate("comments.user", "username fullName photo state");
 
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
-  res.status(201).json({ status: "success", comments: post.comments });
+  // await post.save();
+  res.status(201).json({
+    status: "success",
+    comments: post.comments
+      .filter((comment) => comment.user.state === "active")
+      .sort((a, b) => a - b > 0),
+  });
+});
+
+exports.deleteComment = catchAsync(async (req, res, next) => {
+  const { postId, commentId } = req.params;
+
+  const post = await Post.findById(postId).populate(
+    "comments.user",
+    "username fullName photo state _id"
+  );
+  // { $pull: { comments: { _id: commentId, user: req.user._id } } },
+  // { new: true }
+
+  if (!post) {
+    return next(new AppError("هذا المنشور غير موجود", 404));
+  }
+  const comment = post.comments.find(
+    (comment) => comment._id.toString() === commentId
+  );
+  if (!comment) {
+    return next(new AppError("هذا التعليق غير موجود من قبل", 404));
+  }
+  if (
+    req.user.role !== "admin" &&
+    req.user.role !== "supervisor" &&
+    req.user._id.toString() !== post.user.toString() &&
+    req.user._id.toString() !== comment.user._id.toString()
+  ) {
+    return next(new AppError("لا تملك الصلاحية لحذف هذا التعليق", 401));
+  }
+  post.comments.pull({ _id: commentId });
+  await post.save()
+  // console.log(commentId, post.comments[0].id);
+  // if (post.comments.some((comment) => comment.id === commentId)) {
+  //   return next(new AppError("لا تملك الصلاحيات لحذف هذا المنشور"));
+  // }
+  return res.status(204).json({ status: "success" });
 });
