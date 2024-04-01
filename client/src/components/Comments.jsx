@@ -17,7 +17,7 @@ function Comments(props) {
     validationSchema: Yup.object({
       text: Yup.string().required("يجب إدخال نص للتعليق"),
     }),
-    onSubmit: async (values) => {
+    onSubmit: async (values, helpers) => {
       try {
         const res = await axios({
           method: "POST",
@@ -30,7 +30,7 @@ function Comments(props) {
           const { comments } = res.data;
           setComments(comments);
           props.updateComments(comments);
-          this.values.text = "";
+          helpers.setFieldValue("text", "");
         }
       } catch (error) {
         console.log(error);
@@ -47,15 +47,11 @@ function Comments(props) {
       return newComments;
     });
   };
-  const updateComment = (updatedComment) => {
-    setComments((prevComments) =>
-      prevComments.map((comment) =>
-        comment._id === updatedComment._id ? updatedComment : comment
-      )
-    );
+  const updateComments = (newComments) => {
+    setComments(newComments);
   };
   return (
-    <div className="dark:bg-slate-950 p-6 rounded-md flex flex-col gap-5">
+    <div className="dark:bg-slate-950 bg-slate-200 p-4 md:p-6 rounded-md flex flex-col gap-5">
       {comments.length > 0 ? (
         comments.map((comment) => (
           <Comment
@@ -64,7 +60,7 @@ function Comments(props) {
             postId={props.postId}
             postUser={props.postUser}
             removeComment={removeComment}
-            updateComment={updateComment}
+            updateComments={updateComments}
           />
         ))
       ) : (
@@ -72,7 +68,7 @@ function Comments(props) {
       )}
       <form
         onSubmit={formik.handleSubmit}
-        className="flex gap-5 bg-slate-900 p-3 items-center rounded-md outline-none border-none focus:outline-none"
+        className="flex gap-5 dark:bg-slate-900 bg-slate-100 p-3 items-center rounded-md outline-none border-none focus:outline-none"
       >
         <img
           src={`/img/users/${user.photo}`}
@@ -85,13 +81,18 @@ function Comments(props) {
           onChange={formik.handleChange}
           onBlur={formik.handleBlur}
           placeholder={`التعليق كـ${user.fullName}`}
+          value={formik.values.text}
           aria-multiline={true}
-          className="flex-1 dark:bg-slate-800 p-3 rounded-md h-14"
+          className="flex-1 dark:bg-slate-800 bg-gray-200 p-3 rounded-md h-14"
         />
         <button
           type="submit"
           className="text-green-500 disabled:text-green-900"
-          disabled={formik.isSubmitting || formik.errors.text}
+          disabled={
+            formik.isSubmitting ||
+            formik.errors.text ||
+            formik.values.text === ""
+          }
         >
           {formik.isSubmitting ? (
             <FontAwesomeIcon

@@ -338,10 +338,40 @@ exports.deleteComment = catchAsync(async (req, res, next) => {
     return next(new AppError("لا تملك الصلاحية لحذف هذا التعليق", 401));
   }
   post.comments.pull({ _id: commentId });
-  await post.save()
+  await post.save();
   // console.log(commentId, post.comments[0].id);
   // if (post.comments.some((comment) => comment.id === commentId)) {
   //   return next(new AppError("لا تملك الصلاحيات لحذف هذا المنشور"));
   // }
   return res.status(204).json({ status: "success" });
+});
+
+exports.updateComment = catchAsync(async (req, res, next) => {
+  const { commentId, postId } = req.params;
+  const { text } = req.body;
+  const post = await Post.findById(postId).populate(
+    "comments.user",
+    "username fullName photo state _id"
+  );
+  if (!post) {
+    return next(new AppError("هذا المنشور غير موجود", 404));
+  }
+  const comment = post.comments.find(
+    (comment) => comment._id.toString() === commentId
+  );
+  if (!comment) {
+    return next(new AppError("هذا التعليق غير موجود", 404));
+  }
+  if (req.user.username !== comment.user.username) {
+    return next(new AppError("لا تملك الصلاحيات لتعديل هذا التعليق", 401));
+  }
+  comment.text = text;
+  post.comments = post.comments.map((oldComment) =>
+    oldComment._id.toString() === commentId ? comment : oldComment
+  );
+  await post.save();
+  res.status(200).json({
+    status: "success",
+    comments: post.comments,
+  });
 });

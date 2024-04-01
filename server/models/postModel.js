@@ -45,6 +45,10 @@ const postSchema = new mongoose.Schema({
         type: String,
         required: [true, "يجب أن يحتوي التعليق على نص"],
       },
+      createdAt: {
+        type: Date,
+        default: Date.now(),
+      },
       reactions: [
         {
           username: {

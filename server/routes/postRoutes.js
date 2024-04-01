@@ -11,6 +11,7 @@ const {
   getPost,
   commentOnPost,
   deleteComment,
+  updateComment,
 } = require("../controllers/postController");
 const { protect, restrictTo } = require("../controllers/authController");
 
@@ -36,7 +37,10 @@ router
   .route("/:postId/comment")
   .post(protect, restrictTo("user"), commentOnPost);
 
-router.route("/:postId/comment/:commentId").delete(protect, deleteComment);
+router
+  .route("/:postId/comment/:commentId")
+  .delete(protect, deleteComment)
+  .patch(protect, restrictTo("user"), updateComment);
 // delete and update comment
 // router.route("/:postId/comment").patch(protect, commentOnPost);
 // router.route("/:postId/comment").patch(protect, commentOnPost);

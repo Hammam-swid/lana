@@ -7,7 +7,6 @@ import {
   faThumbsDown,
   faMessage,
   faShare,
-  // faEllipsisVertical,
   faTrash,
   faFlag,
   faPen,
@@ -59,7 +58,7 @@ function Post(props) {
           <FontAwesomeIcon icon={faEllipsisH} />
         </button>
         {postOptions && (
-          <div className="absolute left-5 top-1/3 dark:bg-slate-800 p-3 w-48 rounded-md">
+          <div className="absolute left-5 top-1/3 dark:bg-slate-800 bg-slate-200 p-3 w-48 rounded-md">
             <ul className="*:flex *:justify-between *:items-center hover:*:dark:bg-slate-900 *:p-2 *:rounded-md">
               {user.role === "admin" ||
               user.role === "supervisor" ||
