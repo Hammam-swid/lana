@@ -30,7 +30,7 @@ exports.getPosts = async (req, res, next) => {
     // console.log(io)
     const posts = await Post.find()
       .sort("-createdAt")
-      .limit(5)
+      // .limit(5)
       .populate("user", "username photo fullName state")
       .populate("comments.user", "username photo fullName state");
 
@@ -50,13 +50,12 @@ exports.getPosts = async (req, res, next) => {
 
 exports.scanPost = catchAsync(async (req, res, next) => {
   const { content } = req.body;
-  if (!content) {
-    return next(new AppError("يجب أن يحتوي المنشور على محتوى نصي", 400));
-  }
-  // إنشاء اتصال مع نموذج ذكاء اصطناعي خاص بالتعامل مع النصوص
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-  const textModel = genAI.getGenerativeModel({ model: "gemini-pro" });
-  // تعديل خصائص الحماية
+  console.log(req.body);
+  if (req.method.toUpperCase() === "POST")
+    if (!content) {
+      return next(new AppError("يجب أن يحتوي المنشور على محتوى نصي", 400));
+    }
   const safetySettings = [
     {
       category: HarmCategory.HARM_CATEGORY_HATE_SPEECH,
@@ -79,15 +78,22 @@ exports.scanPost = catchAsync(async (req, res, next) => {
       threshold: HarmBlockThreshold.BLOCK_NONE,
     },
   ];
-  textModel.safetySettings = safetySettings;
-  // إرسال الأوامر للذكاء الاصطناعي
-  const prompt = `what are the categories for this content: '${content}' : in the response separate between the categories by ', '`;
-  const result = await textModel.generateContent(prompt);
-  const response = await result.response;
-  let textCategories = response.text();
-  textCategories = textCategories.split(", ");
+  let textCategories = [];
+  if (content) {
+    // إنشاء اتصال مع نموذج ذكاء اصطناعي خاص بالتعامل مع النصوص
+    const textModel = genAI.getGenerativeModel({ model: "gemini-pro" });
+    // تعديل خصائص الحماية
+
+    textModel.safetySettings = safetySettings;
+    // إرسال الأوامر للذكاء الاصطناعي
+    const prompt = `what are the categories for this content: '${content}' : in the response separate between the categories by ', '`;
+    const result = await textModel.generateContent(prompt);
+    const response = await result.response;
+    textCategories = response.text();
+    textCategories = textCategories.split(", ");
+  }
   let imagesCategories = [];
-  if (req.files.images) {
+  if (req.files && req.files.images) {
     const bufferImages = req.files.images.map((file) => ({
       inlineData: {
         data: file.buffer.toString("base64"),
@@ -133,6 +139,28 @@ exports.createPost = catchAsync(async (req, res, next) => {
   res.status(201).json({
     status: "success",
     post: await post.populate("user", "username fullName photo"),
+  });
+});
+
+exports.updatePost = catchAsync(async (req, res, next) => {
+  const { postId } = req.params;
+  console.log(req.body);
+  let post = await Post.findById(postId);
+  if (!post) {
+    return next(new AppError("هذ المنشور غير موجود", 404));
+  }
+  if (post.user.toString() !== req.user._id.toString()) {
+    return next(new AppError("لا تملك الصلاحيات للعديل على هذا المنشور", 401));
+  }
+  post = await Post.findByIdAndUpdate(postId, req.body, { new: true })
+    .populate("user", "username fullName photo")
+    .populate("comments.user", "username fullName photo state");
+  post.comments = post.comments.filter(
+    (comment) => comment.user.state === "active"
+  );
+  res.status(200).json({
+    status: "success",
+    post,
   });
 });
 

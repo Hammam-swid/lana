@@ -12,6 +12,7 @@ const {
   commentOnPost,
   deleteComment,
   updateComment,
+  updatePost,
 } = require("../controllers/postController");
 const { protect, restrictTo } = require("../controllers/authController");
 
@@ -27,7 +28,11 @@ router
   .post(protect, uploadPostImages, scanPost, createPost);
 
 // DELETE api.lana.com/api/v1/posts/38959jekof23982r2
-router.route("/:postId").delete(protect, deletePost).get(protect, getPost); //.patch(updatePost)
+router
+  .route("/:postId")
+  .delete(protect, deletePost)
+  .get(protect, getPost)
+  .patch(protect, uploadPostImages, scanPost, updatePost);
 
 router.route("/:postId/like").patch(protect, likePost);
 router.route("/:postId/dislike").patch(protect, dislikePost);

@@ -9,6 +9,7 @@ const postSchema = new mongoose.Schema({
   content: {
     type: String,
     required: true,
+    trim: true,
   },
   images: [String],
   createdAt: {
@@ -44,6 +45,7 @@ const postSchema = new mongoose.Schema({
       text: {
         type: String,
         required: [true, "يجب أن يحتوي التعليق على نص"],
+        trim: true,
       },
       createdAt: {
         type: Date,
