@@ -12,8 +12,10 @@ import MainLayout from "./pages/MainLayout";
 import HomePage from "./pages/HomePage";
 import ProfilePage from "./pages/ProfilePage";
 import PostPage from "./pages/PostPage";
+import SettingsLayout from "./pages/SettingsLayout";
 import store from "./store";
 import axios from "axios";
+import ProfileSettings from "./pages/ProfileSettings";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -109,9 +111,27 @@ function App() {
           }}
         />
         <Route
-          path="profile/:username/settings"
-          element={<h1>صفحة إعدادات الملف الشخصي</h1>}
-        />
+          path="settings/:username"
+          loader={({ params }) => {
+            const user = store.getState().user;
+            if (user?.username !== params?.username) {
+              throw "لا يمكنك الوصول إلى هذه الصفحة";
+            }
+            return null;
+          }}
+          element={<SettingsLayout />}
+          errorElement={<h1>حدث خطأ في تحميل الصفحة</h1>}
+        >
+          <Route index element={<ProfileSettings />} />
+          <Route
+            path="change-password"
+            element={<h1>صفحة تغيير كلمة المرور</h1>}
+          />
+          <Route
+            path="deactivate-account"
+            element={<h1>صفحة إلغاء تفعيل الحساب</h1>}
+          />
+        </Route>
         <Route path="*" element={<h1>هذه الصفحة غير موجودة</h1>} />
       </Route>
     </>

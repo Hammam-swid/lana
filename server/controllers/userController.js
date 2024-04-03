@@ -54,11 +54,12 @@ exports.checkUsernameExist = catchAsync(async (req, res, next) => {
 exports.uploadUserPhoto = upload.single("photo");
 
 exports.updateMe = catchAsync(async (req, res, next) => {
-  const { fullName, photo } = req.body;
-  photo = photo || "default.jpg";
+  const { fullName, photo, gender, dateOfBirth } = req.body;
   const user = await User.findByIdAndUpdate({
     fullName,
     photo,
+    gender,
+    dateOfBirth,
     updatedAt: Date.now(),
   });
   res.status(200).json({

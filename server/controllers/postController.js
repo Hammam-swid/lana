@@ -152,7 +152,7 @@ exports.updatePost = catchAsync(async (req, res, next) => {
   if (post.user.toString() !== req.user._id.toString()) {
     return next(new AppError("لا تملك الصلاحيات للعديل على هذا المنشور", 401));
   }
-  post = await Post.findByIdAndUpdate(postId, req.body, { new: true })
+  post = await Post.findByIdAndUpdate(postId, {...req.body, updatedAt: Date.now()}, { new: true })
     .populate("user", "username fullName photo")
     .populate("comments.user", "username fullName photo state");
   post.comments = post.comments.filter(
