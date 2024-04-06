@@ -34,16 +34,20 @@ function ProfilePage() {
     return (
       <div className="p-10">
         <div className="flex items-center justify-center  flex-col sm:gap-5 mb-10">
-          <div className="w-32 h-32 rounded-full overflow-hidden">
+          <div>
             <img
               src={`/img/users/${user.photo}`}
               alt={`صورة ${user.fullName}`}
+              className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden object-cover"
             />
           </div>
           <h1 className="text-3xl">
             {user.fullName}{" "}
             {user.verified && (
-              <FontAwesomeIcon icon={faCheckCircle} className="text-xl text-green-500" />
+              <FontAwesomeIcon
+                icon={faCheckCircle}
+                className="text-xl text-green-500"
+              />
             )}
           </h1>
           {thisUser.username !== params.username && (
@@ -111,7 +115,9 @@ function ProfilePage() {
             return (
               <>
                 {renderUser(data.user, data.posts)}
-                <div className="max-w-[560px] mx-auto">{showedPosts}</div>
+                <div className="w-full p-3 md:w-[38rem] mx-auto">
+                  {showedPosts}
+                </div>
               </>
             );
           }}

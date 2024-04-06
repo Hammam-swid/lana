@@ -5,6 +5,7 @@ const AppError = require("../utils/AppError");
 const catchAsync = require("../utils/catchAsync");
 const Email = require("../utils/email");
 const Post = require("../models/postModel");
+const sharp = require("sharp");
 
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
@@ -15,7 +16,7 @@ const multerFilter = (req, file, cb) => {
 };
 
 const upload = multer({
-  storage: multer.memoryStorage,
+  storage: multer.memoryStorage(),
   fileFilter: multerFilter,
 });
 
@@ -27,7 +28,11 @@ exports.getUser = catchAsync(async (req, res, next) => {
   }
   const posts = await Post.find({ user: user._id })
     .populate("user", "username photo fullName")
+    .populate("comments.user", "username photo fullName state")
     .sort("-createdAt");
+  posts.map((post) =>
+    post.comments.filter((comment) => comment.user.state === "active")
+  );
   res.status(200).json({
     status: "success",
     user,
@@ -51,16 +56,35 @@ exports.checkUsernameExist = catchAsync(async (req, res, next) => {
   });
 });
 
+const filterObj = (obj, ...allowedFields) => {
+  const newObj = {};
+  Object.keys(obj).forEach((el) => {
+    if (allowedFields.includes(el)) {
+      newObj[el] = obj[el];
+    }
+  });
+  return newObj;
+};
+
+exports.saveUserPhoto = catchAsync(async (req, res, next) => {
+  if (!req.file) return next();
+  req.file.filename = `user-${req.user._id}-${Date.now()}.${
+    req.file.mimetype.split("/")[1]
+  }`;
+  await sharp(req.file.buffer).toFile(
+    `public/assets/img/users/${req.file.filename}`
+  );
+  next();
+});
+
 exports.uploadUserPhoto = upload.single("photo");
 
 exports.updateMe = catchAsync(async (req, res, next) => {
-  const { fullName, photo, gender, dateOfBirth } = req.body;
-  const user = await User.findByIdAndUpdate({
-    fullName,
-    photo,
-    gender,
-    dateOfBirth,
-    updatedAt: Date.now(),
+  const filteredBody = filterObj(req.body, "fullName", "gender", "dateOfBirth");
+  filteredBody.updatedAt = Date.now();
+  if (req.file) filteredBody.photo = req.file.filename;
+  const user = await User.findByIdAndUpdate(req.user._id, filteredBody, {
+    new: true,
   });
   res.status(200).json({
     status: "success",
@@ -81,16 +105,17 @@ exports.deactivateMe = catchAsync(async (req, res, next) => {
 });
 
 exports.completeDeactivateMe = catchAsync(async (req, res, next) => {
-  const { verificationCode, password } = req.body;
+  const { verificationCode, password, email } = req.body;
+
   const user = await User.findOne({
-    email: req.user.email,
+    email,
     verificationCode,
     verificationCodeEx: { $gt: Date.now() },
   }).select("+password");
   if (!user) {
     return next(new AppError("رمز التحقق غير صحيح أو منتهي الصلاحية", 404));
   }
-  console.log(user);
+  console.log(req.body);
   if (!(await user.comparePassword(password, user.password))) {
     return next(new AppError("كلمة المرور غير صحيحة", 400));
   }

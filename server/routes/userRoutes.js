@@ -6,6 +6,8 @@ const {
   verifySignup,
   forgotPassword,
   resetPassword,
+  restrictTo,
+  updatePassword,
 } = require("../controllers/authController");
 const {
   getUser,
@@ -16,6 +18,7 @@ const {
   followUser,
   unFollowUser,
   checkUsernameExist,
+  saveUserPhoto,
 } = require("../controllers/userController");
 const Email = require("../utils/email");
 const AppError = require("../utils/AppError");
@@ -31,10 +34,18 @@ router.patch("/resetPassword/:resetToken", resetPassword);
 router.post("/checkUsername", checkUsernameExist);
 
 router.use(protect);
-router.patch("/updateMe", uploadUserPhoto, updateMe);
+router.patch(
+  "/updateMe",
+  restrictTo("user"),
+  uploadUserPhoto,
+  saveUserPhoto,
+  updateMe
+);
 router.post("/deactivateMe", deactivateMe);
 router.patch("/completeDeactivateMe", completeDeactivateMe);
 router.route("/:username").get(getUser);
 router.route("/:userId/follow").post(followUser).delete(unFollowUser);
+
+router.route("/updateMyPassword").patch(updatePassword);
 
 module.exports = router;

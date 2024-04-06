@@ -37,7 +37,14 @@ exports.getPosts = async (req, res, next) => {
     res.status(200).json({
       status: "success",
       result: posts.length,
-      posts: posts.filter((post) => post.user.state === "active"),
+      posts: posts
+        .filter((post) => post.user.state === "active")
+        .map((post) => {
+          post.comments = post.comments.filter(
+            (comment) => comment.user.state === "active"
+          );
+          return post;
+        }),
     });
   } catch (err) {
     console.log(err);
@@ -152,7 +159,11 @@ exports.updatePost = catchAsync(async (req, res, next) => {
   if (post.user.toString() !== req.user._id.toString()) {
     return next(new AppError("لا تملك الصلاحيات للعديل على هذا المنشور", 401));
   }
-  post = await Post.findByIdAndUpdate(postId, {...req.body, updatedAt: Date.now()}, { new: true })
+  post = await Post.findByIdAndUpdate(
+    postId,
+    { ...req.body, updatedAt: Date.now() },
+    { new: true }
+  )
     .populate("user", "username fullName photo")
     .populate("comments.user", "username fullName photo state");
   post.comments = post.comments.filter(
@@ -172,6 +183,9 @@ exports.getPost = catchAsync(async (req, res, next) => {
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
+  post.comments = post.comments.filter(
+    (comment) => comment.user.state === "active"
+  );
   res.status(200).json({
     status: "success",
     post,
@@ -200,7 +214,10 @@ exports.deletePost = catchAsync(async (req, res, next) => {
 
 exports.likePost = catchAsync(async (req, res, next) => {
   const { postId } = req.params;
-  let post = await Post.findById(postId);
+  let post = await Post.findById(postId).populate(
+    "comments.user",
+    "username fullName state photo"
+  );
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
@@ -226,7 +243,11 @@ exports.likePost = catchAsync(async (req, res, next) => {
       createdAt: Date.now(),
     });
   }
-  post = await (await post.save()).populate("user", "username fullName photo");
+  await post.save();
+  post = await post.populate("user", "username fullName photo");
+  post.comments = post.comments.filter(
+    (comment) => comment.user.state === "active"
+  );
   res.status(201).json({
     status: "success",
     post,
@@ -252,7 +273,10 @@ exports.likePost = catchAsync(async (req, res, next) => {
 exports.dislikePost = catchAsync(async (req, res, next) => {
   console.log(req.app.get("socket.io"));
   const { postId } = req.params;
-  let post = await Post.findById(postId);
+  let post = await Post.findById(postId).populate(
+    "comments.user",
+    "username fullName state photo"
+  );
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
@@ -281,6 +305,10 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
     });
   }
   post = await (await post.save()).populate("user", "username fullName photo");
+
+  post.comments = post.comments.filter(
+    (comment) => comment.user.state === "active"
+  );
   res.status(201).json({
     status: "success",
     post,
@@ -289,7 +317,10 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
 
 exports.cancelReaction = catchAsync(async (req, res, next) => {
   const { postId } = req.params;
-  let post = await Post.findById(postId);
+  let post = await Post.findById(postId).populate(
+    "comments.user",
+    "fullName username photo state"
+  );;
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
@@ -304,9 +335,11 @@ exports.cancelReaction = catchAsync(async (req, res, next) => {
     })
   ) {
     post.reactions.splice(reactionIndex, 1);
-    post = await (
-      await post.save()
-    ).populate("user", "username fullName photo");
+    await post.save();
+    post = await post.populate("user", "username fullName photo")
+    post.comments = post.comments.filter(
+      (comment) => comment.user.state === "active"
+    );
     return res.status(203).json({
       status: "success",
       post,

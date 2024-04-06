@@ -70,12 +70,13 @@ function Header({ notification }) {
           <NavLink
             to={`/profile/${user.username}`}
             className={({ isActive }) =>
-              `block w-8 h-8 overflow-hidden rounded-full ${
+              `block rounded-full ${
                 isActive ? "border-2 border-green-500" : ""
               } `
             }
           >
             <img
+              className="w-8 h-8 rounded-full overflow-hidden object-cover"
               src={`/img/users/${user.photo}`}
               alt={`صورة ${user.fullName}`}
             />
@@ -90,7 +91,10 @@ function Header({ notification }) {
           </button>
         </div>
         {options && (
-          <ul className="absolute left-2 top-full sm:mt-[-10px] rounded-md bg-slate-100 dark:bg-slate-800 p-3 w-52 *:flex *:justify-between *:py-4 *:px-2 *:rounded-sm *:font-bold *:cursor-pointer dark:hover:*:bg-slate-900">
+          <ul
+            onClick={() => setOptions(false)}
+            className="absolute left-2 top-full sm:mt-[-10px] rounded-md bg-slate-100 dark:bg-slate-800 p-3 w-52 *:flex *:justify-between *:py-4 *:px-2 *:rounded-sm *:font-bold *:cursor-pointer dark:hover:*:bg-slate-900"
+          >
             <li>
               <Link to={`settings/${user.username}`}>الإعدادات</Link>
               <FontAwesomeIcon

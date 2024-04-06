@@ -1,23 +1,69 @@
+import axios from "axios";
 import { useFormik } from "formik";
 import { useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import { updateUser } from "../store/authSlice";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 
 function ProfileSettings() {
   const user = useSelector((state) => state.user);
+  const token = useSelector((state) => state.token);
+  const dispatch = useDispatch();
   const [image, setImage] = useState(null);
   const formik = useFormik({
     initialValues: {
       photo: user?.photo,
       fullName: user?.fullName,
       gender: user?.gender,
-      day: user?.dateOfBirth ? new Date(user.dateOfBirth).getDate() : 1,
-      month: user?.dateOfBirth ? new Date(user.dateOfBirth).getMonth() : 1,
+      day: user?.dateOfBirth ? new Date(user.dateOfBirth).getDate() : "day",
+      month: user?.dateOfBirth
+        ? new Date(user.dateOfBirth).getMonth() + 1
+        : "month",
       year: user?.dateOfBirth
         ? new Date(user.dateOfBirth).getFullYear()
-        : new Date().getFullYear() - 13,
-      dateOfBirth: user.dateOfBirth,
+        : "year",
     },
-    onSubmit: (values) => console.log(values),
+    onSubmit: async (values) => {
+      const { fullName, photo, day, month, year, gender } = values;
+      try {
+        const formData = new FormData();
+        if (fullName && user.fullName !== fullName)
+          formData.append("fullName", fullName);
+        if (photo && user.photo !== photo) formData.append("photo", photo);
+        if (gender && user.gender !== gender) formData.append("gender", gender);
+        let dateOfBirth;
+        if (day && month && year) {
+          dateOfBirth = new Date(year, month - 1, day);
+          // dateOfBirth.setHours(12, 5);
+        }
+        if (
+          dateOfBirth &&
+          dateOfBirth !== "Invalid Date" &&
+          new Date(user.dateOfBirth).toLocaleString() !==
+            dateOfBirth.toLocaleString()
+        )
+          formData.append("dateOfBirth", dateOfBirth);
+        let isData = false;
+        for (let data of formData) {
+          isData = true;
+          console.log(data);
+        }
+        if (isData) {
+          const res = await axios({
+            method: "PATCH",
+            url: "/api/v1/users/updateMe",
+            headers: { Authorization: `Bearer ${token}` },
+            data: formData,
+          });
+          if (res.data.status === "success") {
+            dispatch(updateUser({ user: res.data.user }));
+          }
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    },
   });
   return (
     <form
@@ -80,6 +126,7 @@ function ProfileSettings() {
           value={formik.values.day}
           onChange={formik.handleChange}
         >
+          <option value="day">يوم</option>
           {(() => {
             let options = [];
             for (let i = 1; i <= 31; i++) {
@@ -98,6 +145,7 @@ function ProfileSettings() {
           value={formik.values.month}
           onChange={formik.handleChange}
         >
+          <option value="month">شهر</option>
           {(() => {
             let options = [];
             for (let i = 1; i <= 12; i++) {
@@ -116,6 +164,7 @@ function ProfileSettings() {
           value={formik.values.year}
           onChange={formik.handleChange}
         >
+          <option value="year">سنة</option>
           {(() => {
             let options = [];
             for (let i = new Date().getFullYear() - 13; i >= 1900; i--) {
@@ -129,11 +178,42 @@ function ProfileSettings() {
           })()}
         </select>
       </div>
+      <div className="text-lg py-6">
+        <label className="font-bold">الجنس: </label>
+        <input
+          type="radio"
+          name="gender"
+          id="male"
+          value="male"
+          checked={formik.values.gender === "male"}
+          className="ms-5"
+          onChange={formik.handleChange}
+        />
+        <label htmlFor="male">ذكر</label>
+        <input
+          type="radio"
+          name="gender"
+          id="female"
+          value="female"
+          className="ms-7"
+          checked={formik.values.gender === "female"}
+          onChange={formik.handleChange}
+        />
+        <label htmlFor="female">أنثى</label>
+      </div>
       <button
+        disabled={formik.isSubmitting}
         type="submit"
-        className="p-3 mt-10 rounded-sm font-bold text-lg bg-gradient-to-b from-green-400 to-green-600"
+        className="p-3 mt-5 rounded-sm font-bold text-lg bg-gradient-to-b from-green-400 to-green-600"
       >
-        تعديل البيانات
+        {!formik.isSubmitting ? (
+          "تعديل البيانات"
+        ) : (
+          <FontAwesomeIcon
+            icon={faCircleNotch}
+            className="text-lg animate-spin"
+          />
+        )}
       </button>
     </form>
   );

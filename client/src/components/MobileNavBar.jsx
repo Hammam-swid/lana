@@ -57,7 +57,7 @@ function MobileNavBar({ options, updateOptions }) {
           <NavLink
             to={`/profile/${user.username}`}
             className={({ isActive }) =>
-              `block w-8 h-8 overflow-hidden rounded-full ${
+              `block rounded-full ${
                 isActive ? "border-2 border-green-500" : ""
               } `
             }
@@ -65,6 +65,7 @@ function MobileNavBar({ options, updateOptions }) {
             <img
               src={`/img/users/${user.photo}`}
               alt={`صورة ${user.fullName}`}
+              className="w-8 h-8 overflow-hidden rounded-full object-cover"
             />
           </NavLink>
         </li>

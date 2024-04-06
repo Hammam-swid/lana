@@ -95,10 +95,11 @@ function Post(props) {
           to={`/profile/${post.user.username}`}
           className="flex items-center gap-3"
         >
-          <div className="w-10 h-10 rounded-full overflow-hidden">
+          <div>
             <img
               src={`/img/users/${post.user.photo}`}
               alt={`صورة ${props?.user?.fullName}`}
+              className="w-10 h-10 rounded-full overflow-hidden object-cover"
             />
           </div>
           <h3 className="font-bold">{post.user.fullName}</h3>

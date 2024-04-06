@@ -16,6 +16,8 @@ import SettingsLayout from "./pages/SettingsLayout";
 import store from "./store";
 import axios from "axios";
 import ProfileSettings from "./pages/ProfileSettings";
+import ChangePasswordPage from "./pages/ChangePasswordPage";
+import DeactivateAccountPage from "./pages/DeactivateAccountPage";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -123,13 +125,10 @@ function App() {
           errorElement={<h1>حدث خطأ في تحميل الصفحة</h1>}
         >
           <Route index element={<ProfileSettings />} />
-          <Route
-            path="change-password"
-            element={<h1>صفحة تغيير كلمة المرور</h1>}
-          />
+          <Route path="change-password" element={<ChangePasswordPage />} />
           <Route
             path="deactivate-account"
-            element={<h1>صفحة إلغاء تفعيل الحساب</h1>}
+            element={<DeactivateAccountPage />}
           />
         </Route>
         <Route path="*" element={<h1>هذه الصفحة غير موجودة</h1>} />

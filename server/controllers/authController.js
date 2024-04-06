@@ -119,7 +119,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     .createHash("sha256")
     .update(resetToken)
     .digest("hex");
-  const user = await User.find({
+  const user = await User.findOne({
     resetPasswordToken: hashedToken,
     resetPasswordTokenExpires: { $gt: Date.now() },
   });
@@ -187,11 +187,12 @@ exports.restrictTo = (...roles) => {
 exports.updatePassword = catchAsync(async (req, res, next) => {
   const user = await User.findById(req.user._id).select("+password");
   if (!(await user.comparePassword(req.body.currentPassword, user.password))) {
-    return next(new AppError("كلمة المرور القديمة غير صحيحة", 400));
+    return next(new AppError("كلمة المرور الحالية غير صحيحة", 400));
   }
   user.password = req.body.password;
   await user.save();
   const token = createToken({ id: user._id });
+  user.password = undefined;
   res.status(201).json({
     status: "success",
     token,

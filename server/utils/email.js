@@ -47,6 +47,9 @@ class Email {
   async sendResetPassword() {
     await this.send("resetPassword", "إعادة تعيين كلمة المرور");
   }
+  async sendConfirmDeactivate() {
+    await this.send("confirmSignUp", "تأكيد عملية إلغاء تفعيل الحساب");
+  }
 }
 
 module.exports = Email;
