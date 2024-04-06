@@ -8,6 +8,7 @@ const {
   resetPassword,
   restrictTo,
   updatePassword,
+  isTokenExist,
 } = require("../controllers/authController");
 const {
   getUser,
@@ -30,6 +31,7 @@ router.post("/verifySignup", verifySignup);
 router.post("/login", login);
 
 router.post("/forgotPassword", forgotPassword);
+router.get("/tokenExist/:resetToken", isTokenExist);
 router.patch("/resetPassword/:resetToken", resetPassword);
 router.post("/checkUsername", checkUsernameExist);
 

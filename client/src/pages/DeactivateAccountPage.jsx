@@ -83,6 +83,7 @@ function DeactivateAccountPage() {
         name="email"
         id="email"
         disabled
+        dir="ltr"
         onChange={formik.handleChange}
         onBlur={formik.handleBlur}
         value={formik.values.email}

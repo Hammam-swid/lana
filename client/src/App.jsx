@@ -18,6 +18,8 @@ import axios from "axios";
 import ProfileSettings from "./pages/ProfileSettings";
 import ChangePasswordPage from "./pages/ChangePasswordPage";
 import DeactivateAccountPage from "./pages/DeactivateAccountPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage";
+import ResetPasswordPage from "./pages/ResetPasswordPage";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -39,10 +41,24 @@ function App() {
           return null;
         }}
       />
-      <Route path="/forgot-password" element={<h1>هل نسيت كلمة المرور</h1>} />
+      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
       <Route
         path="/reset-password/:resetToken"
-        element={<h1>صفحة استعادة كلمة المرور</h1>}
+        element={<ResetPasswordPage />}
+        loader={async ({ params }) => {
+          try {
+            const res = await axios({
+              method: "GET",
+              url: `/api/v1/users/tokenExist/${params.resetToken}`,
+            });
+            if (res.data.status === "success") return null;
+          } catch (error) {
+            if (error.response.status === 404) {
+              return redirect("/forgot-password");
+            }
+          }
+          return null;
+        }}
       />
       <Route
         path="/"

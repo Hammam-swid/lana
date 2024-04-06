@@ -105,7 +105,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   const resetToken = user.createResetPasswordToken();
   await user.save({ validateBeforeSave: false });
 
-  const resetURL = `${req.protocol}://localhost:5173/reset-password/${resetToken}`;
+  const resetURL = `${req.protocol}://localhost:5173/reset-password/${resetToken}?email=${email}`;
   await new Email(user, resetURL).sendResetPassword();
   res.status(200).json({
     status: "success",
@@ -113,7 +113,7 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.resetPassword = catchAsync(async (req, res, next) => {
+exports.isTokenExist = catchAsync(async (req, res, next) => {
   const { resetToken } = req.params;
   const hashedToken = crypto
     .createHash("sha256")
@@ -125,7 +125,29 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   });
   if (!user) {
     return next(
-      new AppError("الرمز الذي أرسلته غير صحيح أو منتهي الصلاحية", 400)
+      new AppError("الرمز الذي أرسلته غير صحيح أو منتهي الصلاحية", 404)
+    );
+  }
+  res.status(200).json({
+    status: 'success',
+  })
+});
+
+exports.resetPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  const { resetToken } = req.params;
+  const hashedToken = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  const user = await User.findOne({
+    email,
+    resetPasswordToken: hashedToken,
+    resetPasswordTokenExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(
+      new AppError("الرمز الذي أرسلته غير صحيح أو منتهي الصلاحية", 404)
     );
   }
   user.password = req.body.password;
