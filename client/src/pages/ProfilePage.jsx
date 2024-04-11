@@ -5,8 +5,13 @@ import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faBan,
   faCheckCircle,
   faCircleNotch,
+  faEllipsisV,
+  faFlag,
+  faTriangleExclamation,
+  faUserSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import { updateUser } from "../store/authSlice";
 
@@ -16,10 +21,11 @@ function ProfilePage() {
   const thisUser = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const dispatch = useDispatch();
+  const [profileOptions, setProfileOptions] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
   function renderUser(user, posts) {
     if (
-      thisUser.following.find((follow) => {
+      thisUser.following?.find((follow) => {
         if (follow.username === user.username) {
           setIsFollowed(true);
           return true;
@@ -41,15 +47,63 @@ function ProfilePage() {
               className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden object-cover"
             />
           </div>
-          <h1 className="text-3xl">
-            {user.fullName}{" "}
-            {user.verified && (
-              <FontAwesomeIcon
-                icon={faCheckCircle}
-                className="text-xl text-green-500"
-              />
+          <div className="flex gap-5 items-end relative">
+            <h1 className="text-3xl">
+              {user.fullName}{" "}
+              {user.verified && (
+                <FontAwesomeIcon
+                  icon={faCheckCircle}
+                  className="text-xl text-green-500"
+                />
+              )}
+            </h1>
+            {thisUser.username !== params.username && (
+              <button onClick={() => setProfileOptions((prev) => !prev)}>
+                <FontAwesomeIcon
+                  icon={faEllipsisV}
+                  className="text-2xl block"
+                />
+              </button>
             )}
-          </h1>
+            {profileOptions && (
+              <ul className="w-52 rounded-md *:flex *:justify-between *:rounded-md *:items-center *:p-3 dark:hover:*:bg-slate-950 *:cursor-pointer dark:bg-slate-900 p-3 absolute -left-3 top-full mt-2">
+                {thisUser.role === "user" ? (
+                  <>
+                    <li id="block-user">
+                      <span>حظر الحساب</span>
+                      <FontAwesomeIcon
+                        icon={faBan}
+                        flip="horizontal"
+                        className="text-red-500"
+                      />
+                    </li>
+                    <li>
+                      <span>الإبلاغ عن الحساب</span>
+                      <FontAwesomeIcon icon={faFlag} className="text-red-500" />
+                    </li>
+                  </>
+                ) : (
+                  <>
+                    <li>
+                      <span>تحذير الحساب</span>
+                      <FontAwesomeIcon
+                        icon={faTriangleExclamation}
+                        className="text-yellow-500"
+                      />
+                    </li>
+                    <li>
+                      <span>حظر الحساب نهائياً</span>
+                      <FontAwesomeIcon
+                        icon={faUserSlash}
+                        flip="horizontal"
+                        className="text-red-500"
+                      />
+                    </li>
+                  </>
+                )}
+              </ul>
+            )}
+          </div>
           {thisUser.username !== params.username && (
             <button
               onClick={async () => {
@@ -106,7 +160,7 @@ function ProfilePage() {
       >
         <Await resolve={dataPromise.data}>
           {(data) => {
-            if (thisUser.following.includes(data.user)) {
+            if (thisUser?.following?.includes(data.user)) {
               setIsFollowed(true);
             }
             const showedPosts = data.posts.map((post) => (

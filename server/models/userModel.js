@@ -64,50 +64,26 @@ const userSchema = new mongoose.Schema({
   resetPasswordTokenExpires: Date,
   followers: [
     {
-      username: {
-        type: String,
-        required: true,
-      },
-      fullName: {
-        type: String,
-        required: true,
-      },
-      photo: {
-        type: String,
-        required: true,
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   ],
   following: [
     {
-      username: {
-        type: String,
-        required: true,
-      },
-      fullName: {
-        type: String,
-        required: true,
-      },
-      photo: {
-        type: String,
-        required: true,
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   ],
   blockedUsers: [
     {
-      username: {
-        type: String,
-        required: true,
-      },
-      fullName: {
-        type: String,
-        required: true,
-      },
-      photo: {
-        type: String,
-        required: true,
-      },
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
+  ],
+  blockingUsers: [
+    {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
     },
   ],
 });

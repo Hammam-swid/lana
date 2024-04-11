@@ -20,9 +20,8 @@ const {
   unFollowUser,
   checkUsernameExist,
   saveUserPhoto,
+  getMyFollowings,
 } = require("../controllers/userController");
-const Email = require("../utils/email");
-const AppError = require("../utils/AppError");
 
 const router = express.Router();
 
@@ -36,13 +35,8 @@ router.patch("/resetPassword/:resetToken", resetPassword);
 router.post("/checkUsername", checkUsernameExist);
 
 router.use(protect);
-router.patch(
-  "/updateMe",
-  restrictTo("user"),
-  uploadUserPhoto,
-  saveUserPhoto,
-  updateMe
-);
+router.patch("/updateMe", uploadUserPhoto, saveUserPhoto, updateMe);
+router.get("/followingUsers", getMyFollowings);
 router.post("/deactivateMe", deactivateMe);
 router.patch("/completeDeactivateMe", completeDeactivateMe);
 router.route("/:username").get(getUser);

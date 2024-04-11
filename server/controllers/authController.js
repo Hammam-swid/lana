@@ -89,6 +89,12 @@ exports.login = catchAsync(async (req, res, next) => {
     ),
   });
   user.password = undefined;
+  if (user.following) {
+    await user.populate("following", "username fullName photo verified");
+    user.following = user.following.filter(
+      (follow) => follow.state === "active"
+    );
+  }
   res.status(200).json({
     status: "success",
     token,
@@ -129,8 +135,8 @@ exports.isTokenExist = catchAsync(async (req, res, next) => {
     );
   }
   res.status(200).json({
-    status: 'success',
-  })
+    status: "success",
+  });
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
@@ -215,6 +221,12 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   await user.save();
   const token = createToken({ id: user._id });
   user.password = undefined;
+  if (user.following) {
+    await user.populate("following", "username fullName photo verified state");
+    user.following = user.following.filter(
+      (follow) => follow.state === "active"
+    );
+  }
   res.status(201).json({
     status: "success",
     token,

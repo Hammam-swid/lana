@@ -19,7 +19,7 @@ function HomePage() {
   const user = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   // const [posts, setPosts] = useState([]);
-  const promisePosts = useLoaderData();
+  const promiseData = useLoaderData();
   const formik = useFormik({
     initialValues: { content: "", images: [], video: "" },
     validationSchema: Yup.object({
@@ -120,7 +120,45 @@ function HomePage() {
         <div className="md:w-1/3 p-6 md:mt-[-120px] self-start sm:self-center w-full overflow-x-scroll md:self-start">
           <h2 className="font-bold text-3xl mb-5">المتابَعون</h2>
           <ul className="flex gap-7 overflow-x-scroll  md:flex-col">
-            {user.following.length > 0 ? (
+            <Suspense
+              fallback={
+                <div className="text-center">
+                  <FontAwesomeIcon
+                    icon={faCircleNotch}
+                    className="text-green-500 animate-spin"
+                  />
+                </div>
+              }
+            >
+              <Await resolve={promiseData.followingUsers}>
+                {(following) => {
+                  console.log(following);
+                  return following.length > 0 ? (
+                    following.map((follower) => (
+                      <li key={follower.username}>
+                        <Link
+                          to={`/profile/${follower.username}`}
+                          className="flex items-center gap-2 flex-col md:flex-row"
+                        >
+                          <div className="w-12 h-12 rounded-full overflow-hidden">
+                            <img
+                              src={`/img/users/${follower.photo}`}
+                              alt={`صورة ${follower.fullName}`}
+                            />
+                          </div>
+                          <p className="text-center font-bold">
+                            {follower.fullName}
+                          </p>
+                        </Link>
+                      </li>
+                    ))
+                  ) : (
+                    <h3 className="text-gray-500">أنت لا تتابع أحداً</h3>
+                  );
+                }}
+              </Await>
+            </Suspense>
+            {/* {user.following.length > 0 ? (
               user.following.map((follower) => (
                 <li key={follower.username}>
                   <Link
@@ -139,7 +177,7 @@ function HomePage() {
               ))
             ) : (
               <h3 className="text-gray-500">أنت لا تتابع أحداً</h3>
-            )}
+            )} */}
           </ul>
         </div>
         <main className="sm:w-2/3 xl:w-[45rem] bg-slate-200 dark:bg-slate-950 p-3">
@@ -153,7 +191,7 @@ function HomePage() {
               </div>
             }
           >
-            <Await resolve={promisePosts.posts}>
+            <Await resolve={promiseData.posts}>
               {(data) => {
                 // setPosts(data);
                 return data.map((post) => <Post key={post._id} post={post} />);

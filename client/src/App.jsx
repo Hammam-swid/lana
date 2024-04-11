@@ -20,6 +20,8 @@ import ChangePasswordPage from "./pages/ChangePasswordPage";
 import DeactivateAccountPage from "./pages/DeactivateAccountPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import { jwtDecode } from "jwt-decode";
+import { setLogout } from "./store/authSlice";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -41,11 +43,21 @@ function App() {
           return null;
         }}
       />
-      <Route path="/forgot-password" element={<ForgotPasswordPage />} />
+      <Route
+        path="/forgot-password"
+        element={<ForgotPasswordPage />}
+        loader={() => {
+          const state = store.getState();
+          if (state.token && state.user) return redirect("/");
+          return null;
+        }}
+      />
       <Route
         path="/reset-password/:resetToken"
         element={<ResetPasswordPage />}
         loader={async ({ params }) => {
+          const state = store.getState();
+          if (state.token && state.user) return redirect("/");
           try {
             const res = await axios({
               method: "GET",
@@ -66,6 +78,11 @@ function App() {
         loader={() => {
           const state = store.getState();
           if (!state.token || !state.user) return redirect("/login");
+          const decodedToken = jwtDecode(state.token);
+          if (Date.now() > decodedToken.exp * 1000) {
+            store.dispatch(setLogout());
+            return redirect("/login");
+          }
           return null;
         }}
       >
@@ -74,8 +91,8 @@ function App() {
           element={<HomePage />}
           errorElement={<h1>حدث خطأ في تحميل الصفحة</h1>}
           loader={() => {
+            const token = store.getState().token;
             const getPosts = async () => {
-              const token = store.getState().token;
               try {
                 const res = await axios({
                   headers: { Authorization: `Bearer ${token}` },
@@ -90,7 +107,22 @@ function App() {
                 console.log(err.message);
               }
             };
-            return defer({ posts: getPosts() });
+            const getFollowing = async () => {
+              try {
+                const res = await axios({
+                  method: "GET",
+                  url: `/api/v1/users/followingUsers`,
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                console.log(res)
+                if (res.data.status === "success") {
+                  return res.data.followingUsers;
+                }
+              } catch (error) {
+                console.log(error);
+              }
+            };
+            return defer({ posts: getPosts(), followingUsers: getFollowing() });
           }}
         />
         <Route path="trending" element={<h1>صفحة المحتوى الرائج</h1>} />

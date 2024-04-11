@@ -9,9 +9,13 @@ import {
   faGear,
 } from "@fortawesome/free-solid-svg-icons";
 import { setLogout } from "../store/authSlice";
-import { useEffect, useState } from "react";
+import {
+  // useEffect,
+  useState,
+} from "react";
 import NavBar from "./NavBar";
 import MobileNavBar from "./MobileNavBar";
+import Modal from "./Modal";
 
 // eslint-disable-next-line react/prop-types
 function Header({ notification }) {
@@ -20,22 +24,22 @@ function Header({ notification }) {
   const [options, setOptions] = useState(false);
   const nav = useNavigate();
   const dispatch = useDispatch();
-  useEffect(() => {
-    if (popup) {
-      document.onscroll = (ev) => {
-        ev.preventDefault();
-      };
-    } else {
-      document.onscroll = undefined;
-    }
-  }, [popup]);
+  // useEffect(() => {
+  //   if (popup) {
+  //     document.onscroll = (ev) => {
+  //       ev.preventDefault();
+  //     };
+  //   } else {
+  //     document.onscroll = undefined;
+  //   }
+  // }, [popup]);
 
   function updateOptions() {
     setOptions((prvOption) => !prvOption);
   }
   return (
     <>
-      <header className=" min-h-20 w-screen sticky sm:top-0 bg-slate-100 shadow-md dark:bg-slate-900 z-10 flex justify-center sm:justify-between items-center py-2 px-6 sm:px-6 flex-wrap sm:flex-nowrap">
+      <header className=" min-h-20 w-screen sticky sm:top-0 bg-slate-100 shadow-md dark:bg-slate-900 z-50 flex justify-center sm:justify-between items-center py-2 px-6 sm:px-6 flex-wrap sm:flex-nowrap">
         <div className="flex justify-between relative items-center gap-5 w-full sm:w-fit mb-5 sm:mb-0">
           <Link
             to="/"
@@ -117,13 +121,23 @@ function Header({ notification }) {
         )}
       </header>
       {popup && (
+        <Modal
+          action={() => {
+            dispatch(setLogout());
+            nav("/login");
+          }}
+          message="هل أنت متأكد من أنك تريد تسجيل الخروج؟"
+          hide={() => setPopup(false)}
+        />
+      )}
+      {/* {popup && (
         <div
           onClick={(e) => {
-            if (e.target.id === "background") {
+            if (e.target.id === "overlay") {
               setPopup(false);
             }
           }}
-          id="background"
+          id="overlay"
           className="fixed z-20 top-[50%] right-[50%] w-screen h-screen bg-black translate-x-[50%] translate-y-[-50%] bg-opacity-60 flex justify-center items-center"
         >
           <div className="bg-white dark:bg-slate-900 min-w-80 max-w-96 w-1/2 h-40 p-3 rounded-lg flex flex-col justify-between">
@@ -149,7 +163,7 @@ function Header({ notification }) {
             </div>
           </div>
         </div>
-      )}
+      )} */}
     </>
   );
 }

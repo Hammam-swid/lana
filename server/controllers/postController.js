@@ -31,7 +31,7 @@ exports.getPosts = async (req, res, next) => {
     const posts = await Post.find()
       .sort("-createdAt")
       // .limit(5)
-      .populate("user", "username photo fullName state")
+      .populate("user", "username photo fullName state verified")
       .populate("comments.user", "username photo fullName state");
 
     res.status(200).json({
@@ -145,7 +145,7 @@ exports.createPost = catchAsync(async (req, res, next) => {
 
   res.status(201).json({
     status: "success",
-    post: await post.populate("user", "username fullName photo"),
+    post: await post.populate("user", "username fullName photo verified"),
   });
 });
 
@@ -164,7 +164,7 @@ exports.updatePost = catchAsync(async (req, res, next) => {
     { ...req.body, updatedAt: Date.now() },
     { new: true }
   )
-    .populate("user", "username fullName photo")
+    .populate("user", "username fullName photo verified")
     .populate("comments.user", "username fullName photo state");
   post.comments = post.comments.filter(
     (comment) => comment.user.state === "active"
@@ -178,7 +178,7 @@ exports.updatePost = catchAsync(async (req, res, next) => {
 exports.getPost = catchAsync(async (req, res, next) => {
   const { postId } = req.params;
   const post = await Post.findById(postId)
-    .populate("user", "username photo fullName")
+    .populate("user", "username photo fullName verified")
     .populate("comments.user", "username photo fullName state");
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
@@ -244,7 +244,7 @@ exports.likePost = catchAsync(async (req, res, next) => {
     });
   }
   await post.save();
-  post = await post.populate("user", "username fullName photo");
+  post = await post.populate("user", "username fullName photo verified");
   post.comments = post.comments.filter(
     (comment) => comment.user.state === "active"
   );
@@ -304,7 +304,9 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
       createdAt: Date.now(),
     });
   }
-  post = await (await post.save()).populate("user", "username fullName photo");
+  post = await (
+    await post.save()
+  ).populate("user", "username fullName photo verified");
 
   post.comments = post.comments.filter(
     (comment) => comment.user.state === "active"
@@ -320,7 +322,7 @@ exports.cancelReaction = catchAsync(async (req, res, next) => {
   let post = await Post.findById(postId).populate(
     "comments.user",
     "fullName username photo state"
-  );;
+  );
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
@@ -336,7 +338,7 @@ exports.cancelReaction = catchAsync(async (req, res, next) => {
   ) {
     post.reactions.splice(reactionIndex, 1);
     await post.save();
-    post = await post.populate("user", "username fullName photo")
+    post = await post.populate("user", "username fullName photo verified");
     post.comments = post.comments.filter(
       (comment) => comment.user.state === "active"
     );

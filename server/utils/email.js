@@ -8,7 +8,7 @@ class Email {
     this.firstName =
       nameArray[0] === "عبد" ? nameArray[0] + nameArray[1] : nameArray[0];
     this.url = url;
-    this.from = "hmam.swid@gmail.com";
+    this.from = "lanasocial00@gmail.com";
     this.verificationCode = user.verificationCode;
   }
 

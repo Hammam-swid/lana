@@ -30,13 +30,16 @@ exports.getUser = catchAsync(async (req, res, next) => {
     .populate("user", "username photo fullName")
     .populate("comments.user", "username photo fullName state")
     .sort("-createdAt");
-  posts.map((post) =>
-    post.comments.filter((comment) => comment.user.state === "active")
-  );
+
   res.status(200).json({
     status: "success",
     user,
-    posts,
+    posts: posts.map((post) => {
+      post.comments = post.comments.filter(
+        (comment) => comment.user.state === "active"
+      );
+      return post;
+    }),
   });
 });
 
@@ -85,7 +88,8 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.file) filteredBody.photo = req.file.filename;
   const user = await User.findByIdAndUpdate(req.user._id, filteredBody, {
     new: true,
-  });
+  }).populate("following", "fullName username photo verified state");
+  user.following = user.following.filter((follow) => follow.state === "active");
   res.status(200).json({
     status: "success",
     user,
@@ -138,22 +142,20 @@ exports.followUser = catchAsync(async (req, res, next) => {
     return next(new AppError("هذا المستخدم غير موجود", 404));
   }
   if (
-    req.user.following.find((user) => user.username === followingUser.username)
+    req.user.following.some(
+      (user) => user.toString() === followingUser._id.toString()
+    )
   ) {
     return next(new AppError("هذا المستخدم متابَع بالفعل", 400));
   }
-  req.user.following.push({
-    username: followingUser.username,
-    fullName: followingUser.fullName,
-    photo: followingUser.photo,
-  });
-  followingUser.followers.push({
-    username: req.user.username,
-    fullName: req.user.fullName,
-    photo: req.user.photo,
-  });
+  req.user.following.push(followingUser._id);
+  followingUser.followers.push(req.user._id);
   await req.user.save();
   await followingUser.save();
+  req.user = await req.user.populate(
+    "following",
+    "username fullName photo verified"
+  );
   res.status(201).json({
     status: "success",
     message: "user followed",
@@ -168,23 +170,40 @@ exports.unFollowUser = catchAsync(async (req, res, next) => {
     return next(new AppError("هذا المستخدم غير موجود", 404));
   }
   if (
-    !req.user.following.find((user) => user.username === followingUser.username)
+    !req.user.following.some(
+      (user) => user.toString() === followingUser._id.toString()
+    )
   ) {
     return next(new AppError("هذا المستخدم غير متابَع بالفعل", 400));
   }
   const newFollowers = req.user.following.filter(
-    (user) => user.username !== followingUser.username
+    (user) => user.toString() !== followingUser._id.toString()
   );
   followingUser.followers = followingUser.followers.filter(
-    (user) => user.username !== req.user.username
+    (user) => user.toString() !== req.user._id.toString()
   );
-  const user = await User.findById(req.user._id);
-  user.following = newFollowers;
-  await user.save();
+  req.user.following = newFollowers;
+  await req.user.save();
   await followingUser.save();
+  req.user = await req.user.populate(
+    "following",
+    "username fullName photo verified"
+  );
   res.status(200).json({
     status: "success",
     message: "user un followed",
-    user,
+    user: req.user,
+  });
+});
+
+exports.getMyFollowings = catchAsync(async (req, res, next) => {
+  const followingUsers = await User.find({
+    _id: { $in: req.user.following },
+    state: "active",
+  }).select("username fullName photo");
+  res.status(200).json({
+    status: "success",
+    result: followingUsers.length,
+    followingUsers,
   });
 });

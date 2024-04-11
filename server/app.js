@@ -17,7 +17,7 @@ const globalErrorHandler = require("./controllers/errorController");
 const postRouter = require("./routes/postRoutes");
 const userRouter = require("./routes/userRoutes");
 // import commentRouter from "./routes/commentRoutes";
-// import notificationRouter from "./routes/notificationRoutes";
+const notificationRouter = require("./routes/notificationRoutes");
 
 app.use(helmet({ crossOriginResourcePolicy: true }));
 
@@ -47,7 +47,7 @@ const limiter = rateLimit({
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/users", userRouter);
 // app.use("/api/v1/comments", commentRouter);
-// app.use("/api/v1/notifications", notificationRouter);
+app.use("/api/v1/notifications", notificationRouter);
 
 app.all("*", (req, res) => {
   res.status(404).json({ status: "fail" });
