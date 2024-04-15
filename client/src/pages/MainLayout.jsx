@@ -4,7 +4,13 @@ import io from "socket.io-client";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faThumbsUp } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCommentSlash,
+  faMessage,
+  faThumbsDown,
+  faThumbsUp,
+  faUserPlus,
+} from "@fortawesome/free-solid-svg-icons";
 function MainLayout() {
   const user = useSelector((state) => state.user);
   const [newNotification, setNewNotification] = useState(null);
@@ -33,9 +39,26 @@ function MainLayout() {
         >
           <h3 className="text-xl font-bold">إشعار جديد</h3>
           {newNotification.message}
-          <span className="ms-2 bg-green-500 py-1 px-2 inline-block rounded-full">
-            {newNotification.type === "like" && (
+          <span
+            className={`ms-2 ${
+              newNotification.type === "dislike" ||
+              newNotification.type === "deleteComment"
+                ? "bg-red-500"
+                : "bg-green-500"
+            } py-1 px-2 inline-block rounded-full`}
+          >
+            {newNotification.type === "like" ? (
               <FontAwesomeIcon icon={faThumbsUp} />
+            ) : newNotification.type === "dislike" ? (
+              <FontAwesomeIcon icon={faThumbsDown} />
+            ) : newNotification.type === "comment" ? (
+              <FontAwesomeIcon icon={faMessage} />
+            ) : newNotification.type === "deleteComment" ? (
+              <FontAwesomeIcon icon={faCommentSlash} />
+            ) : newNotification.type === "follow" ? (
+              <FontAwesomeIcon icon={faUserPlus} />
+            ) : (
+              ""
             )}
           </span>
         </Link>

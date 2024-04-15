@@ -22,6 +22,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { jwtDecode } from "jwt-decode";
 import { setLogout } from "./store/authSlice";
+import ErrorPage from "./pages/ErrorPage";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -114,7 +115,7 @@ function App() {
                   url: `/api/v1/users/followingUsers`,
                   headers: { Authorization: `Bearer ${token}` },
                 });
-                console.log(res)
+                console.log(res);
                 if (res.data.status === "success") {
                   return res.data.followingUsers;
                 }
@@ -129,6 +130,7 @@ function App() {
         <Route
           path="profile/:username"
           element={<ProfilePage />}
+          errorElement={<ErrorPage />}
           loader={({ params }) => {
             const state = store.getState();
             const getUser = async () => {

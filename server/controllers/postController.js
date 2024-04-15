@@ -58,7 +58,7 @@ exports.getPosts = async (req, res, next) => {
 exports.scanPost = catchAsync(async (req, res, next) => {
   const { content } = req.body;
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-  console.log(req.body);
+  // console.log(req.body);
   if (req.method.toUpperCase() === "POST")
     if (!content) {
       return next(new AppError("يجب أن يحتوي المنشور على محتوى نصي", 400));
@@ -151,7 +151,7 @@ exports.createPost = catchAsync(async (req, res, next) => {
 
 exports.updatePost = catchAsync(async (req, res, next) => {
   const { postId } = req.params;
-  console.log(req.body);
+  // console.log(req.body);
   let post = await Post.findById(postId);
   if (!post) {
     return next(new AppError("هذ المنشور غير موجود", 404));
@@ -210,6 +210,23 @@ exports.deletePost = catchAsync(async (req, res, next) => {
   res.status(204).json({
     status: "success",
   });
+  if (post.user.username !== req.user.username) {
+    const notification = await Notification.create({
+      message: `قام أحد المشرفين بحذف منشورك`,
+      senderUsername: req.user.username,
+      recipientUsername: post.user.username,
+      returnUrl: `/post/${post.id}`,
+      type: "deletePost",
+      createdAt: Date.now(),
+    });
+    const io = req.app.get("socket.io");
+    const socketClients = req.app.get("socket-clients");
+    io.to(
+      ...socketClients
+        .filter((client) => client.username === notification.recipientUsername)
+        .map((client) => client.id)
+    ).emit("notification", notification);
+  }
 });
 
 exports.likePost = catchAsync(async (req, res, next) => {
@@ -233,6 +250,7 @@ exports.likePost = catchAsync(async (req, res, next) => {
   ) {
     if (post.reactions[reactionIndex].type === "dislike") {
       post.reactions[reactionIndex].type = "like";
+      post.reactions[reactionIndex].createdAt = Date.now();
     } else {
       return next(new AppError("لقد قمت بالإعجاب بهذا المنشور من قبل", 400));
     }
@@ -240,7 +258,6 @@ exports.likePost = catchAsync(async (req, res, next) => {
     post.reactions.push({
       type: "like",
       username: req.user.username,
-      createdAt: Date.now(),
     });
   }
   await post.save();
@@ -259,6 +276,7 @@ exports.likePost = catchAsync(async (req, res, next) => {
       recipientUsername: post.user.username,
       returnUrl: `/post/${post.id}`,
       type: "like",
+      createdAt: Date.now(),
     });
     const io = req.app.get("socket.io");
     const socketClients = req.app.get("socket-clients");
@@ -271,7 +289,7 @@ exports.likePost = catchAsync(async (req, res, next) => {
 });
 
 exports.dislikePost = catchAsync(async (req, res, next) => {
-  console.log(req.app.get("socket.io"));
+  // console.log(req.app.get("socket.io"));
   const { postId } = req.params;
   let post = await Post.findById(postId).populate(
     "comments.user",
@@ -292,6 +310,7 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
   ) {
     if (post.reactions[reactionIndex].type === "like") {
       post.reactions[reactionIndex].type = "dislike";
+      post.reactions[reactionIndex].createdAt = Date.now();
     } else {
       return next(
         new AppError("لقد قمت بعدم الإعجاب بهذا المنشور من قبل", 400)
@@ -301,7 +320,6 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
     post.reactions.push({
       type: "dislike",
       username: req.user.username,
-      createdAt: Date.now(),
     });
   }
   post = await (
@@ -315,6 +333,23 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
     status: "success",
     post,
   });
+  if (post.user.username !== req.user.username) {
+    const notification = await Notification.create({
+      message: `لم يعجب ${req.user.fullName} بمنشورك`,
+      senderUsername: req.user.username,
+      recipientUsername: post.user.username,
+      returnUrl: `/post/${post.id}`,
+      type: "dislike",
+      createdAt: Date.now(),
+    });
+    const io = req.app.get("socket.io");
+    const socketClients = req.app.get("socket-clients");
+    io.to(
+      ...socketClients
+        .filter((client) => client.username === notification.recipientUsername)
+        .map((client) => client.id)
+    ).emit("notification", notification);
+  }
 });
 
 exports.cancelReaction = catchAsync(async (req, res, next) => {
@@ -359,7 +394,9 @@ exports.commentOnPost = catchAsync(async (req, res, next) => {
       $push: { comments: { user: req.user._id, text, createdAt: Date.now() } },
     },
     { new: true }
-  ).populate("comments.user", "username fullName photo state");
+  )
+    .populate("user", "username fullName photo verified")
+    .populate("comments.user", "username fullName photo state");
 
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
@@ -371,6 +408,23 @@ exports.commentOnPost = catchAsync(async (req, res, next) => {
       .filter((comment) => comment.user.state === "active")
       .sort((a, b) => a - b > 0),
   });
+  if (post.user.username !== req.user.username) {
+    const notification = await Notification.create({
+      message: `قام ${req.user.fullName} بالتعليق على منشورك`,
+      senderUsername: req.user.username,
+      recipientUsername: post.user.username,
+      returnUrl: `/post/${post.id}`,
+      type: "comment",
+      createdAt: Date.now(),
+    });
+    const io = req.app.get("socket.io");
+    const socketClients = req.app.get("socket-clients");
+    io.to(
+      ...socketClients
+        .filter((client) => client.username === notification.recipientUsername)
+        .map((client) => client.id)
+    ).emit("notification", notification);
+  }
 });
 
 exports.deleteComment = catchAsync(async (req, res, next) => {
@@ -406,7 +460,26 @@ exports.deleteComment = catchAsync(async (req, res, next) => {
   // if (post.comments.some((comment) => comment.id === commentId)) {
   //   return next(new AppError("لا تملك الصلاحيات لحذف هذا المنشور"));
   // }
-  return res.status(204).json({ status: "success" });
+  res.status(204).json({ status: "success" });
+  if (comment.user.username !== req.user.username) {
+    const notification = await Notification.create({
+      message: `قام ${
+        req.user.role === "user" ? req.user.fullName : "أحد المشرفين"
+      } بحذف تعليقك`,
+      senderUsername: req.user.username,
+      recipientUsername: comment.user.username,
+      returnUrl: `/post/${post.id}`,
+      type: "deleteComment",
+      createdAt: Date.now(),
+    });
+    const io = req.app.get("socket.io");
+    const socketClients = req.app.get("socket-clients");
+    io.to(
+      ...socketClients
+        .filter((client) => client.username === notification.recipientUsername)
+        .map((client) => client.id)
+    ).emit("notification", notification);
+  }
 });
 
 exports.updateComment = catchAsync(async (req, res, next) => {

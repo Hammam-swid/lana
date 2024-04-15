@@ -1,15 +1,23 @@
 import { useDispatch, useSelector } from "react-redux";
 import { NavLink, useNavigate, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import axios from "axios";
 import {
   faArrowRightFromBracket,
   faMagnifyingGlass,
   faBell,
   faBars,
   faGear,
+  faThumbsUp,
+  faThumbsDown,
+  faCheck,
+  faMessage,
+  faCommentSlash,
+  faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
 import { setLogout } from "../store/authSlice";
 import {
+  useEffect,
   // useEffect,
   useState,
 } from "react";
@@ -20,8 +28,26 @@ import Modal from "./Modal";
 // eslint-disable-next-line react/prop-types
 function Header({ notification }) {
   const user = useSelector((state) => state.user);
+  const token = useSelector((state) => state.token);
   const [popup, setPopup] = useState(false);
   const [options, setOptions] = useState(false);
+  const [notiList, setNotiList] = useState([]);
+  const [showNotiList, setShowNotiList] = useState(false);
+  useEffect(() => {
+    const getNotiList = async () => {
+      try {
+        const res = await axios({
+          method: "GET",
+          url: "/api/v1/notifications",
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        setNotiList(res.data.notifications);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getNotiList();
+  }, [showNotiList]);
   const nav = useNavigate();
   const dispatch = useDispatch();
   // useEffect(() => {
@@ -36,6 +62,7 @@ function Header({ notification }) {
 
   function updateOptions() {
     setOptions((prvOption) => !prvOption);
+    setShowNotiList(false);
   }
   return (
     <>
@@ -62,7 +89,13 @@ function Header({ notification }) {
         <NavBar />
         <MobileNavBar options={options} updateOptions={updateOptions} />
         <div className="hidden items-center sm:gap-5 gap-10 relative sm:flex">
-          <button className="relative p-1">
+          <button
+            onClick={() => {
+              setShowNotiList((prev) => !prev);
+              setOptions(false);
+            }}
+            className="relative p-1"
+          >
             {notification && (
               <span className="absolute right-[0.5px] top-[0.5px] w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
             )}
@@ -70,6 +103,78 @@ function Header({ notification }) {
               icon={faBell}
               className="text-2xl hover:text-green-500 duration-100"
             />
+            {showNotiList &&
+              (notiList ? (
+                <div className="absolute flex flex-col gap-2 max-h-[35rem] top-full overflow-y-scroll p-3 rounded-md mt-8 -right-52 w-80 dark:bg-slate-900 cursor-default text-start">
+                  {notiList.map((noti) => (
+                    <Link
+                      onClick={async () => {
+                        try {
+                          const res = axios({
+                            method: "PATCH",
+                            url: `/api/v1/notifications/${noti._id}`,
+                            headers: { Authorization: `Bearer ${token}` },
+                          });
+                          console.log(res);
+                        } catch (error) {
+                          console.log(error);
+                        }
+                      }}
+                      to={noti.returnUrl}
+                      className="p-2 dark:bg-slate-950 block rounded-md"
+                      key={noti._id}
+                    >
+                      <p>
+                        {new Date(noti.createdAt).toLocaleString("ar", {
+                          day: "2-digit",
+                          year: "2-digit",
+                          month: "2-digit",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                          second: "2-digit",
+                        })}
+                      </p>
+                      <p className="flex justify-between items-center">
+                        {noti.message}
+                        <span
+                          className={`block  ${
+                            noti.type === "dislike" ||
+                            noti.type === "deleteComment"
+                              ? "bg-red-500"
+                              : "bg-green-500"
+                          } rounded-full px-2 py-1`}
+                        >
+                          {noti.type === "like" ? (
+                            <FontAwesomeIcon icon={faThumbsUp} />
+                          ) : noti.type === "dislike" ? (
+                            <FontAwesomeIcon icon={faThumbsDown} />
+                          ) : noti.type === "comment" ? (
+                            <FontAwesomeIcon icon={faMessage} />
+                          ) : noti.type === "deleteComment" ? (
+                            <FontAwesomeIcon icon={faCommentSlash} />
+                          ) : noti.type === "follow" ? (
+                            <FontAwesomeIcon icon={faUserPlus} />
+                          ) : (
+                            ""
+                          )}
+                        </span>
+                      </p>
+                      <p>
+                        <FontAwesomeIcon
+                          icon={faCheck}
+                          className={`${
+                            noti.seen ? "text-green-500" : "text-gray-500"
+                          }`}
+                        />{" "}
+                      </p>
+                    </Link>
+                  ))}
+                </div>
+              ) : (
+                <div className="absolute top-full p-3 rounded-md mt-8 -right-52 w-80 dark:bg-slate-900 cursor-default text-start">
+                  لا توجد إشعارات
+                </div>
+              ))}
           </button>
           <NavLink
             to={`/profile/${user.username}`}
@@ -130,40 +235,6 @@ function Header({ notification }) {
           hide={() => setPopup(false)}
         />
       )}
-      {/* {popup && (
-        <div
-          onClick={(e) => {
-            if (e.target.id === "overlay") {
-              setPopup(false);
-            }
-          }}
-          id="overlay"
-          className="fixed z-20 top-[50%] right-[50%] w-screen h-screen bg-black translate-x-[50%] translate-y-[-50%] bg-opacity-60 flex justify-center items-center"
-        >
-          <div className="bg-white dark:bg-slate-900 min-w-80 max-w-96 w-1/2 h-40 p-3 rounded-lg flex flex-col justify-between">
-            <h2 className="text-2xl font-bold">
-              هل أنت متأكد من أنك تريد تسجيل الخروج؟
-            </h2>
-            <div className="flex flex-row-reverse *:font-bold">
-              <button
-                className="bg-red-500 px-4 py-2 rounded relative bottom-0"
-                onClick={() => {
-                  dispatch(setLogout());
-                  nav("/login");
-                }}
-              >
-                نعم
-              </button>
-              <button
-                className="bg-slate-500 dark:bg-slate-700 px-6 py-2 rounded mx-5"
-                onClick={() => setPopup(false)}
-              >
-                لا
-              </button>
-            </div>
-          </div>
-        </div>
-      )} */}
     </>
   );
 }

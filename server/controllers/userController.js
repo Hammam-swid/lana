@@ -6,6 +6,7 @@ const catchAsync = require("../utils/catchAsync");
 const Email = require("../utils/email");
 const Post = require("../models/postModel");
 const sharp = require("sharp");
+const Notification = require("../models/notificationModel");
 
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
@@ -27,7 +28,7 @@ exports.getUser = catchAsync(async (req, res, next) => {
     return next(new AppError("هذا المستخدم غير موجود", 404));
   }
   const posts = await Post.find({ user: user._id })
-    .populate("user", "username photo fullName")
+    .populate("user", "username photo fullName verified")
     .populate("comments.user", "username photo fullName state")
     .sort("-createdAt");
 
@@ -88,8 +89,9 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   if (req.file) filteredBody.photo = req.file.filename;
   const user = await User.findByIdAndUpdate(req.user._id, filteredBody, {
     new: true,
-  }).populate("following", "fullName username photo verified state");
-  user.following = user.following.filter((follow) => follow.state === "active");
+  });
+  // .populate("following", "fullName username photo verified state");
+  // user.following = user.following.filter((follow) => follow.state === "active");
   res.status(200).json({
     status: "success",
     user,
@@ -152,15 +154,30 @@ exports.followUser = catchAsync(async (req, res, next) => {
   followingUser.followers.push(req.user._id);
   await req.user.save();
   await followingUser.save();
-  req.user = await req.user.populate(
-    "following",
-    "username fullName photo verified"
-  );
+  // req.user = await req.user.populate(
+  //   "following",
+  //   "username fullName photo verified"
+  // );
   res.status(201).json({
     status: "success",
     message: "user followed",
     user: req.user,
   });
+  const notification = await Notification.create({
+    message: `لقد قام ${req.user.fullName} بمتابعة حسابك`,
+    senderUsername: req.user.username,
+    recipientUsername: followingUser.username,
+    returnUrl: `/profile/${followingUser.username}`,
+    type: "follow",
+    createdAt: Date.now(),
+  });
+  const io = req.app.get("socket.io");
+  const socketClients = req.app.get("socket-clients");
+  io.to(
+    ...socketClients
+      .filter((client) => client.username === notification.recipientUsername)
+      .map((client) => client.id)
+  ).emit("notification", notification);
 });
 
 exports.unFollowUser = catchAsync(async (req, res, next) => {
@@ -185,10 +202,10 @@ exports.unFollowUser = catchAsync(async (req, res, next) => {
   req.user.following = newFollowers;
   await req.user.save();
   await followingUser.save();
-  req.user = await req.user.populate(
-    "following",
-    "username fullName photo verified"
-  );
+  // req.user = await req.user.populate(
+  //   "following",
+  //   "username fullName photo verified"
+  // );
   res.status(200).json({
     status: "success",
     message: "user un followed",
@@ -200,10 +217,18 @@ exports.getMyFollowings = catchAsync(async (req, res, next) => {
   const followingUsers = await User.find({
     _id: { $in: req.user.following },
     state: "active",
-  }).select("username fullName photo");
+  }).select("username fullName photo verified");
   res.status(200).json({
     status: "success",
     result: followingUsers.length,
     followingUsers,
+  });
+});
+
+exports.banUser = catchAsync(async (req, res, next) => {
+  const { userId } = req.params;
+  await User.updateOne({ _id: userId }, { state: "banned" });
+  res.status(204).json({
+    status: "success",
   });
 });

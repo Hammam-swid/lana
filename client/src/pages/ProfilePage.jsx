@@ -11,6 +11,8 @@ import {
   faEllipsisV,
   faFlag,
   faTriangleExclamation,
+  faUserMinus,
+  faUserPlus,
   faUserSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import { updateUser } from "../store/authSlice";
@@ -24,9 +26,11 @@ function ProfilePage() {
   const [profileOptions, setProfileOptions] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
   function renderUser(user, posts) {
+    console.log(user._id);
+    console.log(thisUser.following);
     if (
-      thisUser.following?.find((follow) => {
-        if (follow.username === user.username) {
+      thisUser.following?.some((follow) => {
+        if (follow === user._id) {
           setIsFollowed(true);
           return true;
         }
@@ -66,7 +70,7 @@ function ProfilePage() {
               </button>
             )}
             {profileOptions && (
-              <ul className="w-52 rounded-md *:flex *:justify-between *:rounded-md *:items-center *:p-3 dark:hover:*:bg-slate-950 *:cursor-pointer dark:bg-slate-900 p-3 absolute -left-3 top-full mt-2">
+              <ul className="w-52 rounded-md *:flex *:justify-between *:rounded-md *:items-center *:p-3 dark:hover:*:bg-slate-950 *:cursor-pointer dark:bg-slate-900 p-3 absolute z-30 -left-3 top-full mt-2">
                 {thisUser.role === "user" ? (
                   <>
                     <li id="block-user">
@@ -127,6 +131,11 @@ function ProfilePage() {
               } active:bg-green-300 text-xl px-3 py-1 rounded-full mt-5`}
             >
               {isFollowed ? "إلغاء المتابعة" : "متابعة"}
+              <FontAwesomeIcon
+                icon={!isFollowed ? faUserPlus : faUserMinus}
+                flip="horizontal"
+                className="ms-2"
+              />
             </button>
           )}
         </div>

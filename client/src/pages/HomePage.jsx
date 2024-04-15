@@ -7,6 +7,7 @@ import { useSelector } from "react-redux";
 import { useLoaderData, Await, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
+  faCircleCheck,
   faCircleNotch,
   faImage,
   faPaperPlane,
@@ -138,16 +139,23 @@ function HomePage() {
                       <li key={follower.username}>
                         <Link
                           to={`/profile/${follower.username}`}
-                          className="flex items-center gap-2 flex-col md:flex-row"
+                          className="flex items-center gap-2 flex-col md:flex-row shrink-0"
                         >
-                          <div className="w-12 h-12 rounded-full overflow-hidden">
+                          <div>
                             <img
                               src={`/img/users/${follower.photo}`}
                               alt={`صورة ${follower.fullName}`}
+                              className="min-w-16 min-h-16 max-w-16 max-h-16 rounded-full overflow-hidden object-center"
                             />
                           </div>
-                          <p className="text-center font-bold">
-                            {follower.fullName}
+                          <p className="text-center font-bold text-nowrap">
+                            {follower.fullName}{" "}
+                            {follower.verified && (
+                              <span className="inline-block text-green-500">
+                                {" "}
+                                <FontAwesomeIcon icon={faCircleCheck} />{" "}
+                              </span>
+                            )}
                           </p>
                         </Link>
                       </li>

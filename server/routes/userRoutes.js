@@ -21,6 +21,7 @@ const {
   checkUsernameExist,
   saveUserPhoto,
   getMyFollowings,
+  banUser,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -44,4 +45,6 @@ router.route("/:userId/follow").post(followUser).delete(unFollowUser);
 
 router.route("/updateMyPassword").patch(updatePassword);
 
+router.use(restrictTo("admin", "supervisor"));
+router.route("/:userId/ban").patch(banUser);
 module.exports = router;

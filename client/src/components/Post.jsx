@@ -35,6 +35,7 @@ function Post(props) {
   const [postOptions, setPostOptions] = useState(false);
   const [edited, setEdited] = useState(false);
   const [showModal, setShowModal] = useState(false);
+  const [postCopied, setPostCopied] = useState(false);
   const formik = useFormik({
     initialValues: {
       content: post.content,
@@ -311,11 +312,13 @@ function Post(props) {
             <span className="text-xl ms-2">{post?.comments?.length}</span>
           </button>
           <button
-            onClick={() =>
+            onClick={() => {
               navigator.clipboard.writeText(
                 `http://localhost:5173/post/${post._id}`
-              )
-            }
+              );
+              setPostCopied(true);
+              setTimeout(setPostCopied, 3000, false);
+            }}
           >
             <FontAwesomeIcon icon={faShare} />
           </button>
@@ -329,6 +332,11 @@ function Post(props) {
           />
         )}
       </div>
+      {postCopied && (
+        <div className="fixed bottom-2 bg-opacity-50 bg-slate-50 dark:bg-opacity-75 dark:bg-slate-900 z-50 p-9 flex justify-center items-center start-1/2 translate-x-1/2 rounded-md  font-bold">
+          تم نسخ رابط المنشور
+        </div>
+      )}
       {showModal && (
         <Modal
           message="هل أنت متأكد من حذف المنشور؟"
@@ -344,7 +352,7 @@ function Post(props) {
             } catch (error) {
               console.log(error);
             }
-            setShowModal(false)
+            setShowModal(false);
           }}
         />
       )}

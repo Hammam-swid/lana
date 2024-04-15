@@ -12,7 +12,7 @@ import { NavLink } from "react-router-dom";
 function MobileNavBar({ options, updateOptions }) {
   const user = useSelector((state) => state.user);
   return (
-    <nav className="sm:hidden w-full">
+    <nav className="sm:hidden w-full sticky top-0">
       <ul className="flex text-2xl items-center justify-around w-full">
         <li>
           <NavLink
