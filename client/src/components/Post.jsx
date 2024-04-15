@@ -25,6 +25,7 @@ import Comments from "./Comments";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import Modal from "./Modal";
+import Message from "./Message";
 
 function Post(props) {
   const user = useSelector((state) => state.user);
@@ -332,14 +333,10 @@ function Post(props) {
           />
         )}
       </div>
-      {postCopied && (
-        <div className="fixed bottom-2 bg-opacity-50 bg-slate-50 dark:bg-opacity-75 dark:bg-slate-900 z-50 p-9 flex justify-center items-center start-1/2 translate-x-1/2 rounded-md  font-bold">
-          تم نسخ رابط المنشور
-        </div>
-      )}
+      {postCopied && <Message message={"تم نسخ رابط المنشور"} />}
       {showModal && (
         <Modal
-          message="هل أنت متأكد من حذف المنشور؟"
+          message="هل أنت متأكد من أنك تريد حذف هذا المنشور؟"
           hide={() => setShowModal(false)}
           action={async () => {
             try {

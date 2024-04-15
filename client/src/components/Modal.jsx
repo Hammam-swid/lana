@@ -1,10 +1,16 @@
+import { useEffect } from "react";
+
 /* eslint-disable react/prop-types */
 function Modal({ action, message, hide }) {
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+  }, []);
   return (
     <div
       onClick={(e) => {
         if (e.target.id === "overlay") {
           hide();
+          document.body.style.overflow = "auto";
         }
       }}
       id="overlay"
@@ -15,13 +21,20 @@ function Modal({ action, message, hide }) {
         <div className="flex flex-row-reverse *:font-bold">
           <button
             className="bg-red-500 px-4 py-2 rounded relative bottom-0"
-            onClick={action}
+            onClick={() => {
+              action();
+              document.body.style.overflow = "auto";
+              hide();
+            }}
           >
             نعم
           </button>
           <button
             className="bg-slate-500 dark:bg-slate-700 px-6 py-2 rounded mx-5"
-            onClick={hide}
+            onClick={() => {
+              hide();
+              document.body.style.overflow = "auto";
+            }}
           >
             لا
           </button>

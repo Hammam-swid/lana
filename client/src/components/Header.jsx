@@ -14,8 +14,10 @@ import {
   faMessage,
   faCommentSlash,
   faUserPlus,
+  faSun,
+  faMoon,
 } from "@fortawesome/free-solid-svg-icons";
-import { setLogout } from "../store/authSlice";
+import { setLogout, updateTheme } from "../store/authSlice";
 import {
   useEffect,
   // useEffect,
@@ -29,6 +31,7 @@ import Modal from "./Modal";
 function Header({ notification }) {
   const user = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
+  const theme = useSelector((state) => state.theme);
   const [popup, setPopup] = useState(false);
   const [options, setOptions] = useState(false);
   const [notiList, setNotiList] = useState([]);
@@ -72,7 +75,15 @@ function Header({ notification }) {
             to="/"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           >
-            <p className="text-3xl font-bold">لنا</p>
+            <img
+              className="max-w-32"
+              src={
+                theme === "dark"
+                  ? "/src/assets/darkLanaLogo.png"
+                  : "/src/assets/lanaLogo.png"
+              }
+              alt="شعار منصة لنا"
+            />
           </Link>
           <input
             type="text"
@@ -105,7 +116,7 @@ function Header({ notification }) {
             />
             {showNotiList &&
               (notiList ? (
-                <div className="absolute flex flex-col gap-2 max-h-[35rem] top-full overflow-y-scroll p-3 rounded-md mt-8 -right-52 w-80 dark:bg-slate-900 cursor-default text-start">
+                <div dir="rtl" className="absolute bg-slate-50 flex flex-col gap-2 max-h-[35rem] top-full overflow-y-scroll p-3 rounded-md mt-8 -right-52 w-80 dark:bg-slate-900 cursor-default text-start">
                   {notiList.map((noti) => (
                     <Link
                       onClick={async () => {
@@ -121,7 +132,7 @@ function Header({ notification }) {
                         }
                       }}
                       to={noti.returnUrl}
-                      className="p-2 dark:bg-slate-950 block rounded-md"
+                      className="p-2 bg-slate-200 dark:bg-slate-950 block rounded-md"
                       key={noti._id}
                     >
                       <p>
@@ -171,15 +182,25 @@ function Header({ notification }) {
                   ))}
                 </div>
               ) : (
-                <div className="absolute top-full p-3 rounded-md mt-8 -right-52 w-80 dark:bg-slate-900 cursor-default text-start">
+                <div className="absolute bg-slate-50 top-full p-3 rounded-md mt-8 -right-52 w-80 dark:bg-slate-900 cursor-default text-start">
                   لا توجد إشعارات
                 </div>
               ))}
           </button>
+          <button
+            className="text-2xl hover:text-green-500 duration-100"
+            onClick={() => {
+              dispatch(
+                updateTheme({ theme: theme === "light" ? "dark" : "light" })
+              );
+            }}
+          >
+            <FontAwesomeIcon icon={theme === "light" ? faSun : faMoon} />
+          </button>
           <NavLink
             to={`/profile/${user.username}`}
             className={({ isActive }) =>
-              `block rounded-full ${
+              `block shrink-0 rounded-full ${
                 isActive ? "border-2 border-green-500" : ""
               } `
             }

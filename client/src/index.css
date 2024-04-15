@@ -1,10 +1,10 @@
 @tailwind base;
 
 ::-webkit-scrollbar {
-  position: relative;
+  position: absolute;
   left: 0;
   height: 0;
-  width: 5px;
+  width: 0px;
 }
 ::-webkit-scrollbar-track {
   @apply bg-green-950 rounded-xl;

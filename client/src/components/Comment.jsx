@@ -180,7 +180,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
       </div>
       {showModal && (
         <Modal
-          message="هل أنت متأكد من حذف التعليق؟"
+          message="هل أنت متأكد من أنك تريد حذف هذا التعليق؟"
           hide={() => setShowModal(false)}
           action={async () => {
             try {

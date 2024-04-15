@@ -13,7 +13,12 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 function MainLayout() {
   const user = useSelector((state) => state.user);
+  const theme = useSelector((state) => state.theme);
   const [newNotification, setNewNotification] = useState(null);
+  useEffect(() => {
+    if (theme === "dark") document.body.classList.add("dark");
+    else document.body.classList.remove("dark");
+  }, [theme]);
   useEffect(() => {
     const socket = io("/", {
       auth: { username: user.username },

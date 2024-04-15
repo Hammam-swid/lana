@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
 import { setLogin } from "../store/authSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -9,6 +9,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 
 function LoginPage() {
+  const theme = useSelector((state) => state.theme);
   const nav = useNavigate();
   const dispatch = useDispatch();
   const formik = useFormik({
@@ -45,10 +46,21 @@ function LoginPage() {
   });
   const [showPassword, setShowPassword] = useState(false);
   return (
-    <div className="min-h-screen flex justify-center items-center bg-green-50 dark:bg-slate-900">
+    <div className="min-h-screen flex-col md:flex-row flex justify-center items-center bg-green-50 dark:bg-slate-900">
+      <div>
+        <img
+          className="w-80 md:max-w-96"
+          src={
+            theme === "dark"
+              ? "./src/assets/darkLanaLogo.png"
+              : "./src/assets/lanaLogo.png"
+          }
+          alt="شعار منصة لنا"
+        />
+      </div>
       <form
         onSubmit={formik.handleSubmit}
-        className="p-6 flex flex-col w-full max-w-screen-sm mx-auto rounded-md md:border-2 border-green-500 gap-5"
+        className="p-6 flex flex-col w-full max-w-screen-sm gap-5"
       >
         <h1 className="self-center font-bold text-3xl dark:text-green-100">
           مرحباً بكم!

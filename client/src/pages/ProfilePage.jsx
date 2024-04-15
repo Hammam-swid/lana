@@ -16,6 +16,8 @@ import {
   faUserSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import { updateUser } from "../store/authSlice";
+import Modal from "../components/Modal";
+import Message from "../components/Message";
 
 function ProfilePage() {
   const dataPromise = useLoaderData();
@@ -25,6 +27,8 @@ function ProfilePage() {
   const dispatch = useDispatch();
   const [profileOptions, setProfileOptions] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
+  const [banning, setBanning] = useState(false);
+  const [showMessage, setShowMessage] = useState(false);
   function renderUser(user, posts) {
     console.log(user._id);
     console.log(thisUser.following);
@@ -42,117 +46,146 @@ function ProfilePage() {
     }
     console.log(isFollowed);
     return (
-      <div className="p-10">
-        <div className="flex items-center justify-center  flex-col sm:gap-5 mb-10">
-          <div>
-            <img
-              src={`/img/users/${user.photo}`}
-              alt={`صورة ${user.fullName}`}
-              className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden object-cover"
-            />
-          </div>
-          <div className="flex gap-5 items-end relative">
-            <h1 className="text-3xl">
-              {user.fullName}{" "}
-              {user.verified && (
-                <FontAwesomeIcon
-                  icon={faCheckCircle}
-                  className="text-xl text-green-500"
-                />
+      <>
+        <div className="p-10">
+          <div className="flex items-center justify-center  flex-col sm:gap-5 mb-10">
+            <div>
+              <img
+                src={`/img/users/${user.photo}`}
+                alt={`صورة ${user.fullName}`}
+                className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden object-cover"
+              />
+            </div>
+            <div className="flex gap-5 items-end relative">
+              <h1 className="text-3xl">
+                {user.fullName}{" "}
+                {user.verified && (
+                  <FontAwesomeIcon
+                    icon={faCheckCircle}
+                    className="text-xl text-green-500"
+                  />
+                )}
+              </h1>
+              {thisUser.username !== params.username && (
+                <button onClick={() => setProfileOptions((prev) => !prev)}>
+                  <FontAwesomeIcon
+                    icon={faEllipsisV}
+                    className="text-2xl block"
+                  />
+                </button>
               )}
-            </h1>
+              {profileOptions && (
+                <ul className="w-52 rounded-md *:flex *:justify-between *:rounded-md *:items-center *:p-3 dark:hover:*:bg-slate-950 *:cursor-pointer dark:bg-slate-900 p-3 absolute z-30 -left-3 top-full mt-2">
+                  {thisUser.role === "user" ? (
+                    <>
+                      <li id="block-user">
+                        <span>حظر الحساب</span>
+                        <FontAwesomeIcon
+                          icon={faBan}
+                          flip="horizontal"
+                          className="text-red-500"
+                        />
+                      </li>
+                      <li>
+                        <span>الإبلاغ عن الحساب</span>
+                        <FontAwesomeIcon
+                          icon={faFlag}
+                          className="text-red-500"
+                        />
+                      </li>
+                    </>
+                  ) : (
+                    <>
+                      <li>
+                        <span>تحذير الحساب</span>
+                        <FontAwesomeIcon
+                          icon={faTriangleExclamation}
+                          className="text-yellow-500"
+                        />
+                      </li>
+                      <li onClick={() => setBanning(true)}>
+                        <span>حظر الحساب نهائياً</span>
+                        <FontAwesomeIcon
+                          icon={faUserSlash}
+                          flip="horizontal"
+                          className="text-red-500"
+                        />
+                      </li>
+                    </>
+                  )}
+                </ul>
+              )}
+            </div>
             {thisUser.username !== params.username && (
-              <button onClick={() => setProfileOptions((prev) => !prev)}>
+              <button
+                onClick={async () => {
+                  try {
+                    const res = await axios({
+                      headers: { Authorization: `Bearer ${token}` },
+                      url: `/api/v1/users/${user._id}/follow`,
+                      method: isFollowed ? "DELETE" : "POST",
+                    });
+                    // console.log(res);
+                    if (res.data.status === "success") {
+                      console.log(res);
+                      dispatch(updateUser({ user: res.data.user }));
+                    }
+                  } catch (error) {
+                    console.log(error);
+                  }
+                }}
+                className={`${
+                  isFollowed ? "bg-green-900" : "bg-green-500"
+                } active:bg-green-300 text-xl px-3 py-1 rounded-full mt-5`}
+              >
+                {isFollowed ? "إلغاء المتابعة" : "متابعة"}
                 <FontAwesomeIcon
-                  icon={faEllipsisV}
-                  className="text-2xl block"
+                  icon={!isFollowed ? faUserPlus : faUserMinus}
+                  flip="horizontal"
+                  className="ms-2"
                 />
               </button>
             )}
-            {profileOptions && (
-              <ul className="w-52 rounded-md *:flex *:justify-between *:rounded-md *:items-center *:p-3 dark:hover:*:bg-slate-950 *:cursor-pointer dark:bg-slate-900 p-3 absolute z-30 -left-3 top-full mt-2">
-                {thisUser.role === "user" ? (
-                  <>
-                    <li id="block-user">
-                      <span>حظر الحساب</span>
-                      <FontAwesomeIcon
-                        icon={faBan}
-                        flip="horizontal"
-                        className="text-red-500"
-                      />
-                    </li>
-                    <li>
-                      <span>الإبلاغ عن الحساب</span>
-                      <FontAwesomeIcon icon={faFlag} className="text-red-500" />
-                    </li>
-                  </>
-                ) : (
-                  <>
-                    <li>
-                      <span>تحذير الحساب</span>
-                      <FontAwesomeIcon
-                        icon={faTriangleExclamation}
-                        className="text-yellow-500"
-                      />
-                    </li>
-                    <li>
-                      <span>حظر الحساب نهائياً</span>
-                      <FontAwesomeIcon
-                        icon={faUserSlash}
-                        flip="horizontal"
-                        className="text-red-500"
-                      />
-                    </li>
-                  </>
-                )}
-              </ul>
-            )}
           </div>
-          {thisUser.username !== params.username && (
-            <button
-              onClick={async () => {
-                try {
-                  const res = await axios({
-                    headers: { Authorization: `Bearer ${token}` },
-                    url: `/api/v1/users/${user._id}/follow`,
-                    method: isFollowed ? "DELETE" : "POST",
-                  });
-                  // console.log(res);
-                  if (res.data.status === "success") {
-                    console.log(res);
-                    dispatch(updateUser({ user: res.data.user }));
-                  }
-                } catch (error) {
-                  console.log(error);
+          <div className="flex justify-around max-w-[560px] mx-auto">
+            <p>{`${posts.length} ${
+              posts.length >= 3 && posts.length <= 10 ? "مناشير" : "منشور"
+            }`}</p>
+            |
+            <p>
+              {`${posts.reduce((prev, curr) => {
+                return prev + curr.images?.length;
+              }, 0)} صور`}
+            </p>
+            |<p>{`يتابع ${user.following.length}`}</p>|
+            <p>{`${user.followers.length} متابع`}</p>
+          </div>
+        </div>
+        {showMessage && <Message message={"تم حظر هذا المستخدم"} />}
+        {banning && (
+          <Modal
+            message="هل أنت متأكد من أنك تريد حظر هذا الحساب؟"
+            action={async () => {
+              try {
+                const res = await axios({
+                  method: "PATCH",
+                  url: `/api/v1/users/${user._id}/ban`,
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                if (res.status === 204) {
+                  console.log("user banned");
+                  setShowMessage(true);
+                  setTimeout(setShowMessage, 3000, false);
+                  setBanning(false)
                 }
-              }}
-              className={`${
-                isFollowed ? "bg-green-900" : "bg-green-500"
-              } active:bg-green-300 text-xl px-3 py-1 rounded-full mt-5`}
-            >
-              {isFollowed ? "إلغاء المتابعة" : "متابعة"}
-              <FontAwesomeIcon
-                icon={!isFollowed ? faUserPlus : faUserMinus}
-                flip="horizontal"
-                className="ms-2"
-              />
-            </button>
-          )}
-        </div>
-        <div className="flex justify-around max-w-[560px] mx-auto">
-          <p>{`${posts.length} ${
-            posts.length >= 3 && posts.length <= 10 ? "مناشير" : "منشور"
-          }`}</p>
-          |
-          <p>
-            {`${posts.reduce((prev, curr) => {
-              return prev + curr.images?.length;
-            }, 0)} صور`}
-          </p>
-          |<p>{`يتابع ${user.following.length}`}</p>|
-          <p>{`${user.followers.length} متابع`}</p>
-        </div>
-      </div>
+              } catch (error) {
+                console.log(error);
+              }
+            }}
+            hide={() => setBanning(false)}
+          />
+        )}
+      </>
     );
   }
   return (
