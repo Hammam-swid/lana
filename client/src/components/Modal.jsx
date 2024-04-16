@@ -1,4 +1,5 @@
 import { useEffect } from "react";
+import { motion } from "framer-motion";
 
 /* eslint-disable react/prop-types */
 function Modal({ action, message, hide }) {
@@ -16,7 +17,11 @@ function Modal({ action, message, hide }) {
       id="overlay"
       className="fixed z-50 top-[50%] right-[50%] w-screen h-screen bg-black translate-x-[50%] translate-y-[-50%] bg-opacity-60 flex justify-center items-center"
     >
-      <div className="bg-white dark:bg-slate-900 min-w-80 max-w-96 w-1/2 h-40 p-3 rounded-lg flex flex-col justify-between">
+      <motion.div
+        animate={{ scale: 1 }}
+        initial={{ scale: 0 }}
+        className="bg-white dark:bg-slate-900 min-w-80 max-w-96 w-1/2 h-40 p-3 rounded-lg flex flex-col justify-between"
+      >
         <h2 className="text-2xl font-bold">{message}</h2>
         <div className="flex flex-row-reverse *:font-bold">
           <button
@@ -39,7 +44,7 @@ function Modal({ action, message, hide }) {
             لا
           </button>
         </div>
-      </div>
+      </motion.div>
     </div>
   );
 }

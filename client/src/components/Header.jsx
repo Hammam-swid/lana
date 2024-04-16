@@ -26,6 +26,7 @@ import {
 import NavBar from "./NavBar";
 import MobileNavBar from "./MobileNavBar";
 import Modal from "./Modal";
+import { motion } from "framer-motion";
 
 // eslint-disable-next-line react/prop-types
 function Header({ notification }) {
@@ -70,7 +71,7 @@ function Header({ notification }) {
   return (
     <>
       <header className=" min-h-20 w-screen sticky sm:top-0 bg-slate-100 shadow-md dark:bg-slate-900 z-50 flex justify-center sm:justify-between items-center py-2 px-6 sm:px-6 flex-wrap sm:flex-nowrap">
-        <div className="flex justify-between relative items-center gap-5 w-full sm:w-fit mb-5 sm:mb-0">
+        <div className="flex overflow-hidden justify-between relative items-center gap-5 w-full sm:w-fit mb-5 sm:mb-0">
           <Link
             to="/"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
@@ -89,7 +90,7 @@ function Header({ notification }) {
             type="text"
             name="search"
             id="search"
-            className="p-2 rounded-md dark:bg-slate-800 outline-none focus:outline-2 focus:outline-green-500"
+            className="p-2 rounded-md shrink grow-0 dark:bg-slate-800 outline-none focus:outline-2 focus:outline-green-500"
           />
           <FontAwesomeIcon
             icon={faMagnifyingGlass}
@@ -105,7 +106,7 @@ function Header({ notification }) {
               setShowNotiList((prev) => !prev);
               setOptions(false);
             }}
-            className="relative p-1"
+            className="relative pt-1"
           >
             {notification && (
               <span className="absolute right-[0.5px] top-[0.5px] w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
@@ -116,7 +117,12 @@ function Header({ notification }) {
             />
             {showNotiList &&
               (notiList ? (
-                <div dir="rtl" className="absolute bg-slate-50 flex flex-col gap-2 max-h-[35rem] top-full overflow-y-scroll p-3 rounded-md mt-8 -right-52 w-80 dark:bg-slate-900 cursor-default text-start">
+                <motion.div
+                  animate={{ y: 0 }}
+                  initial={{ y: -100 }}
+                  dir="rtl"
+                  className="absolute bg-slate-50 flex flex-col gap-2 max-h-[35rem] top-full overflow-y-scroll p-3 rounded-md mt-8 -right-52 w-80 dark:bg-slate-900 cursor-default text-start"
+                >
                   {notiList.map((noti) => (
                     <Link
                       onClick={async () => {
@@ -180,7 +186,7 @@ function Header({ notification }) {
                       </p>
                     </Link>
                   ))}
-                </div>
+                </motion.div>
               ) : (
                 <div className="absolute bg-slate-50 top-full p-3 rounded-md mt-8 -right-52 w-80 dark:bg-slate-900 cursor-default text-start">
                   لا توجد إشعارات
@@ -221,7 +227,9 @@ function Header({ notification }) {
           </button>
         </div>
         {options && (
-          <ul
+          <motion.ul
+            animate={{ scaleY: 1, y: 0 }}
+            initial={{ scaleY: 0, y: -100 }}
             onClick={() => setOptions(false)}
             className="absolute left-2 top-full sm:mt-[-10px] rounded-md bg-slate-100 dark:bg-slate-800 p-3 w-52 *:flex *:justify-between *:py-4 *:px-2 *:rounded-sm *:font-bold *:cursor-pointer dark:hover:*:bg-slate-900"
           >
@@ -243,7 +251,7 @@ function Header({ notification }) {
                 icon={faArrowRightFromBracket}
               />
             </li>
-          </ul>
+          </motion.ul>
         )}
       </header>
       {popup && (
