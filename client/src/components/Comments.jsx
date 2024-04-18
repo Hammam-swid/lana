@@ -83,7 +83,7 @@ function Comments(props) {
           placeholder={`التعليق كـ${user.fullName}`}
           value={formik.values.text}
           aria-multiline={true}
-          className="flex-1 dark:bg-slate-800 bg-gray-200 p-3 rounded-md h-14"
+          className="flex-1 shrink dark:bg-slate-800 bg-gray-200 p-3 rounded-md h-14"
         />
         <button
           type="submit"

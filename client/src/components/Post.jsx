@@ -26,6 +26,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import Modal from "./Modal";
 import Message from "./Message";
+import { AnimatePresence, motion } from "framer-motion";
 
 function Post(props) {
   const user = useSelector((state) => state.user);
@@ -47,7 +48,8 @@ function Post(props) {
       const formData = new FormData();
       if (content.toString() !== post.content.toString())
         formData.append("content", content);
-      if (images !== post.images)
+      console.log(images);
+      if (images && images !== post.images)
         for (let i = 0; i <= images.length; i++) {
           formData.append("images", images[i]);
         }
@@ -132,36 +134,46 @@ function Post(props) {
               <FontAwesomeIcon icon={faXmark} />
             </button>
           )}
-          {postOptions && (
-            <div className="absolute left-5 top-1/3 dark:bg-slate-800 bg-slate-200 p-3 w-48 rounded-md">
-              <ul
-                onClick={() => setPostOptions(false)}
-                className="*:flex *:justify-between *:items-center hover:*:dark:bg-slate-900 *:p-2 *:rounded-md"
+          <AnimatePresence>
+            {postOptions && (
+              <motion.div
+                animate={{ originX: 0, originY: 0, scale: 1 }}
+                initial={{ scale: 0 }}
+                exit={{ scale: 0, originY: 0 }}
+                className="absolute left-5 top-1/3 dark:bg-slate-800 bg-slate-200 p-3 w-48 rounded-md"
               >
-                {user.role === "admin" ||
-                user.role === "supervisor" ||
-                user.username === post.user.username ? (
-                  <li>
-                    <button onClick={() => setShowModal(true)}>
-                      حذف المنشور
-                    </button>
-                    <FontAwesomeIcon icon={faTrash} className="text-red-500" />
-                  </li>
-                ) : (
-                  <li>
-                    <button>الإبلاغ عن المنشور</button>
-                    <FontAwesomeIcon icon={faFlag} className="text-red-500" />
-                  </li>
-                )}
-                {user.username === post.user.username && (
-                  <li onClick={() => setEdited(true)}>
-                    <button>تعديل المنشور</button>
-                    <FontAwesomeIcon icon={faPen} />
-                  </li>
-                )}
-              </ul>
-            </div>
-          )}
+                <ul
+                  onClick={() => setPostOptions(false)}
+                  className="*:flex *:justify-between *:items-center hover:*:bg-green-200 hover:*:dark:bg-slate-900 *:p-2 *:rounded-md"
+                >
+                  {user.role === "admin" ||
+                  user.role === "supervisor" ||
+                  user.username === post.user.username ? (
+                    <li>
+                      <button onClick={() => setShowModal(true)}>
+                        حذف المنشور
+                      </button>
+                      <FontAwesomeIcon
+                        icon={faTrash}
+                        className="text-red-500"
+                      />
+                    </li>
+                  ) : (
+                    <li>
+                      <button>الإبلاغ عن المنشور</button>
+                      <FontAwesomeIcon icon={faFlag} className="text-red-500" />
+                    </li>
+                  )}
+                  {user.username === post.user.username && (
+                    <li onClick={() => setEdited(true)}>
+                      <button>تعديل المنشور</button>
+                      <FontAwesomeIcon icon={faPen} />
+                    </li>
+                  )}
+                </ul>
+              </motion.div>
+            )}
+          </AnimatePresence>
         </div>
         <p className="text-gray-500 -mt-5 ms-12">
           <FontAwesomeIcon icon={faEarthAfrica} className="me-2 text-sm" />
@@ -177,13 +189,15 @@ function Post(props) {
           <h3>{post.content}</h3>
         ) : (
           <form className="flex items-center" onSubmit={formik.handleSubmit}>
-            <input
+            <textarea
               name="content"
-              type="text"
               value={formik.values.content}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
-              className="w-full dark:bg-slate-800 p-3"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && e.ctrlKey) formik.submitForm();
+              }}
+              className="w-full dark:bg-slate-800 p-3 rounded-md outline-none"
             />
             <label
               htmlFor="images"
@@ -228,8 +242,9 @@ function Post(props) {
         {post.images?.length > 0 && (
           <PostImages images={post.images} fullName={post.user.fullName} />
         )}
-        <div className="flex justify-around items-center *:text-xl hover:*:dark:bg-slate-950 *:p-2 *:rounded-md">
-          <button
+        <div className="flex justify-around items-center *:text-xl hover:*:bg-green-200 *:duration-200 hover:*:dark:bg-green-900 *:p-2 *:rounded-md">
+          <motion.button
+            whileTap={{ scale: 0.8 }}
             onClick={async () => {
               try {
                 let route = "like";
@@ -267,8 +282,9 @@ function Post(props) {
                   .length
               }
             </span>
-          </button>
-          <button
+          </motion.button>
+          <motion.button
+            whileTap={{ scale: 0.8 }}
             onClick={async () => {
               try {
                 let route = "dislike";
@@ -307,7 +323,7 @@ function Post(props) {
                 ).length
               }
             </span>
-          </button>
+          </motion.button>
           <button onClick={() => setComments((prevComments) => !prevComments)}>
             <FontAwesomeIcon icon={faMessage} />
             <span className="text-xl ms-2">{post?.comments?.length}</span>

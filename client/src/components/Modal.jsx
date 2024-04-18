@@ -15,7 +15,7 @@ function Modal({ action, message, hide }) {
         }
       }}
       id="overlay"
-      className="fixed z-50 top-[50%] right-[50%] w-screen h-screen bg-black translate-x-[50%] translate-y-[-50%] bg-opacity-60 flex justify-center items-center"
+      className="fixed z-50 top-0 start-0 w-screen h-screen bg-black  bg-opacity-60 flex justify-center items-center"
     >
       <motion.div
         animate={{ scale: 1 }}

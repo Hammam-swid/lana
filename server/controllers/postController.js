@@ -58,7 +58,7 @@ exports.getPosts = async (req, res, next) => {
 exports.scanPost = catchAsync(async (req, res, next) => {
   const { content } = req.body;
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
-  // console.log(req.body);
+  console.log(req.body);
   if (req.method.toUpperCase() === "POST")
     if (!content) {
       return next(new AppError("يجب أن يحتوي المنشور على محتوى نصي", 400));
@@ -140,6 +140,7 @@ exports.createPost = catchAsync(async (req, res, next) => {
     user: req.user._id,
     content,
     images,
+    createdAt: Date.now(),
     categories: req.categories,
   });
 

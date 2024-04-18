@@ -26,10 +26,10 @@ import {
 import NavBar from "./NavBar";
 import MobileNavBar from "./MobileNavBar";
 import Modal from "./Modal";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 // eslint-disable-next-line react/prop-types
-function Header({ notification }) {
+function Header() {
   const user = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const theme = useSelector((state) => state.theme);
@@ -52,6 +52,7 @@ function Header({ notification }) {
     };
     getNotiList();
   }, [showNotiList]);
+  const isNotified = notiList.filter((noti) => !noti.seen).length;
   const nav = useNavigate();
   const dispatch = useDispatch();
   // useEffect(() => {
@@ -90,7 +91,7 @@ function Header({ notification }) {
             type="text"
             name="search"
             id="search"
-            className="p-2 rounded-md shrink grow-0 dark:bg-slate-800 outline-none focus:outline-2 focus:outline-green-500"
+            className="p-2 duration-100 rounded-md shrink grow-0 dark:bg-slate-800 outline-none focus:outline-2 focus:outline-green-500"
           />
           <FontAwesomeIcon
             icon={faMagnifyingGlass}
@@ -108,7 +109,7 @@ function Header({ notification }) {
             }}
             className="relative pt-1"
           >
-            {notification && (
+            {isNotified > 0 && (
               <span className="absolute right-[0.5px] top-[0.5px] w-3 h-3 bg-green-500 rounded-full animate-pulse"></span>
             )}
             <FontAwesomeIcon
@@ -123,11 +124,29 @@ function Header({ notification }) {
                   dir="rtl"
                   className="absolute bg-slate-50 flex flex-col gap-2 max-h-[35rem] top-full overflow-y-scroll p-3 rounded-md mt-8 -right-52 w-80 dark:bg-slate-900 cursor-default text-start"
                 >
+                  <button
+                    onClick={async () => {
+                      try {
+                        const res = await axios({
+                          method: "PATCH",
+                          url: "/api/v1/notifications",
+                          headers: { Authorization: `Bearer ${token}` },
+                        });
+                        console.log(res);
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    }}
+                    className="p-2 duration-200 rounded-md dark:hover:bg-green-900 hover:bg-green-200 flex justify-center items-center gap-2"
+                  >
+                    <span>تعليم الكل كمقروء</span>
+                    <FontAwesomeIcon icon={faCheck} />
+                  </button>
                   {notiList.map((noti) => (
                     <Link
                       onClick={async () => {
                         try {
-                          const res = axios({
+                          const res = await axios({
                             method: "PATCH",
                             url: `/api/v1/notifications/${noti._id}`,
                             headers: { Authorization: `Bearer ${token}` },
@@ -154,7 +173,7 @@ function Header({ notification }) {
                       <p className="flex justify-between items-center">
                         {noti.message}
                         <span
-                          className={`block  ${
+                          className={`block text-white ${
                             noti.type === "dislike" ||
                             noti.type === "deleteComment"
                               ? "bg-red-500"
@@ -226,33 +245,36 @@ function Header({ notification }) {
             <FontAwesomeIcon icon={faBars} />
           </button>
         </div>
-        {options && (
-          <motion.ul
-            animate={{ scaleY: 1, y: 0 }}
-            initial={{ scaleY: 0, y: -100 }}
-            onClick={() => setOptions(false)}
-            className="absolute left-2 top-full sm:mt-[-10px] rounded-md bg-slate-100 dark:bg-slate-800 p-3 w-52 *:flex *:justify-between *:py-4 *:px-2 *:rounded-sm *:font-bold *:cursor-pointer dark:hover:*:bg-slate-900"
-          >
-            <li>
-              <Link to={`settings/${user.username}`}>الإعدادات</Link>
-              <FontAwesomeIcon
-                className="text-2xl hover:text-green-500 duration-100 hover:animate-spin"
-                icon={faGear}
-              />
-            </li>
-            <li
-              onClick={() => {
-                setPopup(true);
-              }}
+        <AnimatePresence>
+          {options && (
+            <motion.ul
+              animate={{ scaleY: 1, y: 0 }}
+              initial={{ scaleY: 0, y: -100 }}
+              exit={{ scale: 0, originY: 0, originX: 0.2, y: -50 }}
+              onClick={() => setOptions(false)}
+              className="absolute left-2 top-full sm:mt-[-10px] rounded-md bg-slate-100 dark:bg-slate-800 p-3 w-52 *:flex *:justify-between *:py-4 *:px-2 *:rounded-sm *:font-bold *:cursor-pointer dark:hover:*:bg-slate-900"
             >
-              <label>تسجيل الخروج</label>
-              <FontAwesomeIcon
-                className="text-2xl hover:text-red-500 duration-100"
-                icon={faArrowRightFromBracket}
-              />
-            </li>
-          </motion.ul>
-        )}
+              <li>
+                <Link to={`settings/${user.username}`}>الإعدادات</Link>
+                <FontAwesomeIcon
+                  className="text-2xl hover:text-green-500 duration-100 hover:animate-spin"
+                  icon={faGear}
+                />
+              </li>
+              <li
+                onClick={() => {
+                  setPopup(true);
+                }}
+              >
+                <label>تسجيل الخروج</label>
+                <FontAwesomeIcon
+                  className="text-2xl hover:text-red-500 duration-100"
+                  icon={faArrowRightFromBracket}
+                />
+              </li>
+            </motion.ul>
+          )}
+        </AnimatePresence>
       </header>
       {popup && (
         <Modal

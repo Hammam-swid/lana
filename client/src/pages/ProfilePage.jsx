@@ -18,6 +18,7 @@ import {
 import { updateUser } from "../store/authSlice";
 import Modal from "../components/Modal";
 import Message from "../components/Message";
+import { AnimatePresence, motion } from "framer-motion";
 
 function ProfilePage() {
   const dataPromise = useLoaderData();
@@ -74,47 +75,54 @@ function ProfilePage() {
                   />
                 </button>
               )}
-              {profileOptions && (
-                <ul className="w-52 rounded-md *:flex *:justify-between *:rounded-md *:items-center *:p-3 dark:hover:*:bg-slate-950 *:cursor-pointer dark:bg-slate-900 p-3 absolute z-30 -left-3 top-full mt-2">
-                  {thisUser.role === "user" ? (
-                    <>
-                      <li id="block-user">
-                        <span>حظر الحساب</span>
-                        <FontAwesomeIcon
-                          icon={faBan}
-                          flip="horizontal"
-                          className="text-red-500"
-                        />
-                      </li>
-                      <li>
-                        <span>الإبلاغ عن الحساب</span>
-                        <FontAwesomeIcon
-                          icon={faFlag}
-                          className="text-red-500"
-                        />
-                      </li>
-                    </>
-                  ) : (
-                    <>
-                      <li>
-                        <span>تحذير الحساب</span>
-                        <FontAwesomeIcon
-                          icon={faTriangleExclamation}
-                          className="text-yellow-500"
-                        />
-                      </li>
-                      <li onClick={() => setBanning(true)}>
-                        <span>حظر الحساب نهائياً</span>
-                        <FontAwesomeIcon
-                          icon={faUserSlash}
-                          flip="horizontal"
-                          className="text-red-500"
-                        />
-                      </li>
-                    </>
-                  )}
-                </ul>
-              )}
+              <AnimatePresence>
+                {profileOptions && (
+                  <motion.ul
+                    animate={{ y: 0, scale: 1, originX: 0, originY: 0 }}
+                    initial={{ scale: 0, y: -10 }}
+                    exit={{ scale: 0, y: -10 }}
+                    className="w-52 rounded-md *:flex *:justify-between *:rounded-md *:items-center *:p-3 bg-slate-50 *:duration-200 dark:hover:*:bg-slate-950 hover:*:bg-green-200 *:cursor-pointer dark:bg-slate-900 p-3 absolute z-30 -left-3 top-full mt-2"
+                  >
+                    {thisUser.role === "user" ? (
+                      <>
+                        <li id="block-user">
+                          <span>حظر الحساب</span>
+                          <FontAwesomeIcon
+                            icon={faBan}
+                            flip="horizontal"
+                            className="text-red-500"
+                          />
+                        </li>
+                        <li>
+                          <span>الإبلاغ عن الحساب</span>
+                          <FontAwesomeIcon
+                            icon={faFlag}
+                            className="text-red-500"
+                          />
+                        </li>
+                      </>
+                    ) : (
+                      <>
+                        <li>
+                          <span>تحذير الحساب</span>
+                          <FontAwesomeIcon
+                            icon={faTriangleExclamation}
+                            className="text-yellow-500"
+                          />
+                        </li>
+                        <li onClick={() => setBanning(true)}>
+                          <span>حظر الحساب نهائياً</span>
+                          <FontAwesomeIcon
+                            icon={faUserSlash}
+                            flip="horizontal"
+                            className="text-red-500"
+                          />
+                        </li>
+                      </>
+                    )}
+                  </motion.ul>
+                )}
+              </AnimatePresence>
             </div>
             {thisUser.username !== params.username && (
               <button
@@ -176,7 +184,7 @@ function ProfilePage() {
                   console.log("user banned");
                   setShowMessage(true);
                   setTimeout(setShowMessage, 3000, false);
-                  setBanning(false)
+                  setBanning(false);
                 }
               } catch (error) {
                 console.log(error);

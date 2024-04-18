@@ -36,7 +36,7 @@ exports.seeNotification = catchAsync(async (req, res, next) => {
 });
 
 exports.seeAllNotifications = catchAsync(async (req, res, next) => {
-  const response = Notification.updateMany(
+  const response = await Notification.updateMany(
     {
       recipientUsername: req.user.username,
     },

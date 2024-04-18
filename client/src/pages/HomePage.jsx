@@ -1,6 +1,7 @@
 import Post from "../components/Post";
 import {
   Suspense,
+  useState,
   // useState
 } from "react";
 import { useSelector } from "react-redux";
@@ -15,12 +16,14 @@ import {
 import { useFormik } from "formik";
 import axios from "axios";
 import * as Yup from "yup";
+import ImagePreview from "../components/ImagePreview";
 
 function HomePage() {
   const user = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   // const [posts, setPosts] = useState([]);
   const promiseData = useLoaderData();
+  const [imagePreview, setImagePreview] = useState([]);
   const formik = useFormik({
     initialValues: { content: "", images: [], video: "" },
     validationSchema: Yup.object({
@@ -63,30 +66,57 @@ function HomePage() {
   const name = user.fullName.split(" ");
   return (
     <>
-      <div className="max-w-[30rem] mx-auto mt-5 p-6">
+      <div className="max-w-[25rem] md:max-w-[30rem] w-full mx-auto mt-5 p-6">
         <form
           className="rounded-md overflow-hidden"
           onSubmit={formik.handleSubmit}
         >
-          <input
-            type="text"
-            name="content"
-            value={formik.values.content}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}
-            disabled={formik.isSubmitting}
-            className="outline-none bg-slate-300 dark:bg-slate-800 w-full p-6 text-xl rounded-md"
-            placeholder={`بم تفكر يا ${
-              name.length === 3 ? `${name[0]} ${name[1]}` : name[0]
-            } ....؟`}
-          />
-          <div>
+          <div className="relative bg-slate-100 dark:bg-slate-900 rounded-md pb-2">
+            <div className="relative rounded-md">
+              <textarea
+                name="content"
+                value={formik.values.content}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                disabled={formik.isSubmitting}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && e.ctrlKey) formik.submitForm();
+                }}
+                className="outline-none bg-slate-300 resize-none h-fit max-h-20 dark:bg-slate-800 w-full p-6 text-xl rounded-md"
+                placeholder={`بم تفكر يا ${
+                  user.fullName.startsWith("عبد")
+                    ? `${name[0]} ${name[1]}`
+                    : name[0]
+                } ....؟`}
+              />
+              <button
+                disabled={formik.isSubmitting}
+                className="text-green-500 text-xl absolute top-1/2 -translate-y-1/2 end-2"
+                type="submit"
+              >
+                {formik.isSubmitting ? (
+                  <FontAwesomeIcon
+                    icon={faCircleNotch}
+                    className="animate-spin"
+                  />
+                ) : (
+                  <FontAwesomeIcon icon={faPaperPlane} flip="horizontal" />
+                )}
+              </button>
+            </div>
+            <div className="flex flex-row-reverse py-2 px-3 ">
+              {imagePreview &&
+                imagePreview.map((image) => (
+                  <ImagePreview key={image} image={image} />
+                ))}
+            </div>
+          </div>
+          <div className="flex justify-end mt-2">
             <label htmlFor="image" className="cursor-pointer">
               <FontAwesomeIcon
                 icon={faImage}
                 className="text-green-500 text-2xl"
               />
-              صورة
             </label>
             <input
               type="file"
@@ -95,7 +125,16 @@ function HomePage() {
               multiple
               disabled={formik.isSubmitting}
               onChange={(e) => {
-                console.log(formik.errors);
+                const reader = new FileReader();
+                reader.onload = () => {
+                  if (reader.readyState === 2) {
+                    setImagePreview((prev) => [...prev, reader.result]);
+                  }
+                };
+
+                console.log(e.target.files[0]);
+                reader.readAsDataURL(e.target.files[0]);
+                console.log(reader);
                 formik.setFieldValue("images", e.target.files);
               }}
               onBlur={formik.handleBlur}
@@ -104,17 +143,6 @@ function HomePage() {
               accept="image/*"
             />
           </div>
-          <button
-            disabled={formik.isSubmitting}
-            className="text-green-500 text-xl absolute"
-            type="submit"
-          >
-            {formik.isSubmitting ? (
-              <FontAwesomeIcon icon={faCircleNotch} className="animate-spin" />
-            ) : (
-              <FontAwesomeIcon icon={faPaperPlane} flip="horizontal" />
-            )}
-          </button>
         </form>
       </div>
       <div className="flex flex-col md:flex-row-reverse gap-5 items-center md:items-start bg-slate-200 dark:bg-slate-950">
@@ -166,26 +194,6 @@ function HomePage() {
                 }}
               </Await>
             </Suspense>
-            {/* {user.following.length > 0 ? (
-              user.following.map((follower) => (
-                <li key={follower.username}>
-                  <Link
-                    to={`/profile/${follower.username}`}
-                    className="flex items-center gap-2 flex-col md:flex-row"
-                  >
-                    <div className="w-12 h-12 rounded-full overflow-hidden">
-                      <img
-                        src={`/img/users/${follower.photo}`}
-                        alt={`صورة ${follower.fullName}`}
-                      />
-                    </div>
-                    <p className="text-center font-bold">{follower.fullName}</p>
-                  </Link>
-                </li>
-              ))
-            ) : (
-              <h3 className="text-gray-500">أنت لا تتابع أحداً</h3>
-            )} */}
           </ul>
         </div>
         <main className="sm:w-2/3 xl:w-[45rem] bg-slate-200 dark:bg-slate-950 p-3">

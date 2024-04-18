@@ -19,6 +19,7 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import * as Yup from "yup";
 import Modal from "./Modal";
+import { AnimatePresence, motion } from "framer-motion";
 
 function Comment({ comment, removeComment, updateComments, postId, postUser }) {
   const token = useSelector((state) => state.token);
@@ -137,45 +138,53 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
               <FontAwesomeIcon icon={faXmark} />
             </button>
           )}
-          {options && (
-            <ul
-              className="dark:bg-slate-800 bg-slate-300 shadow-md absolute z-20 left-0 p-3 rounded-md dark:hover:*:bg-slate-900 *:p-2 *:rounded-md"
-              onClick={() => setOptions(false)}
-            >
-              {comment.user.username === user.username ||
-              user.username === postUser.username ||
-              user.role === "admin" ||
-              user.role === "supervisor" ? (
-                <li>
-                  <button
-                    className="flex justify-between items-center w-full"
-                    onClick={() => setShowModal(true)}
-                  >
-                    <span>حذف التعليق</span>{" "}
-                    <FontAwesomeIcon icon={faTrash} className="text-red-500" />
-                  </button>
-                </li>
-              ) : (
-                <li>
-                  <button className="flex justify-between items-center gap-2 w-full">
-                    <span>الإبلاغ عن التعليق</span>
-                    <FontAwesomeIcon icon={faFlag} className="text-red-500" />
-                  </button>
-                </li>
-              )}
-              {user.username === comment.user.username && (
-                <li>
-                  <button
-                    onClick={() => setEdited(true)}
-                    className="flex justify-between items-center gap-2"
-                  >
-                    <span>تعديل التعليق</span>
-                    <FontAwesomeIcon icon={faPen} />
-                  </button>
-                </li>
-              )}
-            </ul>
-          )}
+          <AnimatePresence>
+            {options && (
+              <motion.ul
+                animate={{ originX: 0.5, originY: 0, scale: 1 }}
+                initial={{ scale: 0 }}
+                exit={{ scale: 0, originY: 0, originX: 0 }}
+                className="dark:bg-slate-800 bg-slate-300 shadow-md absolute z-20 left-0 p-3 rounded-md dark:hover:*:bg-slate-900 *:p-2 *:rounded-md"
+                onClick={() => setOptions(false)}
+              >
+                {comment.user.username === user.username ||
+                user.username === postUser.username ||
+                user.role === "admin" ||
+                user.role === "supervisor" ? (
+                  <li>
+                    <button
+                      className="flex justify-between items-center w-full"
+                      onClick={() => setShowModal(true)}
+                    >
+                      <span>حذف التعليق</span>{" "}
+                      <FontAwesomeIcon
+                        icon={faTrash}
+                        className="text-red-500"
+                      />
+                    </button>
+                  </li>
+                ) : (
+                  <li>
+                    <button className="flex justify-between items-center gap-2 w-full">
+                      <span>الإبلاغ عن التعليق</span>
+                      <FontAwesomeIcon icon={faFlag} className="text-red-500" />
+                    </button>
+                  </li>
+                )}
+                {user.username === comment.user.username && (
+                  <li>
+                    <button
+                      onClick={() => setEdited(true)}
+                      className="flex justify-between items-center gap-2"
+                    >
+                      <span>تعديل التعليق</span>
+                      <FontAwesomeIcon icon={faPen} />
+                    </button>
+                  </li>
+                )}
+              </motion.ul>
+            )}
+          </AnimatePresence>
         </div>
       </div>
       {showModal && (

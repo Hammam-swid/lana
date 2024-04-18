@@ -22,6 +22,7 @@ exports.signup = catchAsync(async (req, res, next) => {
     username,
     gender,
     dateOfBirth,
+    createdAt: Date.now(),
     verificationCode,
     verificationCodeEx: Date.now() + 5 * 60 * 1000,
   });
