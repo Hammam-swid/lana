@@ -1,9 +1,5 @@
 import Post from "../components/Post";
-import {
-  Suspense,
-  useState,
-  // useState
-} from "react";
+import { Suspense, useState } from "react";
 import { useSelector } from "react-redux";
 import { useLoaderData, Await, Link } from "react-router-dom";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -17,6 +13,7 @@ import { useFormik } from "formik";
 import axios from "axios";
 import * as Yup from "yup";
 import ImagePreview from "../components/ImagePreview";
+import Message from "../components/Message";
 
 function HomePage() {
   const user = useSelector((state) => state.user);
@@ -24,6 +21,7 @@ function HomePage() {
   // const [posts, setPosts] = useState([]);
   const promiseData = useLoaderData();
   const [imagePreview, setImagePreview] = useState([]);
+  const [message, setMessage] = useState("");
   const formik = useFormik({
     initialValues: { content: "", images: [], video: "" },
     validationSchema: Yup.object({
@@ -46,6 +44,8 @@ function HomePage() {
           data: formData,
         });
         console.log(res);
+        setMessage("تم نشر المنشور بنجاح");
+        setTimeout(setMessage, 3000, "");
         // setPosts((prevPosts) => prevPosts.unshift(res.data.post));
       } catch (error) {
         console.log(error);
@@ -104,7 +104,7 @@ function HomePage() {
                 )}
               </button>
             </div>
-            <div className="flex flex-row-reverse py-2 px-3 ">
+            <div className="flex flex-row-reverse gap-2 py-2 px-3 ">
               {imagePreview &&
                 imagePreview.map((image) => (
                   <ImagePreview key={image} image={image} />
@@ -143,6 +143,7 @@ function HomePage() {
               accept="image/*"
             />
           </div>
+          <Message message={message} show={message} />
         </form>
       </div>
       <div className="flex flex-col md:flex-row-reverse gap-5 items-center md:items-start bg-slate-200 dark:bg-slate-950">

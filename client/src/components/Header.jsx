@@ -14,8 +14,8 @@ import {
   faMessage,
   faCommentSlash,
   faUserPlus,
-  faSun,
   faMoon,
+  faCircleHalfStroke,
 } from "@fortawesome/free-solid-svg-icons";
 import { setLogout, updateTheme } from "../store/authSlice";
 import {
@@ -220,7 +220,9 @@ function Header() {
               );
             }}
           >
-            <FontAwesomeIcon icon={theme === "light" ? faSun : faMoon} />
+            <FontAwesomeIcon
+              icon={theme === "light" ? faCircleHalfStroke : faMoon}
+            />
           </button>
           <NavLink
             to={`/profile/${user.username}`}

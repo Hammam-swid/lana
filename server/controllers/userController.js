@@ -160,7 +160,6 @@ exports.followUser = catchAsync(async (req, res, next) => {
   // );
   res.status(201).json({
     status: "success",
-    message: "user followed",
     user: req.user,
   });
   const notification = await Notification.create({
@@ -208,7 +207,6 @@ exports.unFollowUser = catchAsync(async (req, res, next) => {
   // );
   res.status(200).json({
     status: "success",
-    message: "user un followed",
     user: req.user,
   });
 });
@@ -222,6 +220,57 @@ exports.getMyFollowings = catchAsync(async (req, res, next) => {
     status: "success",
     result: followingUsers.length,
     followingUsers,
+  });
+});
+
+exports.blockUser = catchAsync(async (req, res, next) => {
+  const { userId } = req.params;
+  if (req.user._id.toString() === userId) {
+    return next(new AppError("لا يمكنك حظر نفسك", 400));
+  }
+  if (req.user.blockedUsers.some((user) => user._id.toString() === userId)) {
+    return next(new AppError("هذا المستخدم محظور بالفعل", 400));
+  }
+  const toBlockUser = await User.findById(userId, { state: "active" });
+  if (!toBlockUser) {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  console.log(req.user);
+  if (!req.user.blockedUsers) req.user.blockedUsers = [];
+  req.user.blockedUsers.push(toBlockUser._id);
+  if (!toBlockUser.blockerUsers) toBlockUser.blockerUsers = [];
+  toBlockUser.blockerUsers.push(req.user._id);
+  await req.user.save();
+  await toBlockUser.save();
+  res.status(200).json({
+    status: "success",
+    user: req.user,
+  });
+});
+
+exports.unBlockUser = catchAsync(async (req, res, next) => {
+  const { userId } = req.params;
+  if (req.user._id.toString() === userId) {
+    return next(new AppError("لا يمكنك حظر نفسك من الأساس", 400));
+  }
+  if (!req.user.blockedUsers.some((user) => user._id.toString() === userId)) {
+    return next(new AppError("هذا المستخدم غير محظور بالفعل", 400));
+  }
+  const toUnBlockUser = await User.findById(userId, { state: "active" });
+  if (!toUnBlockUser) {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  req.user.blockedUsers = req.user.blockedUsers.filter(
+    (user) => user.toString() !== userId
+  );
+  toUnBlockUser.blockerUsers = toUnBlockUser.blockerUsers.filter(
+    (user) => user.toString() !== req.user._id.toString()
+  );
+  await req.user.save();
+  await toUnBlockUser.save();
+  res.status(200).json({
+    status: "success",
+    user: req.user,
   });
 });
 

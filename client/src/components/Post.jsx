@@ -37,7 +37,7 @@ function Post(props) {
   const [postOptions, setPostOptions] = useState(false);
   const [edited, setEdited] = useState(false);
   const [showModal, setShowModal] = useState(false);
-  const [postCopied, setPostCopied] = useState(false);
+  const [message, setMessage] = useState("");
   const formik = useFormik({
     initialValues: {
       content: post.content,
@@ -197,7 +197,7 @@ function Post(props) {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && e.ctrlKey) formik.submitForm();
               }}
-              className="w-full dark:bg-slate-800 p-3 rounded-md outline-none"
+              className="w-full resize-none dark:bg-slate-800 p-3 rounded-md outline-none"
             />
             <label
               htmlFor="images"
@@ -333,8 +333,8 @@ function Post(props) {
               navigator.clipboard.writeText(
                 `http://localhost:5173/post/${post._id}`
               );
-              setPostCopied(true);
-              setTimeout(setPostCopied, 3000, false);
+              setMessage("تم نسخ رابط المنشور بنجاح");
+              setTimeout(setMessage, 3000, "");
             }}
           >
             <FontAwesomeIcon icon={faShare} />
@@ -349,7 +349,7 @@ function Post(props) {
           />
         )}
       </div>
-      {postCopied && <Message message={"تم نسخ رابط المنشور"} />}
+      <Message message={message} />
       {showModal && (
         <Modal
           message="هل أنت متأكد من أنك تريد حذف هذا المنشور؟"
@@ -362,6 +362,8 @@ function Post(props) {
                 headers: { Authorization: `Bearer ${token}` },
               });
               console.log(res);
+              setMessage("تم حذف المنشور بنجاح");
+              setTimeout(setMessage, 3000, "");
             } catch (error) {
               console.log(error);
             }

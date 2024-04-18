@@ -80,7 +80,7 @@ const userSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
-  blockingUsers: [
+  blockerUsers: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",

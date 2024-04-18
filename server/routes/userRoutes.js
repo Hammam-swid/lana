@@ -22,6 +22,8 @@ const {
   saveUserPhoto,
   getMyFollowings,
   banUser,
+  blockUser,
+  unBlockUser,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -42,6 +44,7 @@ router.post("/deactivateMe", deactivateMe);
 router.patch("/completeDeactivateMe", completeDeactivateMe);
 router.route("/:username").get(getUser);
 router.route("/:userId/follow").post(followUser).delete(unFollowUser);
+router.route("/:userId/block").post(blockUser).delete(unBlockUser);
 
 router.route("/updateMyPassword").patch(updatePassword);
 

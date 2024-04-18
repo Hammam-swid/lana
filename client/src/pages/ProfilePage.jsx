@@ -28,8 +28,8 @@ function ProfilePage() {
   const dispatch = useDispatch();
   const [profileOptions, setProfileOptions] = useState(false);
   const [isFollowed, setIsFollowed] = useState(false);
-  const [banning, setBanning] = useState(false);
-  const [showMessage, setShowMessage] = useState(false);
+  const [modalData, setModalData] = useState({});
+  const [message, setMessage] = useState("");
   function renderUser(user, posts) {
     console.log(user._id);
     console.log(thisUser.following);
@@ -85,7 +85,34 @@ function ProfilePage() {
                   >
                     {thisUser.role === "user" ? (
                       <>
-                        <li id="block-user">
+                        <li
+                          onClick={() => {
+                            setModalData({
+                              message:
+                                "هل أنت متأكد من أنك تريد حظر هذا المستخدم؟",
+                              hide: () => setModalData({}),
+                              action: async () => {
+                                try {
+                                  console.log(user._id)
+                                  const res = await axios({
+                                    method: "POST",
+                                    url: `/api/v1/users/${user._id}/block`,
+                                    headers: {
+                                      Authorization: `Bearer ${token}`,
+                                    },
+                                  });
+                                  if (res.status === 200) {
+                                    setMessage("تم حظر هذا المستخدم بنجاح");
+                                    setTimeout(setMessage, 3000, "");
+                                  }
+                                } catch (error) {
+                                  console.log(error);
+                                }
+                              },
+                            });
+                          }}
+                          id="block-user"
+                        >
                           <span>حظر الحساب</span>
                           <FontAwesomeIcon
                             icon={faBan}
@@ -110,7 +137,33 @@ function ProfilePage() {
                             className="text-yellow-500"
                           />
                         </li>
-                        <li onClick={() => setBanning(true)}>
+                        <li
+                          onClick={() =>
+                            setModalData({
+                              message:
+                                "هل أنت متأكد من أنك تريد حظر هذا الحساب؟",
+                              hide: () => setModalData({}),
+                              action: async () => {
+                                try {
+                                  const res = await axios({
+                                    method: "PATCH",
+                                    url: `/api/v1/users/${user._id}/ban`,
+                                    headers: {
+                                      Authorization: `Bearer ${token}`,
+                                    },
+                                  });
+                                  if (res.status === 204) {
+                                    setMessage("تم حظر هذا المستخدم");
+                                    setTimeout(setMessage, 3000, false);
+                                    setModalData({});
+                                  }
+                                } catch (error) {
+                                  console.log(error);
+                                }
+                              },
+                            })
+                          }
+                        >
                           <span>حظر الحساب نهائياً</span>
                           <FontAwesomeIcon
                             icon={faUserSlash}
@@ -169,30 +222,12 @@ function ProfilePage() {
             <p>{`${user.followers.length} متابع`}</p>
           </div>
         </div>
-        {showMessage && <Message message={"تم حظر هذا المستخدم"} />}
-        {banning && (
-          <Modal
-            message="هل أنت متأكد من أنك تريد حظر هذا الحساب؟"
-            action={async () => {
-              try {
-                const res = await axios({
-                  method: "PATCH",
-                  url: `/api/v1/users/${user._id}/ban`,
-                  headers: { Authorization: `Bearer ${token}` },
-                });
-                if (res.status === 204) {
-                  console.log("user banned");
-                  setShowMessage(true);
-                  setTimeout(setShowMessage, 3000, false);
-                  setBanning(false);
-                }
-              } catch (error) {
-                console.log(error);
-              }
-            }}
-            hide={() => setBanning(false)}
-          />
-        )}
+        <Message message={message} />
+        <Modal
+          message={modalData.message}
+          action={modalData.action}
+          hide={modalData.hide}
+        />
       </>
     );
   }
