@@ -28,12 +28,35 @@ exports.getPosts = async (req, res, next) => {
   try {
     // const io = req.app.get('socket.io');
     // console.log(io)
-    const posts = await Post.find()
+    const posts = await Post.find({
+      $nor: [
+        { user: { $in: req.user.blockedUsers } },
+        { user: { $in: req.user.blockerUsers } },
+      ],
+    })
       .sort("-createdAt")
       // .limit(5)
-      .populate("user", "username photo fullName state verified")
-      .populate("comments.user", "username photo fullName state");
-
+      .populate("user", "username photo fullName state verified _id")
+      .populate("comments.user", "username photo fullName state verified _id");
+    // .populate({
+    //   path: "comments",
+    //   match: {
+    //     user: {
+    //       state: "active",
+    //       $nor: [
+    //         { id: req.user.blockedUsers },
+    //         { id: req.user.blockerUsers },
+    //       ],
+    //     },
+    //   },
+    // })
+    console.log(req.user.blockedUsers);
+    // posts.filter(
+    //   (post) =>
+    //     !req.user.blockedUsers
+    //       .map((user) => user.toString())
+    //       .includes(post.user._id.toString())
+    // );
     res.status(200).json({
       status: "success",
       result: posts.length,
@@ -43,6 +66,24 @@ exports.getPosts = async (req, res, next) => {
           post.comments = post.comments.filter(
             (comment) => comment.user.state === "active"
           );
+          return post;
+        })
+        .map((post) => {
+          post.comments = post.comments.filter((comment) => {
+            console.log(
+              req.user.blockedUsers
+                .map((user) => user.toString())
+                .some((user) => user === comment.user._id.toString())
+            );
+            return (
+              !req.user.blockedUsers
+                .map((user) => user.toString())
+                .some((user) => user === comment.user._id.toString()) ||
+              !req.user.blockerUsers
+                .map((user) => user.toString())
+                .includes(comment.user._id.toString())
+            );
+          });
           return post;
         }),
     });

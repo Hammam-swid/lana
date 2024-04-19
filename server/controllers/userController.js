@@ -23,7 +23,14 @@ const upload = multer({
 
 exports.getUser = catchAsync(async (req, res, next) => {
   const { username } = req.params;
-  const user = await User.findOne({ username, state: "active" });
+  const user = await User.findOne({
+    username,
+    state: "active",
+    $nor: [
+      { _id: { $in: req.user.blockedUsers } },
+      { _id: { $in: req.user.blockerUsers } },
+    ],
+  });
   if (!user) {
     return next(new AppError("هذا المستخدم غير موجود", 404));
   }
