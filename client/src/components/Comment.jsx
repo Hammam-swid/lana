@@ -26,7 +26,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
   const user = useSelector((state) => state.user);
   const [options, setOptions] = useState(false);
   const [edited, setEdited] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [modalData, setModalData] = useState({});
   const formik = useFormik({
     initialValues: {
       text: comment.text,
@@ -154,7 +154,27 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
                   <li>
                     <button
                       className="flex justify-between items-center w-full"
-                      onClick={() => setShowModal(true)}
+                      onClick={() =>
+                        setModalData({
+                          message: "هل أنت متأكد من أنك تريد حذف هذا التعليق؟",
+                          hide: () => setModalData({}),
+                          action: async () => {
+                            try {
+                              const res = await axios({
+                                method: "DELETE",
+                                url: `/api/v1/posts/${postId}/comment/${comment._id}`,
+                                headers: { Authorization: `Bearer ${token}` },
+                              });
+                              console.log(res);
+                              if (res.status === 204) {
+                                removeComment(comment._id);
+                              }
+                            } catch (error) {
+                              console.log(error);
+                            }
+                          },
+                        })
+                      }
                     >
                       <span>حذف التعليق</span>{" "}
                       <FontAwesomeIcon
@@ -187,27 +207,11 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
           </AnimatePresence>
         </div>
       </div>
-      {showModal && (
-        <Modal
-          message="هل أنت متأكد من أنك تريد حذف هذا التعليق؟"
-          hide={() => setShowModal(false)}
-          action={async () => {
-            try {
-              const res = await axios({
-                method: "DELETE",
-                url: `/api/v1/posts/${postId}/comment/${comment._id}`,
-                headers: { Authorization: `Bearer ${token}` },
-              });
-              console.log(res);
-              if (res.status === 204) {
-                removeComment(comment._id);
-              }
-            } catch (error) {
-              console.log(error);
-            }
-          }}
-        />
-      )}
+      <Modal
+        message={modalData.message}
+        hide={modalData.hide}
+        action={modalData.action}
+      />
     </>
   );
 }

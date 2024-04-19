@@ -176,6 +176,7 @@ function App() {
         >
           <Route index element={<ProfileSettings />} />
           <Route path="change-password" element={<ChangePasswordPage />} />
+          <Route path="blocked-users" element={<>صفحة الأشخاص المحظورين</>} />
           <Route
             path="deactivate-account"
             element={<DeactivateAccountPage />}

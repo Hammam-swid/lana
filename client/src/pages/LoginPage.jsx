@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import axios from "axios";
@@ -11,6 +11,10 @@ import * as Yup from "yup";
 function LoginPage() {
   const theme = useSelector((state) => state.theme);
   const nav = useNavigate();
+  useEffect(() => {
+    if (theme === "dark") document.body.classList.add("dark");
+    else document.body.classList.remove("dark");
+  }, [theme]);
   const dispatch = useDispatch();
   const formik = useFormik({
     initialValues: {
@@ -52,8 +56,8 @@ function LoginPage() {
           className="w-80 md:max-w-96"
           src={
             theme === "dark"
-              ? "./src/assets/darkLanaLogo.png"
-              : "./src/assets/lanaLogo.png"
+              ? "./src/assets/darkLanaLogo.svg"
+              : "./src/assets/lanaLogo.svg"
           }
           alt="شعار منصة لنا"
         />

@@ -64,26 +64,15 @@ exports.getPosts = async (req, res, next) => {
         .filter((post) => post.user.state === "active")
         .map((post) => {
           post.comments = post.comments.filter(
-            (comment) => comment.user.state === "active"
-          );
-          return post;
-        })
-        .map((post) => {
-          post.comments = post.comments.filter((comment) => {
-            console.log(
-              req.user.blockedUsers
-                .map((user) => user.toString())
-                .some((user) => user === comment.user._id.toString())
-            );
-            return (
+            (comment) =>
+              comment.user.state === "active" &&
               !req.user.blockedUsers
                 .map((user) => user.toString())
-                .some((user) => user === comment.user._id.toString()) ||
+                .includes(comment.user._id.toString()) &&
               !req.user.blockerUsers
                 .map((user) => user.toString())
                 .includes(comment.user._id.toString())
-            );
-          });
+          );
           return post;
         }),
     });
@@ -209,7 +198,14 @@ exports.updatePost = catchAsync(async (req, res, next) => {
     .populate("user", "username fullName photo verified")
     .populate("comments.user", "username fullName photo state");
   post.comments = post.comments.filter(
-    (comment) => comment.user.state === "active"
+    (comment) =>
+      comment.user.state === "active" &&
+      !req.user.blockedUsers
+        .map((user) => user.toString())
+        .includes(comment.user._id.toString()) &&
+      !req.user.blockerUsers
+        .map((user) => user.toString())
+        .includes(comment.user._id.toString())
   );
   res.status(200).json({
     status: "success",
@@ -226,7 +222,14 @@ exports.getPost = catchAsync(async (req, res, next) => {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
   post.comments = post.comments.filter(
-    (comment) => comment.user.state === "active"
+    (comment) =>
+      comment.user.state === "active" &&
+      !req.user.blockedUsers
+        .map((user) => user.toString())
+        .includes(comment.user._id.toString()) &&
+      !req.user.blockerUsers
+        .map((user) => user.toString())
+        .includes(comment.user._id.toString())
   );
   res.status(200).json({
     status: "success",
@@ -305,7 +308,14 @@ exports.likePost = catchAsync(async (req, res, next) => {
   await post.save();
   post = await post.populate("user", "username fullName photo verified");
   post.comments = post.comments.filter(
-    (comment) => comment.user.state === "active"
+    (comment) =>
+      comment.user.state === "active" &&
+      !req.user.blockedUsers
+        .map((user) => user.toString())
+        .includes(comment.user._id.toString()) &&
+      !req.user.blockerUsers
+        .map((user) => user.toString())
+        .includes(comment.user._id.toString())
   );
   res.status(201).json({
     status: "success",
@@ -369,7 +379,14 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
   ).populate("user", "username fullName photo verified");
 
   post.comments = post.comments.filter(
-    (comment) => comment.user.state === "active"
+    (comment) =>
+      comment.user.state === "active" &&
+      !req.user.blockedUsers
+        .map((user) => user.toString())
+        .includes(comment.user._id.toString()) &&
+      !req.user.blockerUsers
+        .map((user) => user.toString())
+        .includes(comment.user._id.toString())
   );
   res.status(201).json({
     status: "success",
@@ -417,7 +434,14 @@ exports.cancelReaction = catchAsync(async (req, res, next) => {
     await post.save();
     post = await post.populate("user", "username fullName photo verified");
     post.comments = post.comments.filter(
-      (comment) => comment.user.state === "active"
+      (comment) =>
+        comment.user.state === "active" &&
+        !req.user.blockedUsers
+          .map((user) => user.toString())
+          .includes(comment.user._id.toString()) &&
+        !req.user.blockerUsers
+          .map((user) => user.toString())
+          .includes(comment.user._id.toString())
     );
     return res.status(203).json({
       status: "success",
@@ -447,7 +471,16 @@ exports.commentOnPost = catchAsync(async (req, res, next) => {
   res.status(201).json({
     status: "success",
     comments: post.comments
-      .filter((comment) => comment.user.state === "active")
+      .filter(
+        (comment) =>
+          comment.user.state === "active" &&
+          !req.user.blockedUsers
+            .map((user) => user.toString())
+            .includes(comment.user._id.toString()) &&
+          !req.user.blockerUsers
+            .map((user) => user.toString())
+            .includes(comment.user._id.toString())
+      )
       .sort((a, b) => a - b > 0),
   });
   if (post.user.username !== req.user.username) {
@@ -550,6 +583,15 @@ exports.updateComment = catchAsync(async (req, res, next) => {
   await post.save();
   res.status(200).json({
     status: "success",
-    comments: post.comments,
+    comments: post.comments.filter(
+      (comment) =>
+        comment.user.state === "active" &&
+        !req.user.blockedUsers
+          .map((user) => user.toString())
+          .includes(comment.user._id.toString()) &&
+        !req.user.blockerUsers
+          .map((user) => user.toString())
+          .includes(comment.user._id.toString())
+    ),
   });
 });

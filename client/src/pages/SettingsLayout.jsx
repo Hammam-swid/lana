@@ -3,6 +3,7 @@ import {
   faKey,
   faLock,
   faUser,
+  faUserLock,
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
@@ -49,6 +50,20 @@ function SettingsLayout() {
               >
                 <span>إعدادات الملف الشخصي</span>
                 <FontAwesomeIcon icon={faUser} />
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="blocked-users"
+                className={({ isActive }) =>
+                  `p-3 rounded-md flex justify-between items-center ${
+                    isActive &&
+                    "text-green-500 font-bold bg-slate-200 dark:bg-slate-950"
+                  }`
+                }
+              >
+                <span>الأشخاص المحظورون</span>
+                <FontAwesomeIcon icon={faUserLock} />
               </NavLink>
             </li>
             <li>

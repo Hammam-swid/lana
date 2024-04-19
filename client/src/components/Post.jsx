@@ -36,7 +36,7 @@ function Post(props) {
   const [comments, setComments] = useState(false);
   const [postOptions, setPostOptions] = useState(false);
   const [edited, setEdited] = useState(false);
-  const [showModal, setShowModal] = useState(false);
+  const [modalData, setModalData] = useState({});
   const [message, setMessage] = useState("");
   const formik = useFormik({
     initialValues: {
@@ -150,7 +150,29 @@ function Post(props) {
                   user.role === "supervisor" ||
                   user.username === post.user.username ? (
                     <li>
-                      <button onClick={() => setShowModal(true)}>
+                      <button
+                        onClick={() =>
+                          setModalData({
+                            message: "هل أنت متأكد من أنك تريد حذف المنشور؟",
+                            hide: () => setModalData({}),
+                            action: async () => {
+                              try {
+                                const res = await axios({
+                                  url: `/api/v1/posts/${post._id}`,
+                                  method: "DELETE",
+                                  headers: { Authorization: `Bearer ${token}` },
+                                });
+                                console.log(res);
+                                setMessage("تم حذف المنشور بنجاح");
+                                setTimeout(setMessage, 3000, "");
+                              } catch (error) {
+                                console.log(error);
+                              }
+                              setModalData({});
+                            },
+                          })
+                        }
+                      >
                         حذف المنشور
                       </button>
                       <FontAwesomeIcon
@@ -186,7 +208,13 @@ function Post(props) {
           {/* {new Date(post.createdAt).getSeconds(0)} */}
         </p>
         {!edited ? (
-          <h3>{post.content}</h3>
+          <h3
+            className={`break-words ${
+              /^[a-zA-Z]/.test(post?.content) && "text-left"
+            }`}
+          >
+            {post.content}
+          </h3>
         ) : (
           <form className="flex items-center" onSubmit={formik.handleSubmit}>
             <textarea
@@ -350,27 +378,11 @@ function Post(props) {
         )}
       </div>
       <Message message={message} />
-      {showModal && (
-        <Modal
-          message="هل أنت متأكد من أنك تريد حذف هذا المنشور؟"
-          hide={() => setShowModal(false)}
-          action={async () => {
-            try {
-              const res = await axios({
-                url: `/api/v1/posts/${post._id}`,
-                method: "DELETE",
-                headers: { Authorization: `Bearer ${token}` },
-              });
-              console.log(res);
-              setMessage("تم حذف المنشور بنجاح");
-              setTimeout(setMessage, 3000, "");
-            } catch (error) {
-              console.log(error);
-            }
-            setShowModal(false);
-          }}
-        />
-      )}
+      <Modal
+        message={modalData.message}
+        hide={modalData.hide}
+        action={modalData.action}
+      />
     </>
   );
 }

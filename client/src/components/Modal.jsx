@@ -10,7 +10,8 @@ function Modal({ action, message, hide }) {
   return (
     <AnimatePresence>
       {message && action && hide && (
-        <div
+        <motion.div
+          exit={{ opacity: 0 }}
           onClick={(e) => {
             if (e.target.id === "overlay") {
               hide();
@@ -23,6 +24,7 @@ function Modal({ action, message, hide }) {
           <motion.div
             animate={{ scale: 1 }}
             initial={{ scale: 0 }}
+            // exit={{ opacity: 0 }}
             className="bg-white dark:bg-slate-900 min-w-80 max-w-96 w-1/2 h-40 p-3 rounded-lg flex flex-col justify-between"
           >
             <h2 className="text-2xl font-bold">{message}</h2>
@@ -48,7 +50,7 @@ function Modal({ action, message, hide }) {
               </button>
             </div>
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );

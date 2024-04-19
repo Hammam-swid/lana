@@ -78,11 +78,11 @@ function Header() {
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           >
             <img
-              className="max-w-32"
+              className=" w-20"
               src={
                 theme === "dark"
-                  ? "/src/assets/darkLanaLogo.png"
-                  : "/src/assets/lanaLogo.png"
+                  ? "/src/assets/darkLanaLogo.svg"
+                  : "/src/assets/lanaLogo.svg"
               }
               alt="شعار منصة لنا"
             />
