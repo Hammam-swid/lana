@@ -44,11 +44,14 @@ function MainLayout() {
       <AnimatePresence>
         {newNotification && (
           <motion.div
-            initial={{ y: window.visualViewport.width > 640 ? 100 : -200 }}
-            animate={{ y: 0 }}
+            initial={{
+              y: window.visualViewport.width > 640 ? 100 : -200,
+              x: "50%",
+            }}
+            animate={{ y: 0, x: "50" }}
             drag={window.visualViewport.width < 640}
             dragConstraints={{ bottom: 0, right: 0, left: 0 }}
-            exit={{ y: window.visualViewport.width > 640 ? 120 : -200 }}
+            exit={{ y: window.visualViewport.width > 640 ? 120 : -200, x:'50%' }}
             onClick={() => setNewNotification(null)}
             className="fixed z-50 top-5 rounded-md right-1/2 dark:bg-slate-900 w-fit  sm:mx-0 sm:top-auto sm:bottom-5 sm:right-5"
           >

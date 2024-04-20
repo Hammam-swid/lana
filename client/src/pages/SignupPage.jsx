@@ -19,9 +19,9 @@ function SignupPage() {
       username: "",
       fullName: "",
       gender: "",
-      day: 1,
-      month: 1,
-      year: new Date().getFullYear() - 13,
+      day: "day",
+      month: "month",
+      year: "year",
       password: "",
       passwordConfirm: "",
     },
@@ -49,7 +49,8 @@ function SignupPage() {
       const dateOfBirth = new Date(
         [values.day, values.month, values.year].join("-")
       );
-      values.dateOfBirth = dateOfBirth;
+      if (dateOfBirth && dateOfBirth !== "Invalid Date")
+        values.dateOfBirth = dateOfBirth;
       try {
         const res = await axios({
           method: "POST",
@@ -168,9 +169,21 @@ function SignupPage() {
                     value={formik.values.day}
                     onChange={formik.handleChange}
                   >
+                    <option value="day">يوم</option>
                     {(() => {
                       let options = [];
-                      for (let i = 1; i <= 31; i++) {
+                      let limit;
+                      console.log(formik.values)
+                      if (
+                        [1, 3, 5, 7, 8, 10, 12].includes(+formik.values.month)
+                      )
+                        limit = 31;
+                      else if ([4, 6, 9, 11].includes(+formik.values.month))
+                        limit = 30;
+                      else if (+formik.values.month === 2)
+                        limit = +formik?.values?.year % 4 === 0 ? 29 : 28;
+                      else limit = 31
+                      for (let i = 1; i <= limit; i++) {
                         options.push(
                           <option key={`day-${i}`} value={i}>
                             {i}
@@ -186,6 +199,7 @@ function SignupPage() {
                     value={formik.values.month}
                     onChange={formik.handleChange}
                   >
+                    <option value="month">شهر</option>
                     {(() => {
                       let options = [];
                       for (let i = 1; i <= 12; i++) {
@@ -204,6 +218,7 @@ function SignupPage() {
                     value={formik.values.year}
                     onChange={formik.handleChange}
                   >
+                    <option value="year">سنة</option>
                     {(() => {
                       let options = [];
                       for (

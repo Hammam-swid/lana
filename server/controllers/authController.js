@@ -17,7 +17,7 @@ exports.signup = catchAsync(async (req, res, next) => {
   const verificationCode = crypto.randomInt(100000, 999999);
   const user = await User.create({
     fullName,
-    email,
+    email: email.toLowerCase(),
     password,
     username,
     gender,
@@ -37,7 +37,7 @@ exports.signup = catchAsync(async (req, res, next) => {
 exports.verifySignup = catchAsync(async (req, res, next) => {
   const { email, verificationCode } = req.body;
   const user = await User.findOne({
-    email,
+    email: email.toLowerCase(),
     verificationCode,
     verificationCodeEx: { $gt: Date.now() },
   });
@@ -74,7 +74,7 @@ exports.login = catchAsync(async (req, res, next) => {
       new AppError("الرجاء إدخال البريد الإلكتروني وكلمة المرور", 400)
     );
   }
-  const user = await User.findOne({ email, state: "active" }).select(
+  const user = await User.findOne({ email: email.toLowerCase(), state: "active" }).select(
     "+password"
   );
   if (!user || !(await user.comparePassword(password, user.password))) {
@@ -105,7 +105,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   const { email } = req.body;
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email: email.toLowerCase() });
   if (!user) {
     return next(new AppError("البريد الإلكتروني غير صحيح", 404));
   }
@@ -148,7 +148,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     .update(resetToken)
     .digest("hex");
   const user = await User.findOne({
-    email,
+    email: email.toLowerCase(),
     resetPasswordToken: hashedToken,
     resetPasswordTokenExpires: { $gt: Date.now() },
   });

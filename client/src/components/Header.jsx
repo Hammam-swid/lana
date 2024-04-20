@@ -15,7 +15,6 @@ import {
   faCommentSlash,
   faUserPlus,
   faMoon,
-  faCircleHalfStroke,
 } from "@fortawesome/free-solid-svg-icons";
 import { setLogout, updateTheme } from "../store/authSlice";
 import {
@@ -33,7 +32,7 @@ function Header() {
   const user = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const theme = useSelector((state) => state.theme);
-  const [popup, setPopup] = useState(false);
+  const [modalData, setModalData] = useState({});
   const [options, setOptions] = useState(false);
   const [notiList, setNotiList] = useState([]);
   const [showNotiList, setShowNotiList] = useState(false);
@@ -167,7 +166,6 @@ function Header() {
                           month: "2-digit",
                           hour: "2-digit",
                           minute: "2-digit",
-                          second: "2-digit",
                         })}
                       </p>
                       <p className="flex justify-between items-center">
@@ -220,9 +218,31 @@ function Header() {
               );
             }}
           >
-            <FontAwesomeIcon
-              icon={theme === "light" ? faCircleHalfStroke : faMoon}
-            />
+            {theme === "dark" ? (
+              <FontAwesomeIcon icon={faMoon} />
+            ) : (
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="24"
+                height="24"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="5" />
+                <line x1="12" y1="1" x2="12" y2="3" />
+                <line x1="12" y1="21" x2="12" y2="23" />
+                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
+                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
+                <line x1="1" y1="12" x2="3" y2="12" />
+                <line x1="21" y1="12" x2="23" y2="12" />
+                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
+                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
+              </svg>
+            )}
           </button>
           <NavLink
             to={`/profile/${user.username}`}
@@ -265,7 +285,14 @@ function Header() {
               </li>
               <li
                 onClick={() => {
-                  setPopup(true);
+                  setModalData({
+                    message: "هل أنت متأكد من أنك تريد تسجيل الخروج؟",
+                    hide: () => setModalData({}),
+                    action: () => {
+                      dispatch(setLogout());
+                      nav("/login");
+                    },
+                  });
                 }}
               >
                 <label>تسجيل الخروج</label>
@@ -278,16 +305,11 @@ function Header() {
           )}
         </AnimatePresence>
       </header>
-      {popup && (
-        <Modal
-          action={() => {
-            dispatch(setLogout());
-            nav("/login");
-          }}
-          message="هل أنت متأكد من أنك تريد تسجيل الخروج؟"
-          hide={() => setPopup(false)}
-        />
-      )}
+      <Modal
+        action={modalData.action}
+        message={modalData.message}
+        hide={modalData.hide}
+      />
     </>
   );
 }

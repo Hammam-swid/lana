@@ -23,6 +23,7 @@ import ResetPasswordPage from "./pages/ResetPasswordPage";
 import { jwtDecode } from "jwt-decode";
 import { setLogout } from "./store/authSlice";
 import ErrorPage from "./pages/ErrorPage";
+import BlockedUsers from "./pages/BlockedUsers";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -176,7 +177,27 @@ function App() {
         >
           <Route index element={<ProfileSettings />} />
           <Route path="change-password" element={<ChangePasswordPage />} />
-          <Route path="blocked-users" element={<>صفحة الأشخاص المحظورين</>} />
+          <Route
+            path="blocked-users"
+            element={<BlockedUsers />}
+            loader={() => {
+              const getBlockedUsers = async () => {
+                try {
+                  const token = store.getState().token;
+                  const res = await axios({
+                    method: "GET",
+                    url: "/api/v1/users/blockedUsers",
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  if (res.status === 200) return res.data.blockedUsers;
+                } catch (error) {
+                  console.log(error);
+                  return null;
+                }
+              };
+              return defer({ blockedUsers: getBlockedUsers() });
+            }}
+          />
           <Route
             path="deactivate-account"
             element={<DeactivateAccountPage />}

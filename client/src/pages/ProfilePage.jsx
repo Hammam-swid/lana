@@ -30,6 +30,7 @@ function ProfilePage() {
   const [isFollowed, setIsFollowed] = useState(false);
   const [modalData, setModalData] = useState({});
   const [message, setMessage] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
   function renderUser(user, posts) {
     console.log(user._id);
     console.log(thisUser.following);
@@ -93,7 +94,7 @@ function ProfilePage() {
                               hide: () => setModalData({}),
                               action: async () => {
                                 try {
-                                  console.log(user._id)
+                                  console.log(user._id);
                                   const res = await axios({
                                     method: "POST",
                                     url: `/api/v1/users/${user._id}/block`,
@@ -193,6 +194,8 @@ function ProfilePage() {
                     }
                   } catch (error) {
                     console.log(error);
+                    setErrorMessage(error?.response?.data?.message);
+                    setTimeout(setErrorMessage, 3000, "");
                   }
                 }}
                 className={`${
@@ -222,7 +225,7 @@ function ProfilePage() {
             <p>{`${user.followers.length} متابع`}</p>
           </div>
         </div>
-        <Message message={message} />
+        <Message message={message || errorMessage} error={errorMessage} />
         <Modal
           message={modalData.message}
           action={modalData.action}

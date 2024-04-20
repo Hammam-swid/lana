@@ -75,6 +75,7 @@ function HomePage() {
             <div className="relative rounded-md">
               <textarea
                 name="content"
+                dir={/^[a-zA-Z]/.test(formik.values.content) ? "ltr" : "rtl"}
                 value={formik.values.content}
                 onChange={formik.handleChange}
                 onBlur={formik.handleBlur}
@@ -82,7 +83,9 @@ function HomePage() {
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && e.ctrlKey) formik.submitForm();
                 }}
-                className="outline-none bg-slate-300 resize-none h-fit max-h-20 dark:bg-slate-800 w-full p-6 text-xl rounded-md"
+                className={`${
+                  /^[a-zA-Z]/.test(formik.values.content) && "pl-10"
+                } outline-none bg-slate-300 resize-none h-fit max-h-20 dark:bg-slate-800 w-full p-6 text-xl rounded-md`}
                 placeholder={`بم تفكر يا ${
                   user.fullName.startsWith("عبد")
                     ? `${name[0]} ${name[1]}`

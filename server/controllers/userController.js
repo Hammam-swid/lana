@@ -57,7 +57,7 @@ exports.checkUsernameExist = catchAsync(async (req, res, next) => {
   if (user) {
     return next(new AppError("اسم المستخدم هذا موجود بالفعل", 400));
   }
-  user = await User.findOne({ email });
+  user = await User.findOne({ email: email.toLowerCase() });
   if (user) {
     return next(new AppError("لا يمكنك استخدام هذا البريد الالكتروني", 400));
   }
@@ -121,7 +121,7 @@ exports.completeDeactivateMe = catchAsync(async (req, res, next) => {
   const { verificationCode, password, email } = req.body;
 
   const user = await User.findOne({
-    email,
+    email: email.toLowerCase(),
     verificationCode,
     verificationCodeEx: { $gt: Date.now() },
   }).select("+password");
@@ -146,7 +146,13 @@ exports.followUser = catchAsync(async (req, res, next) => {
   if (userId === req.user._id) {
     return next(new AppError("لا يمكنك متابعة حسابك", 400));
   }
-  const followingUser = await User.findById(userId);
+  const followingUser = await User.findOne({
+    $and: [
+      { _id: userId },
+      { _id: { $nin: req.user.blockedUsers } },
+      { _id: { $nin: req.user.blockerUsers } },
+    ],
+  });
   if (!followingUser) {
     return next(new AppError("هذا المستخدم غير موجود", 404));
   }
@@ -247,6 +253,21 @@ exports.blockUser = catchAsync(async (req, res, next) => {
   req.user.blockedUsers.push(toBlockUser._id);
   if (!toBlockUser.blockerUsers) toBlockUser.blockerUsers = [];
   toBlockUser.blockerUsers.push(req.user._id);
+  req.user.followers = req.user.followers.filter(
+    (user) => user.toString() !== userId
+  );
+  req.user.following = req.user.following.filter(
+    (user) => user.toString() !== userId
+  );
+
+  if (!toBlockUser.followers) toBlockUser.followers = [];
+  if (!toBlockUser.following) toBlockUser.following = [];
+  toBlockUser.followers = toBlockUser.followers.filter(
+    (user) => user.toString() !== req.user._id.toString()
+  );
+  toBlockUser.following = toBlockUser.following.filter(
+    (user) => user.toString() !== req.user._id.toString()
+  );
   await req.user.save();
   await toBlockUser.save();
   res.status(200).json({
@@ -263,13 +284,15 @@ exports.unBlockUser = catchAsync(async (req, res, next) => {
   if (!req.user.blockedUsers.some((user) => user._id.toString() === userId)) {
     return next(new AppError("هذا المستخدم غير محظور بالفعل", 400));
   }
-  const toUnBlockUser = await User.findById(userId, { state: "active" });
+  const toUnBlockUser = await User.findOne({ _id: userId, state: "active" });
   if (!toUnBlockUser) {
     return next(new AppError("هذا المستخدم غير موجود", 404));
   }
+  console.log(req.user.blockedUsers);
   req.user.blockedUsers = req.user.blockedUsers.filter(
     (user) => user.toString() !== userId
   );
+  console.log(toUnBlockUser);
   toUnBlockUser.blockerUsers = toUnBlockUser.blockerUsers.filter(
     (user) => user.toString() !== req.user._id.toString()
   );
@@ -278,6 +301,18 @@ exports.unBlockUser = catchAsync(async (req, res, next) => {
   res.status(200).json({
     status: "success",
     user: req.user,
+  });
+});
+
+exports.getMyBlockedUsers = catchAsync(async (req, res, next) => {
+  const blockedUsers = await User.find({
+    _id: { $in: req.user.blockedUsers },
+    state: "active",
+  }).select("_id fullName photo verified");
+  res.status(200).json({
+    status: "success",
+    result: blockedUsers.length,
+    blockedUsers,
   });
 });
 

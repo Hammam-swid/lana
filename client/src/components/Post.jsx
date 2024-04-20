@@ -204,6 +204,8 @@ function Post(props) {
             day: "2-digit",
             month: "long",
             year: "numeric",
+            hour: '2-digit',
+            minute: '2-digit'
           })}
           {/* {new Date(post.createdAt).getSeconds(0)} */}
         </p>
@@ -219,6 +221,7 @@ function Post(props) {
           <form className="flex items-center" onSubmit={formik.handleSubmit}>
             <textarea
               name="content"
+              dir={/^[a-zA-Z]/.test(formik.values.content) ? "ltr" : "rtl"}
               value={formik.values.content}
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
