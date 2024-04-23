@@ -49,9 +49,10 @@ function Comments(props) {
   };
   const updateComments = (newComments) => {
     setComments(newComments);
+    props.updateComments(newComments)
   };
   return (
-    <div className="dark:bg-slate-950 bg-slate-200 p-4 md:p-6 rounded-md flex flex-col gap-5">
+    <div className="dark:bg-slate-950 bg-slate-200 p-2 md:p-6 rounded-md flex flex-col gap-5">
       {comments.length > 0 ? (
         comments.map((comment) => (
           <Comment

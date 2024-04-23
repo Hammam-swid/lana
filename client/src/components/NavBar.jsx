@@ -4,8 +4,8 @@ import { NavLink } from "react-router-dom";
 
 function NavBar() {
   return (
-    <nav className="sm:flex justify-center w-2/5 hidden">
-      <ul className="flex gap-10 sm:gap-5 md:gap-20 hover:*:text-green-500 *:text-2xl">
+    <nav className="sm:flex justify-center w-fit hidden">
+      <ul className="flex md:gap-10 sm:gap-5 lg:gap-20 hover:*:text-green-500 *:text-2xl">
         <li>
           <NavLink
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}

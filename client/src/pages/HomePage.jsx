@@ -93,17 +93,21 @@ function HomePage() {
                 } ....؟`}
               />
               <button
-                disabled={formik.isSubmitting}
-                className="text-green-500 text-xl absolute top-1/2 -translate-y-1/2 end-2"
+                disabled={formik.isSubmitting || formik.values.content === ""}
+                className="text-green-500 text-xl disabled:text-green-900 absolute top-1/2 -translate-y-1/2 end-2"
                 type="submit"
               >
                 {formik.isSubmitting ? (
                   <FontAwesomeIcon
                     icon={faCircleNotch}
-                    className="animate-spin"
+                    className="animate-spin text-green-500"
                   />
                 ) : (
-                  <FontAwesomeIcon icon={faPaperPlane} flip="horizontal" />
+                  <FontAwesomeIcon
+                    icon={faPaperPlane}
+                    flip="horizontal"
+                    rotation={45}
+                  />
                 )}
               </button>
             </div>

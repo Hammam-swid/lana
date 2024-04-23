@@ -215,7 +215,13 @@ exports.updatePost = catchAsync(async (req, res, next) => {
 
 exports.getPost = catchAsync(async (req, res, next) => {
   const { postId } = req.params;
-  const post = await Post.findById(postId)
+  const post = await Post.findOne({
+    _id: postId,
+    $nor: [
+      { user: { $in: req.user.blockedUsers } },
+      { user: { $in: req.user.blockerUsers } },
+    ],
+  })
     .populate("user", "username photo fullName verified")
     .populate("comments.user", "username photo fullName state");
   if (!post) {
@@ -303,6 +309,7 @@ exports.likePost = catchAsync(async (req, res, next) => {
     post.reactions.push({
       type: "like",
       username: req.user.username,
+      createdAt: Date.now(),
     });
   }
   await post.save();
@@ -509,8 +516,6 @@ exports.deleteComment = catchAsync(async (req, res, next) => {
     "comments.user",
     "username fullName photo state _id"
   );
-  // { $pull: { comments: { _id: commentId, user: req.user._id } } },
-  // { new: true }
 
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
@@ -577,6 +582,7 @@ exports.updateComment = catchAsync(async (req, res, next) => {
     return next(new AppError("لا تملك الصلاحيات لتعديل هذا التعليق", 401));
   }
   comment.text = text;
+  comment.updatedAt = Date.now();
   post.comments = post.comments.map((oldComment) =>
     oldComment._id.toString() === commentId ? comment : oldComment
   );
@@ -594,4 +600,195 @@ exports.updateComment = catchAsync(async (req, res, next) => {
           .includes(comment.user._id.toString())
     ),
   });
+});
+
+exports.likeComment = catchAsync(async (req, res, next) => {
+  const { commentId } = req.params;
+  const post = await Post.findOne({
+    "comments._id": commentId,
+    $nor: [
+      { user: { $in: req.user.blockedUsers } },
+      { user: { $in: req.user.blockerUsers } },
+    ],
+  })
+    .populate("user", "username fullName state photo verified")
+    .populate("comments.user", "username fullName state photo verified");
+  if (!post) {
+    return next(new AppError("هذا التعليق غير موجود", 404));
+  }
+  if (post.user.state !== "active") {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  const comment = post.comments.find(
+    (comment) => comment._id.toString() === commentId
+  );
+  let i;
+  if (
+    comment.reactions.some((react, index) => {
+      if (react.username === req.user.username) {
+        i = index;
+        return true;
+      }
+      return false;
+    })
+  ) {
+    if (comment.reactions[i].type === "dislike") {
+      comment.reactions[i].type = "like";
+      comment.reactions[i].createdAt = Date.now();
+    } else {
+      return next(new AppError("لقد قمت بالإعجاب بهذا التعليق من قبل", 400));
+    }
+  } else {
+    comment.reactions.push({
+      type: "like",
+      username: req.user.username,
+      createdAt: Date.now(),
+    });
+  }
+  await post.save();
+  post.comments = post.comments.filter(
+    (comment) =>
+      comment.user.state === "active" &&
+      !req.user.blockedUsers.includes(comment.user._id.toString()) &&
+      !req.user.blockerUsers.includes(comment.user._id.toString())
+  );
+  res.status(201).json({
+    status: "success",
+    comments: post.comments,
+    returnUrl: `/post/${post.id}?commentId=${commentId}`,
+  });
+  if (comment.user.username !== req.user.username) {
+    const notification = await Notification.create({
+      message: `قام ${req.user.fullName} بالإعجاب بتعليقك`,
+      senderUsername: req.user.username,
+      recipientUsername: comment.user.username,
+      returnUrl: `/post/${post.id}?commentId=${commentId}`,
+      type: "like",
+      createdAt: Date.now(),
+    });
+    const io = req.app.get("socket.io");
+    const socketClients = req.app.get("socket-clients");
+    io.to(
+      ...socketClients
+        .filter((client) => client.username === notification.recipientUsername)
+        .map((client) => client.id)
+    ).emit("notification", notification);
+  }
+});
+
+exports.dislikeComment = catchAsync(async (req, res, next) => {
+  const { commentId } = req.params;
+  const post = await Post.findOne({
+    "comments._id": commentId,
+    $nor: [
+      { user: { $in: req.user.blockedUsers } },
+      { user: { $in: req.user.blockerUsers } },
+    ],
+  })
+    .populate("user", "username fullName state photo verified")
+    .populate("comments.user", "username fullName state photo verified");
+  if (!post) {
+    return next(new AppError("هذا التعليق غير موجود", 404));
+  }
+  if (post.user.state !== "active") {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  const comment = post.comments.find(
+    (comment) => comment._id.toString() === commentId
+  );
+  let i;
+  if (
+    comment.reactions.some((react, index) => {
+      if (react.username === req.user.username) {
+        i = index;
+        return true;
+      }
+      return false;
+    })
+  ) {
+    if (comment.reactions[i].type === "like") {
+      comment.reactions[i].type = "dislike";
+      comment.reactions[i].createdAt = Date.now();
+    } else {
+      return next(new AppError("لم تعجب بهذا التعليق من قبل", 400));
+    }
+  } else {
+    comment.reactions.push({
+      type: "dislike",
+      username: req.user.username,
+      createdAt: Date.now(),
+    });
+  }
+  await post.save();
+  post.comments = post.comments.filter(
+    (comment) =>
+      comment.user.state === "active" &&
+      !req.user.blockedUsers.includes(comment.user._id.toString()) &&
+      !req.user.blockerUsers.includes(comment.user._id.toString())
+  );
+  res.status(201).json({ status: "success", comments: post.comments });
+  if (comment.user.username !== req.user.username) {
+    const notification = await Notification.create({
+      message: `لم يعجب ${req.user.fullName} بتعليقك`,
+      senderUsername: req.user.username,
+      recipientUsername: comment.user.username,
+      returnUrl: `/post/${post.id}?commentId=${commentId}`,
+      type: "dislike",
+      createdAt: Date.now(),
+    });
+    const io = req.app.get("socket.io");
+    const socketClients = req.app.get("socket-clients");
+    io.to(
+      ...socketClients
+        .filter((client) => client.username === notification.recipientUsername)
+        .map((client) => client.id)
+    ).emit("notification", notification);
+  }
+});
+
+exports.cancelCommentReaction = catchAsync(async (req, res, next) => {
+  const { commentId } = req.params;
+  const post = await Post.findOne({
+    "comments._id": commentId,
+    $nor: [
+      { user: { $in: req.user.blockedUsers } },
+      { user: { $in: req.user.blockerUsers } },
+    ],
+  })
+    .populate("user", "username fullName state photo verified")
+    .populate("comments.user", "username fullName state photo verified");
+  if (!post) {
+    return next(new AppError("هذا التعليق غير موجود", 404));
+  }
+  if (post.user.state !== "active") {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  const comment = post.comments.find(
+    (comment) => comment._id.toString() === commentId
+  );
+  let i;
+  if (
+    comment.reactions.some((react, index) => {
+      if (react.username === req.user.username) {
+        i = index;
+        return true;
+      }
+      return false;
+    })
+  ) {
+    comment.reactions.splice(i, 1);
+    await post.save();
+    post.comments = post.comments.filter(
+      (comment) =>
+        comment.user.state === "active" &&
+        !req.user.blockedUsers.includes(comment.user._id.toString()) &&
+        !req.user.blockerUsers.includes(comment.user._id.toString())
+    );
+    return res.status(200).json({
+      status: "success",
+      comments: post.comments,
+      message: "تم إلغاء التفاعل",
+    });
+  }
+  next(new AppError("لم تتفاعل مع هذا التعليق بالفعل", 400));
 });

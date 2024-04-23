@@ -6,6 +6,8 @@ import {
   faFlag,
   faPaperPlane,
   faPen,
+  faThumbsDown,
+  faThumbsUp,
   // faEllipsisH,
   // faEllipsisVertical,
   faTrash,
@@ -14,19 +16,33 @@ import {
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useFormik } from "formik";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
+import { Link, useSearchParams } from "react-router-dom";
 import * as Yup from "yup";
 import Modal from "./Modal";
 import { AnimatePresence, motion } from "framer-motion";
+import getTimeDifference from "../utils/getTimeDifference";
 
 function Comment({ comment, removeComment, updateComments, postId, postUser }) {
+  let [isHighlighted, setIsHighlighted] = useState(
+    useSearchParams()[0].get("commentId") === comment._id
+  );
+  console.log(
+    (Date.now() - new Date(comment.createdAt).getTime()) / 1000 / 60 / 60 / 24
+  );
+  useEffect(() => {
+    setTimeout(setIsHighlighted, 5000, false);
+  }, []);
+  console.log(comment._id);
+  console.log(isHighlighted);
   const token = useSelector((state) => state.token);
   const user = useSelector((state) => state.user);
   const [options, setOptions] = useState(false);
   const [edited, setEdited] = useState(false);
   const [modalData, setModalData] = useState({});
+  const [isLiked, setIsLiked] = useState(false);
+  const [isDisliked, setIsDisliked] = useState(false);
   const formik = useFormik({
     initialValues: {
       text: comment.text,
@@ -55,7 +71,10 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
   return (
     <>
       <div
-        className="p-3 flex items-center gap-3"
+        className={`p-3 flex gap-3 ${
+          isHighlighted &&
+          "bg-green-200 dark:bg-green-400 rounded-md dark:bg-opacity-20"
+        }`}
         onClick={() => {
           if (options) setOptions(false);
         }}
@@ -81,9 +100,121 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
                 />
               </span>
             )}
+            {comment.updatedAt && (
+              <span
+                onClick={(e) => e.preventDefault()}
+                className="font-normal text-gray-500 ms-3 text-xs"
+              >
+                (تم تعديله)
+              </span>
+            )}
           </Link>
           {!edited ? (
-            <p>{comment.text}</p>
+            <>
+              <p>{comment.text}</p>
+              <div className="flex mt-2 items-end gap-5py-1 px-2 rounded-md *:flex *:gap-2 *:items-center hover:*:dark:bg-slate-950 *:duration-200 *:px-1 *:rounded-md">
+                <button
+                  onClick={async () => {
+                    try {
+                      let route = "like";
+                      if (
+                        comment.reactions
+                          ?.filter((reaction) => reaction.type === "like")
+                          ?.some(
+                            (reaction) => reaction.username === user.username
+                          )
+                      ) {
+                        route = "cancelReaction";
+                        setIsLiked(false);
+                      }
+                      if (route === "like") setIsLiked(true);
+                      setIsDisliked(false);
+                      const res = await axios({
+                        method: route === "like" ? "POST" : "DELETE",
+                        url: `/api/v1/posts/comment/${comment._id}/${route}`,
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
+                      if (res.data.status === "success")
+                        updateComments(res.data.comments);
+                      console.log(res.data.comments);
+                      console.log(res);
+                    } catch (error) {
+                      console.log(error);
+                      setIsLiked(false);
+                    }
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={faThumbsUp}
+                    className={`${
+                      (comment.reactions
+                        .filter((react) => react.type === "like")
+                        .some((react) => react.username === user.username) ||
+                        isLiked) &&
+                      "text-green-500"
+                    }`}
+                  />
+                  <span>
+                    {
+                      comment.reactions.filter((react) => react.type === "like")
+                        .length
+                    }
+                  </span>
+                </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      let route = "dislike";
+                      if (
+                        comment.reactions
+                          ?.filter((reaction) => reaction.type === "dislike")
+                          ?.some(
+                            (reaction) => reaction.username === user.username
+                          )
+                      ) {
+                        route = "cancelReaction";
+                        setIsDisliked(false);
+                      }
+                      if (route === "dislike") setIsDisliked(true);
+                      setIsLiked(false);
+                      const res = await axios({
+                        method: route === "dislike" ? "POST" : "DELETE",
+                        url: `/api/v1/posts/comment/${comment._id}/${route}`,
+                        headers: { Authorization: `Bearer ${token}` },
+                      });
+                      if (res.data.status === "success")
+                        updateComments(res.data.comments);
+                      console.log(res.data.comments);
+                      console.log(res);
+                    } catch (error) {
+                      console.log(error);
+                      setIsDisliked(false);
+                    }
+                  }}
+                >
+                  <FontAwesomeIcon
+                    icon={faThumbsDown}
+                    className={`${
+                      (comment.reactions
+                        .filter((react) => react.type === "dislike")
+                        .some((react) => react.username === user.username) ||
+                        isDisliked) &&
+                      "text-green-500"
+                    }`}
+                  />
+                  <span>
+                    {
+                      comment.reactions.filter(
+                        (react) => react.type === "dislike"
+                      ).length
+                    }
+                  </span>
+                </button>
+                <p className="text-gray-500">
+                  {getTimeDifference(new Date(comment.createdAt))}
+                </p>
+              </div>
+            </>
           ) : (
             <form onSubmit={formik.handleSubmit}>
               <div className="w-full mt-5 flex gap-2">
@@ -120,7 +251,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
           {!edited ? (
             <button
               type="button"
-              className="absolute left-3 top-1/2 -translate-y-1/2"
+              className="absolute left-3 top-3"
               id={`${comment._id}-options`}
               onClick={() => setOptions((prev) => !prev)}
             >
@@ -144,7 +275,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
                 animate={{ originX: 0.5, originY: 0, scale: 1 }}
                 initial={{ scale: 0 }}
                 exit={{ scale: 0, originY: 0, originX: 0 }}
-                className="dark:bg-slate-800 bg-slate-300 shadow-md absolute z-20 left-0 p-3 rounded-md dark:hover:*:bg-slate-900 *:p-2 *:rounded-md"
+                className="dark:bg-slate-800 bg-slate-300 shadow-md absolute z-20 left-0 top-8 p-3 rounded-md dark:hover:*:bg-slate-900 *:p-2 *:rounded-md"
                 onClick={() => setOptions(false)}
               >
                 {comment.user.username === user.username ||

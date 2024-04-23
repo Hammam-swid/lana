@@ -15,6 +15,7 @@ import {
   faCommentSlash,
   faUserPlus,
   faMoon,
+  faCircleNotch,
 } from "@fortawesome/free-solid-svg-icons";
 import { setLogout, updateTheme } from "../store/authSlice";
 import {
@@ -25,7 +26,11 @@ import {
 import NavBar from "./NavBar";
 import MobileNavBar from "./MobileNavBar";
 import Modal from "./Modal";
+import SearchSuggestions from "./SearchSuggestions";
 import { AnimatePresence, motion } from "framer-motion";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import translate from "translate";
 
 // eslint-disable-next-line react/prop-types
 function Header() {
@@ -54,30 +59,46 @@ function Header() {
   const isNotified = notiList.filter((noti) => !noti.seen).length;
   const nav = useNavigate();
   const dispatch = useDispatch();
-  // useEffect(() => {
-  //   if (popup) {
-  //     document.onscroll = (ev) => {
-  //       ev.preventDefault();
-  //     };
-  //   } else {
-  //     document.onscroll = undefined;
-  //   }
-  // }, [popup]);
-
   function updateOptions() {
     setOptions((prvOption) => !prvOption);
     setShowNotiList(false);
   }
+  const formik = useFormik({
+    initialValues: {
+      search: "",
+    },
+    validationSchema: Yup.object({
+      search: Yup.string().required(""),
+    }),
+    onSubmit: async (values) => {
+      try {
+        const { search } = values;
+        if (/[أ-ي]/gi.test(search)) {
+          values.arSearch = await translate(search, { from: "ar", to: "en" });
+        }
+        console.log(values);
+        const res = await axios({
+          method: "POST",
+          url: "/api/v1/search",
+          headers: { Authorization: `Bearer ${token}` },
+          data: values,
+        });
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+      }
+    },
+  });
   return (
     <>
       <header className=" min-h-20 w-screen sticky sm:top-0 bg-slate-100 shadow-md dark:bg-slate-900 z-50 flex justify-center sm:justify-between items-center py-2 px-6 sm:px-6 flex-wrap sm:flex-nowrap">
-        <div className="flex overflow-hidden justify-between relative items-center gap-5 w-full sm:w-fit mb-5 sm:mb-0">
+        <div className="flex  justify-between relative items-center gap-5 w-full sm:w-fit mb-5 sm:mb-0">
           <Link
             to="/"
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
           >
             <img
-              className=" w-20"
+              className="w-20 h-14"
               src={
                 theme === "dark"
                   ? "/src/assets/darkLanaLogo.svg"
@@ -86,21 +107,43 @@ function Header() {
               alt="شعار منصة لنا"
             />
           </Link>
-          <input
-            type="text"
-            name="search"
-            id="search"
-            className="p-2 duration-100 rounded-md shrink grow-0 dark:bg-slate-800 outline-none focus:outline-2 focus:outline-green-500"
-          />
-          <FontAwesomeIcon
-            icon={faMagnifyingGlass}
-            className="absolute left-2 text-2xl"
+          <form className="relative py-1" onSubmit={formik.handleSubmit}>
+            <input
+              type="text"
+              name="search"
+              id="search"
+              autoSave={""}
+              onChange={formik.handleChange}
+              onBlur={formik.handleBlur}
+              value={formik.values.search}
+              className="p-2 duration-100 rounded-md shrink grow-0 bg-slate-200 dark:bg-slate-800 outline-none focus:outline-3 focus:outline-green-500"
+            />
+            <button
+              type="submit"
+              disabled={formik.isSubmitting}
+              className="absolute left-2 text-2xl"
+            >
+              {formik.isSubmitting ? (
+                <FontAwesomeIcon
+                  icon={faCircleNotch}
+                  className="text-green-500 animate-spin"
+                />
+              ) : (
+                <FontAwesomeIcon icon={faMagnifyingGlass} />
+              )}
+            </button>
+          </form>
+          <SearchSuggestions
+            value={formik.values.search}
+            removeValue={() => {
+              formik.setValues({ search: "" });
+            }}
           />
         </div>
 
         <NavBar />
         <MobileNavBar options={options} updateOptions={updateOptions} />
-        <div className="hidden items-center sm:gap-5 gap-10 relative sm:flex">
+        <div className="hidden items-center sm:w-56 sm:gap-5 gap-10 relative sm:flex sm:justify-end">
           <button
             onClick={() => {
               setShowNotiList((prev) => !prev);
@@ -116,7 +159,7 @@ function Header() {
               className="text-2xl hover:text-green-500 duration-100"
             />
             {showNotiList &&
-              (notiList ? (
+              (notiList.length > 0 ? (
                 <motion.div
                   animate={{ y: 0 }}
                   initial={{ y: -100 }}
@@ -205,7 +248,7 @@ function Header() {
                   ))}
                 </motion.div>
               ) : (
-                <div className="absolute bg-slate-50 top-full p-3 rounded-md mt-8 -right-52 w-80 dark:bg-slate-900 cursor-default text-start">
+                <div className="absolute text-gray-500 text-center bg-slate-50 top-full p-3 rounded-md mt-8 -right-52 w-80 dark:bg-slate-900 cursor-default">
                   لا توجد إشعارات
                 </div>
               ))}

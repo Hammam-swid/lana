@@ -16,6 +16,7 @@ const globalErrorHandler = require("./controllers/errorController");
 // استدعاء الموجهات راوتر الخاصة بالمصادر
 const postRouter = require("./routes/postRoutes");
 const userRouter = require("./routes/userRoutes");
+const searchRouter = require("./routes/searchRoutes");
 // import commentRouter from "./routes/commentRoutes";
 const notificationRouter = require("./routes/notificationRoutes");
 
@@ -46,7 +47,7 @@ const limiter = rateLimit({
 // توجيه الطلبات باتجاه الموجه الخاص بكل مصدر
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/users", userRouter);
-// app.use("/api/v1/comments", commentRouter);
+app.use("/api/v1/search", searchRouter);
 app.use("/api/v1/notifications", notificationRouter);
 
 app.all("*", (req, res) => {

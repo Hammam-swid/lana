@@ -49,7 +49,7 @@ function MainLayout() {
               x: "50%",
             }}
             animate={{ y: 0, x: "50" }}
-            drag={window.visualViewport.width < 640}
+            drag={window.visualViewport.width < 640 && 'y'}
             dragConstraints={{ bottom: 0, right: 0, left: 0 }}
             exit={{ y: window.visualViewport.width > 640 ? 120 : -200, x:'50%' }}
             onClick={() => setNewNotification(null)}

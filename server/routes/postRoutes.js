@@ -13,6 +13,9 @@ const {
   deleteComment,
   updateComment,
   updatePost,
+  likeComment,
+  dislikeComment,
+  cancelCommentReaction,
 } = require("../controllers/postController");
 const { protect, restrictTo } = require("../controllers/authController");
 
@@ -46,6 +49,10 @@ router
   .route("/:postId/comment/:commentId")
   .delete(protect, deleteComment)
   .patch(protect, restrictTo("user"), updateComment);
+
+router.route("/comment/:commentId/like").post(protect, likeComment);
+router.route("/comment/:commentId/dislike").post(protect, dislikeComment);
+router.route("/comment/:commentId/cancelReaction").delete(protect, cancelCommentReaction);
 // delete and update comment
 // router.route("/:postId/comment").patch(protect, commentOnPost);
 // router.route("/:postId/comment").patch(protect, commentOnPost);

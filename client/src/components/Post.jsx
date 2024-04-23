@@ -2,6 +2,7 @@
 import { Link, useNavigate } from "react-router-dom";
 import PostImages from "./PostImages";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { CopyToClipboard } from "react-copy-to-clipboard";
 import {
   faThumbsUp,
   faThumbsDown,
@@ -32,12 +33,15 @@ function Post(props) {
   const user = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const nav = useNavigate();
+  const [messageError, setMessageError] = useState(false);
   const [post, setPost] = useState(props.post);
   const [comments, setComments] = useState(false);
   const [postOptions, setPostOptions] = useState(false);
   const [edited, setEdited] = useState(false);
   const [modalData, setModalData] = useState({});
   const [message, setMessage] = useState("");
+  const [isLiked, setIsLiked] = useState(false);
+  const [isDisliked, setIsDisliked] = useState(false);
   const formik = useFormik({
     initialValues: {
       content: post.content,
@@ -204,8 +208,8 @@ function Post(props) {
             day: "2-digit",
             month: "long",
             year: "numeric",
-            hour: '2-digit',
-            minute: '2-digit'
+            hour: "2-digit",
+            minute: "2-digit",
           })}
           {/* {new Date(post.createdAt).getSeconds(0)} */}
         </p>
@@ -215,7 +219,11 @@ function Post(props) {
               /^[a-zA-Z]/.test(post?.content) && "text-left"
             }`}
           >
-            {post.content}
+            {post.content.split("\n").map((ele) => (
+              <>
+                {ele} <br />{" "}
+              </>
+            ))}
           </h3>
         ) : (
           <form className="flex items-center" onSubmit={formik.handleSubmit}>
@@ -285,14 +293,18 @@ function Post(props) {
                     ?.find((reaction) => reaction.username === user.username)
                 ) {
                   route = "cancelReaction";
+                  setIsLiked(false);
                 }
+                if (route === "like") setIsLiked(true);
                 const res = await axios({
                   headers: { Authorization: `Bearer ${token}` },
                   method: "PATCH",
                   url: `/api/v1/posts/${post._id}/${route}`,
                 });
                 if (res.data.status === "success") setPost(res.data.post);
+                setIsDisliked(false);
               } catch (error) {
+                setIsLiked(false);
                 console.log(error);
               }
             }}
@@ -300,12 +312,13 @@ function Post(props) {
           >
             <FontAwesomeIcon
               icon={faThumbsUp}
-              className={
-                post.reactions
+              className={`${
+                (post.reactions
                   ?.filter((reaction) => reaction.type === "like")
-                  .find((reaction) => reaction.username === user.username) &&
+                  .find((reaction) => reaction.username === user.username) ||
+                  isLiked) &&
                 "text-green-500"
-              }
+              }`}
             />
             <span className="text-xl ms-2">
               {
@@ -325,7 +338,9 @@ function Post(props) {
                     .find((reaction) => reaction.username === user.username)
                 ) {
                   route = "cancelReaction";
+                  setIsDisliked(false);
                 }
+                if (route === "dislike") setIsDisliked(true);
                 const res = await axios({
                   headers: { Authorization: `Bearer ${token}` },
                   method: "PATCH",
@@ -333,19 +348,22 @@ function Post(props) {
                 });
                 console.log(res.data.post);
                 if (res.data.status === "success") setPost(res.data.post);
+                setIsLiked(false);
               } catch (err) {
+                setIsDisliked(false);
                 console.log(err.message);
               }
             }}
           >
             <FontAwesomeIcon
               icon={faThumbsDown}
-              className={
-                post.reactions
+              className={`${
+                (post.reactions
                   ?.filter((reaction) => reaction.type === "dislike")
-                  .find((reaction) => reaction.username === user.username) &&
+                  .find((reaction) => reaction.username === user.username) ||
+                  isDisliked) &&
                 "text-green-500"
-              }
+              }`}
             />
             <span className="text-xl ms-2">
               {
@@ -359,17 +377,23 @@ function Post(props) {
             <FontAwesomeIcon icon={faMessage} />
             <span className="text-xl ms-2">{post?.comments?.length}</span>
           </button>
-          <button
-            onClick={() => {
-              navigator.clipboard.writeText(
-                `http://localhost:5173/post/${post._id}`
-              );
-              setMessage("تم نسخ رابط المنشور بنجاح");
+          <CopyToClipboard
+            onCopy={(text, result) => {
+              if (result) {
+                setMessage("تم نسخ رابط المنشور بنجاح");
+              } else {
+                setMessage("حدث خطأ أثناء نسخ الرابط");
+                setMessageError(true);
+                setTimeout(setMessageError, 3500, false);
+              }
               setTimeout(setMessage, 3000, "");
             }}
+            text={`http://localhost:5173/post/${post._id}`}
           >
-            <FontAwesomeIcon icon={faShare} />
-          </button>
+            <button>
+              <FontAwesomeIcon icon={faShare} />
+            </button>
+          </CopyToClipboard>
         </div>
         {comments && (
           <Comments
@@ -380,7 +404,7 @@ function Post(props) {
           />
         )}
       </div>
-      <Message message={message} />
+      <Message message={message} error={messageError} />
       <Modal
         message={modalData.message}
         hide={modalData.hide}
