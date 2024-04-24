@@ -4,11 +4,13 @@ const catchAsync = require("../utils/catchAsync");
 
 exports.searchUserPosts = catchAsync(async (req, res, next) => {
   const { search, arSearch } = req.body;
-  console.log(search);
+  console.log(search, arSearch);
   const users = await User.find({
     $or: [
       { fullName: { $regex: `.*${search}.*`, $options: "i" } },
+      { fullName: { $regex: `.*${arSearch}.*`, $options: "i" } },
       { username: { $regex: `.*${search}.*`, $options: "i" } },
+      { username: { $regex: `.*${arSearch}.*`, $options: "i" } },
     ],
     state: "active",
     $nor: [
@@ -28,8 +30,8 @@ exports.searchUserPosts = catchAsync(async (req, res, next) => {
       { user: { $in: req.user.blockerUsers } },
     ],
   })
-    .select("content user _id categories")
-    .populate("user", "photo fullName username state");
+    .populate("user", "photo fullName username state")
+    .sort("-createdAt");
 
   res.status(200).json({
     status: "success",
@@ -51,7 +53,10 @@ exports.searchUser = catchAsync(async (req, res, next) => {
       { _id: { $in: req.user.blockedUsers } },
       { _id: { $in: req.user.blockerUsers } },
     ],
-  }).select("username fullName photo verified");
+  })
+    .select("username fullName photo verified")
+    .limit(7)
+    .sort("followers");
   res.status(200).json({
     status: "success",
     result: users.length,

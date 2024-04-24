@@ -8,6 +8,7 @@ import {
   faCircleNotch,
   faImage,
   faPaperPlane,
+  faXmark,
 } from "@fortawesome/free-solid-svg-icons";
 import { useFormik } from "formik";
 import axios from "axios";
@@ -28,7 +29,6 @@ function HomePage() {
       content: Yup.string().required("يجب أن يكون للمنشور محتوى نصي"),
     }),
     onSubmit: async (values) => {
-      console.log(values);
       const { content, images } = values;
       try {
         const formData = new FormData();
@@ -63,6 +63,11 @@ function HomePage() {
   // function addPost(post) {
   //   setPosts((prevPosts) => prevPosts.unshift(post));
   // }
+  function removeImages() {
+    formik.values.images = [];
+    setImagePreview([]);
+    console.log(formik.values);
+  }
   const name = user.fullName.split(" ");
   return (
     <>
@@ -71,7 +76,7 @@ function HomePage() {
           className="rounded-md overflow-hidden"
           onSubmit={formik.handleSubmit}
         >
-          <div className="relative bg-slate-100 dark:bg-slate-900 rounded-md pb-2">
+          <div className="relative bg-green-200 dark:bg-slate-900 rounded-md pb-2">
             <div className="relative rounded-md">
               <textarea
                 name="content"
@@ -111,11 +116,21 @@ function HomePage() {
                 )}
               </button>
             </div>
-            <div className="flex flex-row-reverse gap-2 py-2 px-3 ">
-              {imagePreview &&
-                imagePreview.map((image) => (
-                  <ImagePreview key={image} image={image} />
-                ))}
+            <div className="flex flex-row-reverse gap-2 py-2 px-8 relative ">
+              {imagePreview.length > 0 && (
+                <>
+                  {imagePreview.map((image, index) => (
+                    <ImagePreview key={image} image={image} index={index} />
+                  ))}
+                  <button
+                    onClick={() => removeImages()}
+                    type="button"
+                    className="w-5 h-5 rounded-full flex justify-center items-center text-white dark:text-black bg-opacity-80 bg-gray-800 dark:bg-white absolute top-0 end-2"
+                  >
+                    <FontAwesomeIcon icon={faXmark} />
+                  </button>
+                </>
+              )}
             </div>
           </div>
           <div className="flex justify-end mt-2">
@@ -131,18 +146,21 @@ function HomePage() {
               name="images"
               multiple
               disabled={formik.isSubmitting}
-              onChange={(e) => {
-                const reader = new FileReader();
-                reader.onload = () => {
-                  if (reader.readyState === 2) {
-                    setImagePreview((prev) => [...prev, reader.result]);
+              onChange={async (e) => {
+                setImagePreview([]);
+                const updateImages = async () => {
+                  for (let i = 0; i < formik.values.images.length; i++) {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      if (reader.readyState === 2) {
+                        setImagePreview((prev) => [...prev, reader.result]);
+                      }
+                    };
+                    reader.readAsDataURL(formik.values.images[i]);
                   }
                 };
-
-                console.log(e.target.files[0]);
-                reader.readAsDataURL(e.target.files[0]);
-                console.log(reader);
-                formik.setFieldValue("images", e.target.files);
+                formik.values.images = e.target.files;
+                await updateImages();
               }}
               onBlur={formik.handleBlur}
               // value={formik.values.images}
@@ -169,7 +187,6 @@ function HomePage() {
             >
               <Await resolve={promiseData.followingUsers}>
                 {(following) => {
-                  console.log(following);
                   return following.length > 0 ? (
                     following.map((follower) => (
                       <li key={follower.username}>

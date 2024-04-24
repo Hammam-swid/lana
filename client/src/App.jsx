@@ -24,6 +24,9 @@ import { jwtDecode } from "jwt-decode";
 import { setLogout } from "./store/authSlice";
 import ErrorPage from "./pages/ErrorPage";
 import BlockedUsers from "./pages/BlockedUsers";
+import NotificationsPage from "./pages/NotificationsPage";
+import SearchPage from "./pages/SearchPage";
+import translate from "translate";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -128,6 +131,56 @@ function App() {
           }}
         />
         <Route path="trending" element={<h1>صفحة المحتوى الرائج</h1>} />
+        <Route
+          path="search"
+          element={<SearchPage />}
+          loader={({ request }) => {
+            const getSearchResult = async () => {
+              console.log(true)
+              try {
+                const values = {};
+                values.search = new URL(request.url).searchParams.get('search');
+                const token = store.getState().token;
+                if (/[أ-ي]/gi.test(values.search)) {
+                  values.arSearch = await translate(values.search, {
+                    from: "ar",
+                    to: "en",
+                  });
+                }
+                const res = await axios({
+                  method: "POST",
+                  url: "/api/v1/search",
+                  headers: { Authorization: `Bearer ${token}` },
+                  data: values,
+                });
+                return res.data;
+              } catch (error) {
+                console.log(error);
+              }
+            };
+            return defer({ data: getSearchResult() });
+          }}
+        />
+        <Route
+          path="notifications"
+          element={<NotificationsPage />}
+          loader={() => {
+            const getNotifications = async () => {
+              try {
+                const token = store.getState().token;
+                const res = await axios({
+                  method: "GET",
+                  url: "/api/v1/notifications",
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                return res.data.notifications;
+              } catch (error) {
+                console.log(error);
+              }
+            };
+            return defer({ notifications: getNotifications() });
+          }}
+        />
         <Route
           path="profile/:username"
           element={<ProfilePage />}

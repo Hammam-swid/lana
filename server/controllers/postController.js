@@ -7,6 +7,7 @@ const {
   HarmCategory,
   HarmBlockThreshold,
 } = require("@google/generative-ai");
+const aws = require("aws-sdk");
 const multer = require("multer");
 const sharp = require("sharp");
 
@@ -792,3 +793,16 @@ exports.cancelCommentReaction = catchAsync(async (req, res, next) => {
   }
   next(new AppError("لم تتفاعل مع هذا التعليق بالفعل", 400));
 });
+
+// exports.scanImageVideos = catchAsync((async) => (req, res, next) => {});
+
+// aws.config.update({
+//   accessKeyId: ''
+// })
+// const rek = new aws.Rekognition();
+
+// console.log(rek.config.params)
+
+// // rek.detectModerationLabels((error, data) => {
+// //   console.log(error, data);
+// // });

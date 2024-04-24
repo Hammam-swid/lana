@@ -103,7 +103,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
             {comment.updatedAt && (
               <span
                 onClick={(e) => e.preventDefault()}
-                className="font-normal text-gray-500 ms-3 text-xs"
+                className="font-normal text-gray-500 ms-3 text-xs cursor-default"
               >
                 (تم تعديله)
               </span>

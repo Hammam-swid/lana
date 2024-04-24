@@ -3,21 +3,29 @@ const mongoose = require("mongoose");
 const reportSchema = new mongoose.Schema({
   reporterId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
-    required: [true, 'يجب أن يكون للبلاغ مستخدم مبلغ']
+    ref: "User",
+    required: [true, "يجب أن يكون للبلاغ مستخدم مبلغ"],
   },
   // قد يكون المبلغ عليه شخصاً أو منشوراً
-  reportedId: {
+  reportedPost: {
     type: mongoose.Schema.Types.ObjectId,
-    required: true,
+    ref: "Post",
   },
-  type: String,
-  seen: Boolean,
+  reportedUser: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "User",
+  },
+  reportedComment: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: "Post.comments",
+  },
   reason: String,
+  seen: Boolean,
+  description: String,
   createdAt: {
     type: Date,
-    default: Date.now()
-  }
+    default: Date.now(),
+  },
 });
 
 const Report = mongoose.model("Report", reportSchema);

@@ -20,6 +20,7 @@ import {
 import { setLogout, updateTheme } from "../store/authSlice";
 import {
   useEffect,
+  useRef,
   // useEffect,
   useState,
 } from "react";
@@ -30,7 +31,6 @@ import SearchSuggestions from "./SearchSuggestions";
 import { AnimatePresence, motion } from "framer-motion";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import translate from "translate";
 
 // eslint-disable-next-line react/prop-types
 function Header() {
@@ -41,6 +41,7 @@ function Header() {
   const [options, setOptions] = useState(false);
   const [notiList, setNotiList] = useState([]);
   const [showNotiList, setShowNotiList] = useState(false);
+  const ref = useRef(null);
   useEffect(() => {
     const getNotiList = async () => {
       try {
@@ -71,22 +72,9 @@ function Header() {
       search: Yup.string().required(""),
     }),
     onSubmit: async (values) => {
-      try {
-        const { search } = values;
-        if (/[أ-ي]/gi.test(search)) {
-          values.arSearch = await translate(search, { from: "ar", to: "en" });
-        }
-        console.log(values);
-        const res = await axios({
-          method: "POST",
-          url: "/api/v1/search",
-          headers: { Authorization: `Bearer ${token}` },
-          data: values,
-        });
-        console.log(res);
-      } catch (error) {
-        console.log(error);
-      }
+      const { search } = values;
+      nav(`/search?search=${search}`, { preventScrollReset: false });
+      ref.current.blur();
     },
   });
   return (
@@ -113,10 +101,12 @@ function Header() {
               name="search"
               id="search"
               autoSave={""}
+              ref={ref}
+              placeholder="أدخل للبحث"
               onChange={formik.handleChange}
               onBlur={formik.handleBlur}
               value={formik.values.search}
-              className="p-2 duration-100 rounded-md shrink grow-0 bg-slate-200 dark:bg-slate-800 outline-none focus:outline-3 focus:outline-green-500"
+              className="peer p-2 duration-100 rounded-md shrink grow-0 bg-slate-200 dark:bg-slate-800 outline-none focus:outline-3 focus:outline-green-500"
             />
             <button
               type="submit"
@@ -132,17 +122,21 @@ function Header() {
                 <FontAwesomeIcon icon={faMagnifyingGlass} />
               )}
             </button>
+            <SearchSuggestions
+              value={formik.values.search}
+              removeValue={() => {
+                formik.setValues({ search: "" });
+              }}
+            />
           </form>
-          <SearchSuggestions
-            value={formik.values.search}
-            removeValue={() => {
-              formik.setValues({ search: "" });
-            }}
-          />
         </div>
 
         <NavBar />
-        <MobileNavBar options={options} updateOptions={updateOptions} />
+        <MobileNavBar
+          options={options}
+          updateOptions={updateOptions}
+          notification={isNotified}
+        />
         <div className="hidden items-center sm:w-56 sm:gap-5 gap-10 relative sm:flex sm:justify-end">
           <button
             onClick={() => {

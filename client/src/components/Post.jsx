@@ -28,6 +28,7 @@ import * as Yup from "yup";
 import Modal from "./Modal";
 import Message from "./Message";
 import { AnimatePresence, motion } from "framer-motion";
+import ReportModal from "./ReportModal";
 
 function Post(props) {
   const user = useSelector((state) => state.user);
@@ -42,6 +43,7 @@ function Post(props) {
   const [message, setMessage] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const formik = useFormik({
     initialValues: {
       content: post.content,
@@ -185,7 +187,7 @@ function Post(props) {
                       />
                     </li>
                   ) : (
-                    <li>
+                    <li onClick={() => setShowReport(true)}>
                       <button>الإبلاغ عن المنشور</button>
                       <FontAwesomeIcon icon={faFlag} className="text-red-500" />
                     </li>
@@ -409,6 +411,11 @@ function Post(props) {
         message={modalData.message}
         hide={modalData.hide}
         action={modalData.action}
+      />
+      <ReportModal
+        show={showReport}
+        hide={() => setShowReport(false)}
+        reportedPost={post._id}
       />
     </>
   );
