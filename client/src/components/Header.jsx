@@ -56,6 +56,7 @@ function Header() {
       }
     };
     getNotiList();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showNotiList]);
   const isNotified = notiList.filter((noti) => !noti.seen).length;
   const nav = useNavigate();

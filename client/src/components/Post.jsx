@@ -187,7 +187,10 @@ function Post(props) {
                       />
                     </li>
                   ) : (
-                    <li onClick={() => setShowReport(true)}>
+                    <li
+                      className="cursor-pointer"
+                      onClick={() => setShowReport(true)}
+                    >
                       <button>الإبلاغ عن المنشور</button>
                       <FontAwesomeIcon icon={faFlag} className="text-red-500" />
                     </li>
@@ -221,10 +224,10 @@ function Post(props) {
               /^[a-zA-Z]/.test(post?.content) && "text-left"
             }`}
           >
-            {post.content.split("\n").map((ele) => (
-              <>
+            {post.content.split("\n").map((ele, i) => (
+              <span key={`${post._id}-${i}-line`}>
                 {ele} <br />{" "}
-              </>
+              </span>
             ))}
           </h3>
         ) : (

@@ -17,7 +17,7 @@ const globalErrorHandler = require("./controllers/errorController");
 const postRouter = require("./routes/postRoutes");
 const userRouter = require("./routes/userRoutes");
 const searchRouter = require("./routes/searchRoutes");
-// import commentRouter from "./routes/commentRoutes";
+const reportRouter = require("./routes/reportRoutes");
 const notificationRouter = require("./routes/notificationRoutes");
 
 app.use(helmet({ crossOriginResourcePolicy: true }));
@@ -48,6 +48,7 @@ const limiter = rateLimit({
 app.use("/api/v1/posts", postRouter);
 app.use("/api/v1/users", userRouter);
 app.use("/api/v1/search", searchRouter);
+app.use("/api/v1/reports", reportRouter);
 app.use("/api/v1/notifications", notificationRouter);
 
 app.all("*", (req, res) => {
