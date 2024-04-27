@@ -19,6 +19,7 @@ import { updateUser } from "../store/authSlice";
 import Modal from "../components/Modal";
 import Message from "../components/Message";
 import { AnimatePresence, motion } from "framer-motion";
+import ReportModal from "../components/ReportModal";
 
 function ProfilePage() {
   const dataPromise = useLoaderData();
@@ -31,8 +32,10 @@ function ProfilePage() {
   const [modalData, setModalData] = useState({});
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
+  const [showReport, setShowReport] = useState(false);
+  let userId;
   function renderUser(user, posts) {
-    console.log(user._id);
+    userId = user._id;
     console.log(thisUser.following);
     if (
       thisUser.following?.some((follow) => {
@@ -121,7 +124,7 @@ function ProfilePage() {
                             className="text-red-500"
                           />
                         </li>
-                        <li>
+                        <li onClick={() => setShowReport(true)}>
                           <span>الإبلاغ عن الحساب</span>
                           <FontAwesomeIcon
                             icon={faFlag}
@@ -230,6 +233,11 @@ function ProfilePage() {
           message={modalData.message}
           action={modalData.action}
           hide={modalData.hide}
+        />
+        <ReportModal
+          show={showReport}
+          hide={() => setShowReport(false)}
+          reportedUser={userId}
         />
       </>
     );

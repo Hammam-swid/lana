@@ -25,6 +25,7 @@ const {
   blockUser,
   unBlockUser,
   getMyBlockedUsers,
+  isModerator,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -39,17 +40,24 @@ router.patch("/resetPassword/:resetToken", resetPassword);
 router.post("/checkUsername", checkUsernameExist);
 
 router.use(protect);
+router.get("/isModerator", isModerator);
 router.patch("/updateMe", uploadUserPhoto, saveUserPhoto, updateMe);
 router.get("/followingUsers", getMyFollowings);
 router.get("/blockedUsers", getMyBlockedUsers);
 router.post("/deactivateMe", deactivateMe);
 router.patch("/completeDeactivateMe", completeDeactivateMe);
 router.route("/:username").get(getUser);
-router.route("/:userId/follow").post(followUser).delete(unFollowUser);
-router.route("/:userId/block").post(blockUser).delete(unBlockUser);
+router
+  .route("/:userId/follow")
+  .post(restrictTo("user"), followUser)
+  .delete(restrictTo("user"), unFollowUser);
+router
+  .route("/:userId/block")
+  .post(restrictTo("user"), blockUser)
+  .delete(restrictTo("user"), unBlockUser);
 
 router.route("/updateMyPassword").patch(updatePassword);
 
-router.use(restrictTo("admin", "supervisor"));
+router.use(restrictTo("admin", "moderator"));
 router.route("/:userId/ban").patch(banUser);
 module.exports = router;

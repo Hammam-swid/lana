@@ -323,3 +323,10 @@ exports.banUser = catchAsync(async (req, res, next) => {
     status: "success",
   });
 });
+
+exports.isModerator = catchAsync(async (req, res, next) => {
+  if (req.user.role !== "admin" && req.user.role !== "moderator") {
+    return next(new AppError("لا يمكنك الوصول إلى هذه الصفحة", 403));
+  }
+  res.status(200).json({ status: "success" });
+});

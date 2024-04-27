@@ -16,6 +16,7 @@ import {
   faUserPlus,
   faMoon,
   faCircleNotch,
+  faToolbox,
 } from "@fortawesome/free-solid-svg-icons";
 import { setLogout, updateTheme } from "../store/authSlice";
 import {
@@ -56,7 +57,7 @@ function Header() {
       }
     };
     getNotiList();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [showNotiList]);
   const isNotified = notiList.filter((noti) => !noti.seen).length;
   const nav = useNavigate();
@@ -314,6 +315,16 @@ function Header() {
               onClick={() => setOptions(false)}
               className="absolute left-2 top-full sm:mt-[-10px] rounded-md bg-slate-100 dark:bg-slate-800 p-3 w-52 *:flex *:justify-between *:py-4 *:px-2 *:rounded-sm *:font-bold *:cursor-pointer dark:hover:*:bg-slate-900"
             >
+              {user.role === "supervisor" ||
+                (user.role === "admin" && (
+                  <li>
+                    <Link to={"dashboard"}>لوحة التحكم</Link>
+                    <FontAwesomeIcon
+                      className="text-2xl hover:text-green-500 "
+                      icon={faToolbox}
+                    />
+                  </li>
+                ))}
               <li>
                 <Link to={`settings/${user.username}`}>الإعدادات</Link>
                 <FontAwesomeIcon

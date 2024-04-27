@@ -23,68 +23,189 @@ const upload = multer({
   fileFilter: multerFilter,
 });
 
+const filterSortPosts = (posts, req) => {
+  const newPosts = posts
+    .filter((post) => post.user.state === "active")
+    .map((post) => {
+      const commentsScore = post.comments.length * 0.2;
+      const reactionsScore = post.reactions.length * 0.3;
+      const timeScore =
+        new Date(post.createdAt).getTime() >
+        Date.now() - 3 * 24 * 60 * 60 * 1000
+          ? 1.5
+          : new Date(post.createdAt).getTime() >
+            Date.now() - 7 * 24 * 60 * 60 * 1000
+          ? 0.5
+          : 0.1;
+      post.score = commentsScore + reactionsScore + timeScore;
+      post.comments = post.comments.filter(
+        (comment) =>
+          comment.user.state === "active" &&
+          !req.user.blockedUsers
+            .map((user) => user.toString())
+            .includes(comment.user._id.toString()) &&
+          !req.user.blockerUsers
+            .map((user) => user.toString())
+            .includes(comment.user._id.toString())
+      );
+      return post;
+    })
+    .sort((a, b) => b.score - a.score);
+  return newPosts;
+};
+
 exports.uploadPostImages = upload.fields([{ name: "images", maxCount: 4 }]);
 
-exports.getPosts = async (req, res, next) => {
-  try {
-    // const io = req.app.get('socket.io');
-    // console.log(io)
-    const posts = await Post.find({
-      $nor: [
-        { user: { $in: req.user.blockedUsers } },
-        { user: { $in: req.user.blockerUsers } },
-      ],
-    })
-      .sort("-createdAt")
-      // .limit(5)
-      .populate("user", "username photo fullName state verified _id")
-      .populate("comments.user", "username photo fullName state verified _id");
-    // .populate({
-    //   path: "comments",
-    //   match: {
-    //     user: {
-    //       state: "active",
-    //       $nor: [
-    //         { id: req.user.blockedUsers },
-    //         { id: req.user.blockerUsers },
-    //       ],
-    //     },
-    //   },
-    // })
-    console.log(req.user.blockedUsers);
-    // posts.filter(
-    //   (post) =>
-    //     !req.user.blockedUsers
-    //       .map((user) => user.toString())
-    //       .includes(post.user._id.toString())
-    // );
-    res.status(200).json({
-      status: "success",
-      result: posts.length,
-      posts: posts
-        .filter((post) => post.user.state === "active")
-        .map((post) => {
-          post.comments = post.comments.filter(
-            (comment) =>
-              comment.user.state === "active" &&
-              !req.user.blockedUsers
-                .map((user) => user.toString())
-                .includes(comment.user._id.toString()) &&
-              !req.user.blockerUsers
-                .map((user) => user.toString())
-                .includes(comment.user._id.toString())
-          );
-          return post;
-        }),
-    });
-  } catch (err) {
-    console.log(err);
-    res.status(500).json({
-      status: "error",
-      data: null,
-    });
-  }
-};
+exports.getPosts = catchAsync(async (req, res, next) => {
+  let followingPosts = await Post.find({
+    $nor: [
+      { user: { $in: req.user.blockedUsers } },
+      { user: { $in: req.user.blockerUsers } },
+    ],
+    user: { $in: req.user.following },
+  })
+    // .limit(5)
+    .populate("user", "username photo fullName state verified _id")
+    .populate("comments.user", "username photo fullName state verified _id");
+
+  let otherPosts = await Post.find({
+    $nor: [
+      { user: { $in: req.user.blockedUsers } },
+      { user: { $in: req.user.blockerUsers } },
+      { user: { $in: req.user.following } },
+    ],
+  })
+    .populate("user", "username photo fullName state verified _id")
+    .populate("comments.user", "username photo fullName state verified _id");
+
+  followingPosts = filterSortPosts(followingPosts, req);
+  otherPosts = filterSortPosts(otherPosts, req);
+  const posts = [...followingPosts, ...otherPosts];
+  res.status(200).json({
+    status: "success",
+    result: posts.length,
+    posts,
+  });
+});
+
+exports.getPosts2 = catchAsync(async (req, res, next) => {
+  const posts = await Post.aggregate([
+    {
+      $match: {
+        $or: [{ user: { $in: req.user.following } }, { user: req.user._id }],
+        $nor: [
+          { user: { $in: req.user.blockedUsers } },
+          { user: { $in: req.user.blockerUsers } },
+        ],
+      },
+    },
+    { $addFields: { likesCount: { $size: "$reactions" } } }, // Add a field with the count of likes
+    { $sort: { likesCount: -1, createdAt: -1 } }, // Sort by likes count in descending order
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user",
+      },
+    }, // Populate user field
+    { $unwind: "$user" }, // Unwind the array created by the lookup,
+    {
+      $lookup: {
+        from: "users",
+        localField: "comments.user",
+        foreignField: "_id",
+        as: "comments.user",
+      },
+    }, // Populate users of comments
+    { $unwind: { path: "$comments", preserveNullAndEmptyArrays: true } }, // Unwind the comments array
+    { $unwind: { path: "$comments.user", preserveNullAndEmptyArrays: true } }, // Unwind the users array within comments
+    {
+      $group: {
+        _id: "$_id",
+        user: { $first: "$user" },
+        content: { $first: "$content" },
+        images: { $first: "$images" },
+        createdAt: { $first: "$createdAt" },
+        updatedAt: { $first: "$updatedAt" },
+        categories: { $first: "$categories" },
+        reactions: { $first: "$reactions" },
+        comments: { $push: "$comments" },
+        likesCount: { $first: "$likesCount" },
+      },
+    },
+  ]);
+  const otherPosts = await Post.aggregate([
+    {
+      $match: {
+        user: {
+          $nin: req.user.following,
+          $ne: req.user._id,
+        },
+        $nor: [
+          { user: { $in: req.user.blockedUsers } },
+          { user: { $in: req.user.blockerUsers } },
+        ],
+      },
+    },
+    { $addFields: { likesCount: { $size: "$reactions" } } }, // Add a field with the count of likes
+    { $sort: { likesCount: -1, createdAt: -1 } }, // Sort by likes count in descending order
+    {
+      $lookup: {
+        from: "users",
+        localField: "user",
+        foreignField: "_id",
+        as: "user",
+      },
+    }, // Populate user field
+    { $unwind: "$user" },
+    {
+      $lookup: {
+        from: "users",
+        localField: "comments.user",
+        foreignField: "_id",
+        as: "comments.user",
+      },
+    }, // Populate users of comments
+    {
+      $project: {
+        user: 1,
+        content: 1,
+        images: 1,
+        createdAt: 1,
+        updatedAt: 1,
+        categories: 1,
+        reactions: 1,
+        likesCount: 1,
+        "comments.user._id": 1,
+        "comments.user.username": 1,
+        "comments.user.photo": 1, // Include additional properties from the user collection
+        "comments.text": 1,
+        "comments.createdAt": 1,
+        "comments.updatedAt": 1,
+        "comments.reactions": 1,
+      },
+    },
+    { $unwind: { path: "$comments", preserveNullAndEmptyArrays: true } }, // Unwind the comments array
+    { $unwind: { path: "$comments.user", preserveNullAndEmptyArrays: true } }, // Unwind the users array within comments
+    {
+      $group: {
+        _id: "$_id",
+        user: { $first: "$user" },
+        content: { $first: "$content" },
+        images: { $first: "$images" },
+        createdAt: { $first: "$createdAt" },
+        updatedAt: { $first: "$updatedAt" },
+        categories: { $first: "$categories" },
+        reactions: { $first: "$reactions" },
+        comments: { $push: "$comments" },
+        likesCount: { $first: "$likesCount" },
+      },
+    },
+  ]);
+  // await posts.populate("user", "username fullName photo state verified");
+  res.status(200).json({ status: "success", posts: [...posts, ...otherPosts] });
+});
 
 exports.scanPost = catchAsync(async (req, res, next) => {
   const { content } = req.body;
@@ -254,7 +375,7 @@ exports.deletePost = catchAsync(async (req, res, next) => {
   if (
     req.user.id !== post.user.toString() &&
     req.user.role !== "admin" &&
-    req.user.role !== "supervisor"
+    req.user.role !== "moderator"
   ) {
     return next(new AppError("ليس لديك الصلاحية لحذف هذا المنشور", 403));
   }
@@ -529,7 +650,7 @@ exports.deleteComment = catchAsync(async (req, res, next) => {
   }
   if (
     req.user.role !== "admin" &&
-    req.user.role !== "supervisor" &&
+    req.user.role !== "moderator" &&
     req.user._id.toString() !== post.user.toString() &&
     req.user._id.toString() !== comment.user._id.toString()
   ) {

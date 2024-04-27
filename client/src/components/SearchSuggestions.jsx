@@ -41,7 +41,7 @@ function SearchSuggestions({ value, removeValue }) {
           initial={{ scale: 0, originX: "50%" }}
           animate={{ scale: 1, originY: "0%", originX: "50%" }}
           exit={{ scale: 0 }}
-          className="absolute hidden peer-focus:flex z-50 w-80 end-5 md:-end-5 bg-slate-100 dark:bg-slate-900 rounded-md top-full p-6 flex-col gap-3"
+          className="absolute z-50 w-80 end-5 md:-end-5 bg-slate-100 dark:bg-slate-900 rounded-md top-full p-6 flex-col gap-3"
         >
           {searching ? (
             <FontAwesomeIcon

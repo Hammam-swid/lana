@@ -393,7 +393,7 @@ function Post(props) {
               }
               setTimeout(setMessage, 3000, "");
             }}
-            text={`http://localhost:5173/post/${post._id}`}
+            text={`${window.location}post/${post._id}`}
           >
             <button>
               <FontAwesomeIcon icon={faShare} />

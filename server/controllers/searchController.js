@@ -30,14 +30,29 @@ exports.searchUserPosts = catchAsync(async (req, res, next) => {
       { user: { $in: req.user.blockerUsers } },
     ],
   })
-    .populate("user", "photo fullName username state")
+    .populate("user", "photo fullName username state verified")
+    .populate("comments.user", "username photo fullName state verified _id")
     .sort("-createdAt");
 
   res.status(200).json({
     status: "success",
     result: users.length + posts.length,
     users,
-    posts: posts.filter((post) => post.user.state === "active"),
+    posts: posts
+      .filter((post) => post.user.state === "active")
+      .map((post) => {
+        post.comments = post.comments.filter(
+          (comment) =>
+            comment.user.state === "active" &&
+            !req.user.blockedUsers
+              .map((user) => user.toString())
+              .includes(comment.user._id.toString()) &&
+            !req.user.blockerUsers
+              .map((user) => user.toString())
+              .includes(comment.user._id.toString())
+        );
+        return post;
+      }),
   });
 });
 

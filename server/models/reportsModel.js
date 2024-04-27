@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
 const reportSchema = new mongoose.Schema({
-  reporterId: {
+  reporterUser: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "User",
     required: [true, "يجب أن يكون للبلاغ مستخدم مبلغ"],
@@ -17,7 +17,6 @@ const reportSchema = new mongoose.Schema({
   },
   reportedComment: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "Post.comments",
   },
   reason: String,
   seen: Boolean,

@@ -23,6 +23,7 @@ import * as Yup from "yup";
 import Modal from "./Modal";
 import { AnimatePresence, motion } from "framer-motion";
 import getTimeDifference from "../utils/getTimeDifference";
+import ReportModal from "./ReportModal";
 
 function Comment({ comment, removeComment, updateComments, postId, postUser }) {
   let [isHighlighted, setIsHighlighted] = useState(
@@ -43,6 +44,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
   const [modalData, setModalData] = useState({});
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
+  const [showReport, setShowReport] = useState(false);
   const formik = useFormik({
     initialValues: {
       text: comment.text,
@@ -275,7 +277,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
                 animate={{ originX: 0.5, originY: 0, scale: 1 }}
                 initial={{ scale: 0 }}
                 exit={{ scale: 0, originY: 0, originX: 0 }}
-                className="dark:bg-slate-800 bg-slate-300 shadow-md absolute z-20 left-0 top-8 p-3 rounded-md dark:hover:*:bg-slate-900 *:p-2 *:rounded-md"
+                className="dark:bg-slate-800 bg-slate-300 shadow-md absolute z-20 left-0 top-8 p-3 rounded-md dark:hover:*:bg-slate-900 hover:*:bg-green-200 *:p-2 *:rounded-md"
                 onClick={() => setOptions(false)}
               >
                 {comment.user.username === user.username ||
@@ -316,7 +318,10 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
                   </li>
                 ) : (
                   <li>
-                    <button className="flex justify-between items-center gap-2 w-full">
+                    <button
+                      onClick={() => setShowReport(true)}
+                      className="flex justify-between items-center gap-2 w-full"
+                    >
                       <span>الإبلاغ عن التعليق</span>
                       <FontAwesomeIcon icon={faFlag} className="text-red-500" />
                     </button>
@@ -342,6 +347,11 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
         message={modalData.message}
         hide={modalData.hide}
         action={modalData.action}
+      />
+      <ReportModal
+        show={showReport}
+        hide={() => setShowReport(false)}
+        reportedComment={comment._id}
       />
     </>
   );

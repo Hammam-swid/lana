@@ -56,7 +56,13 @@ function ReportModal({
         if (res.status === 201) {
           setMessage("تم إرسال البلاغ بنجاح");
           setTimeout(setMessage, 3000, "");
-          helpers.setValues({ reason: "", description: "" });
+          helpers.setValues({
+            reason: "",
+            description: "",
+            reportedComment,
+            reportedPost,
+            reportedUser,
+          });
           hide();
         }
       } catch (error) {
@@ -92,6 +98,7 @@ function ReportModal({
                     "كفر",
                     "إساءة",
                     "خطاب كراهية",
+                    "عنصرية",
                   ].map((ele) => (
                     <p key={ele}>
                       <input
@@ -132,7 +139,13 @@ function ReportModal({
               <button
                 type="button"
                 onClick={() => {
-                  formik.setValues({ description: "", reason: "" });
+                  formik.setValues({
+                    description: "",
+                    reason: "",
+                    reportedComment,
+                    reportedPost,
+                    reportedUser,
+                  });
                   hide();
                 }}
                 className="text-xl dark:text-green-100 text-gray-700 absolute end-5 top-5"

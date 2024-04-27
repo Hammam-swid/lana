@@ -27,6 +27,8 @@ import BlockedUsers from "./pages/BlockedUsers";
 import NotificationsPage from "./pages/NotificationsPage";
 import SearchPage from "./pages/SearchPage";
 import translate from "translate";
+import DashboardLayout from "./pages/DashboardLayout";
+import ReportsPage from "./pages/ReportsPage";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -104,12 +106,13 @@ function App() {
                   method: "GET",
                   url: "/api/v1/posts",
                 });
-                console.log(res);
+                console.log(res.data);
                 if (res.data.status === "success") {
                   return res.data.posts;
                 }
               } catch (err) {
-                console.log(err.message);
+                console.log(err);
+                return null;
               }
             };
             const getFollowing = async () => {
@@ -130,16 +133,56 @@ function App() {
             return defer({ posts: getPosts(), followingUsers: getFollowing() });
           }}
         />
+        <Route
+          path="dashboard"
+          element={<DashboardLayout />}
+          loader={() => {
+            const { token, user } = store.getState();
+            if (!token || !user) return redirect("/login");
+            return axios({
+              method: "GET",
+              url: "/api/v1/users/isModerator",
+              headers: { Authorization: `Bearer ${token}` },
+            })
+              .then(() => null)
+              .catch(() => redirect("/"));
+          }}
+        >
+          <Route
+            index
+            element={<ReportsPage />}
+            loader={() => {
+              const { token } = store.getState();
+              const getReports = async () => {
+                try {
+                  const res = await axios({
+                    method: "GET",
+                    url: "/api/v1/reports",
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  console.log(res)
+                  if (res.status === 200) return res.data.reports;
+                } catch (error) {
+                  console.log(error);
+                  return null;
+                }
+              };
+              return defer({ reports: getReports() });
+            }}
+          />
+          <Route path="users" element={<>صفحة إدارة المستخدمين</>} />
+          <Route path="moderators" element={<>صفحة المشرفين</>} />
+        </Route>
         <Route path="trending" element={<h1>صفحة المحتوى الرائج</h1>} />
         <Route
           path="search"
           element={<SearchPage />}
           loader={({ request }) => {
             const getSearchResult = async () => {
-              console.log(true)
+              console.log(true);
               try {
                 const values = {};
-                values.search = new URL(request.url).searchParams.get('search');
+                values.search = new URL(request.url).searchParams.get("search");
                 const token = store.getState().token;
                 if (/[أ-ي]/gi.test(values.search)) {
                   values.arSearch = await translate(values.search, {
