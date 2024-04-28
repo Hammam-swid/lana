@@ -26,6 +26,10 @@ const {
   unBlockUser,
   getMyBlockedUsers,
   isModerator,
+  getAllUsers,
+  activateUser,
+  deactivateUser,
+  unBanUser,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -60,4 +64,8 @@ router.route("/updateMyPassword").patch(updatePassword);
 
 router.use(restrictTo("admin", "moderator"));
 router.route("/:userId/ban").patch(banUser);
+router.route("/:userId/activate").patch(activateUser);
+router.route("/:userId/deactivate").patch(deactivateUser);
+router.route("/:userId/unBan").patch(unBanUser);
+router.route("/").get(getAllUsers);
 module.exports = router;

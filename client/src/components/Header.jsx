@@ -313,7 +313,7 @@ function Header() {
               initial={{ scaleY: 0, y: -100 }}
               exit={{ scale: 0, originY: 0, originX: 0.2, y: -50 }}
               onClick={() => setOptions(false)}
-              className="absolute left-2 top-full sm:mt-[-10px] rounded-md bg-slate-100 dark:bg-slate-800 p-3 w-52 *:flex *:justify-between *:py-4 *:px-2 *:rounded-sm *:font-bold *:cursor-pointer dark:hover:*:bg-slate-900"
+              className="absolute left-2 top-full sm:mt-[-10px] rounded-md bg-slate-100 dark:bg-slate-800 p-3 w-52 *:flex *:justify-between *:py-4 *:px-2 *:rounded-md *:font-bold *:cursor-pointer dark:hover:*:bg-slate-900"
             >
               {user.role === "supervisor" ||
                 (user.role === "admin" && (

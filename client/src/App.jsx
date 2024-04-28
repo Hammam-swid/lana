@@ -29,6 +29,7 @@ import SearchPage from "./pages/SearchPage";
 import translate from "translate";
 import DashboardLayout from "./pages/DashboardLayout";
 import ReportsPage from "./pages/ReportsPage";
+import UsersPage from "./pages/UsersPage";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -160,7 +161,7 @@ function App() {
                     url: "/api/v1/reports",
                     headers: { Authorization: `Bearer ${token}` },
                   });
-                  console.log(res)
+                  console.log(res);
                   if (res.status === 200) return res.data.reports;
                 } catch (error) {
                   console.log(error);
@@ -170,7 +171,28 @@ function App() {
               return defer({ reports: getReports() });
             }}
           />
-          <Route path="users" element={<>صفحة إدارة المستخدمين</>} />
+          <Route
+            path="users"
+            element={<UsersPage />}
+            loader={() => {
+              const getUsers = async () => {
+                try {
+                  const { token } = store.getState();
+                  const res = await axios({
+                    method: "GET",
+                    url: `/api/v1/users`,
+                    headers: { Authorization: `Bearer ${token}` },
+                  });
+                  if (res.status === 200) return res.data.users;
+                  else return null;
+                } catch (error) {
+                  console.log(error);
+                  return null;
+                }
+              };
+              return defer({ users: getUsers() });
+            }}
+          />
           <Route path="moderators" element={<>صفحة المشرفين</>} />
         </Route>
         <Route path="trending" element={<h1>صفحة المحتوى الرائج</h1>} />
