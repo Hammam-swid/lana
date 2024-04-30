@@ -328,7 +328,8 @@ exports.unBanUser = catchAsync(async (req, res, next) => {
   const { userId } = req.params;
   const user = await User.findOneAndUpdate(
     { _id: userId, state: "banned" },
-    { state: "active" }
+    { state: "active" },
+    { new: true }
   );
   if (!user) {
     return next(new AppError("هذا المستخدم غير موجود", 404));
@@ -339,6 +340,10 @@ exports.unBanUser = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.isActive = (req, res, next) => {
+  res.status(200).json({});
+};
+
 exports.isModerator = catchAsync(async (req, res, next) => {
   if (req.user.role !== "admin" && req.user.role !== "moderator") {
     return next(new AppError("لا يمكنك الوصول إلى هذه الصفحة", 403));
@@ -347,14 +352,21 @@ exports.isModerator = catchAsync(async (req, res, next) => {
 });
 
 exports.getAllUsers = catchAsync(async (req, res, next) => {
-  const users = await User.find({ role: "user" }).sort("-state");
+  const users = await User.find({ role: "user" }).sort("-state fullName");
   res.status(200).json({ status: "success", users });
+});
+
+exports.getAllModerators = catchAsync(async (req, res, next) => {
+  const moderators = await User.find({
+    $or: [{ role: "admin" }, { role: "moderator" }],
+  });
+  res.status(200).json({ status: "success", moderators });
 });
 
 exports.deactivateUser = catchAsync(async (req, res, next) => {
   const { userId } = req.params;
   const user = await User.findOneAndUpdate(
-    { _id: userId, state: "active" },
+    { _id: userId, state: "active", role: "user" },
     { state: "nonactive" },
     { new: true }
   );
@@ -370,7 +382,47 @@ exports.deactivateUser = catchAsync(async (req, res, next) => {
 exports.activateUser = catchAsync(async (req, res, next) => {
   const { userId } = req.params;
   const user = await User.findOneAndUpdate(
-    { _id: userId, state: "nonactive" },
+    { _id: userId, state: "nonactive", role: "user" },
+    { state: "active" },
+    { new: true }
+  );
+  if (!user) {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    user,
+  });
+});
+
+exports.deactivateModerator = catchAsync(async (req, res, next) => {
+  const { userId } = req.params;
+  const user = await User.findOneAndUpdate(
+    {
+      _id: userId,
+      state: "active",
+      $or: [{ role: "admin" }, { role: "moderator" }],
+    },
+    { state: "nonactive" },
+    { new: true }
+  );
+  if (!user) {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  res.status(200).json({
+    status: "success",
+    user,
+  });
+});
+
+exports.activateModerator = catchAsync(async (req, res, next) => {
+  const { userId } = req.params;
+  const user = await User.findOneAndUpdate(
+    {
+      _id: userId,
+      state: "nonactive",
+      $or: [{ role: "admin" }, { role: "moderator" }],
+    },
     { state: "active" },
     { new: true }
   );

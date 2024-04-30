@@ -13,6 +13,7 @@ exports.searchUserPosts = catchAsync(async (req, res, next) => {
       { username: { $regex: `.*${arSearch}.*`, $options: "i" } },
     ],
     state: "active",
+    role: "user",
     $nor: [
       { _id: { $in: req.user.blockedUsers } },
       { _id: { $in: req.user.blockerUsers } },
@@ -64,6 +65,7 @@ exports.searchUser = catchAsync(async (req, res, next) => {
       { username: { $regex: `.*${search}.*`, $options: "i" } },
     ],
     state: "active",
+    role: "user",
     $nor: [
       { _id: { $in: req.user.blockedUsers } },
       { _id: { $in: req.user.blockerUsers } },

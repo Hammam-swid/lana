@@ -9,6 +9,8 @@ const {
   restrictTo,
   updatePassword,
   isTokenExist,
+  createModerator,
+  logout,
 } = require("../controllers/authController");
 const {
   getUser,
@@ -30,6 +32,10 @@ const {
   activateUser,
   deactivateUser,
   unBanUser,
+  isActive,
+  getAllModerators,
+  activateModerator,
+  deactivateModerator,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -37,6 +43,7 @@ const router = express.Router();
 router.post("/signup", signup);
 router.post("/verifySignup", verifySignup);
 router.post("/login", login);
+router.get("/logout", logout);
 
 router.post("/forgotPassword", forgotPassword);
 router.get("/tokenExist/:resetToken", isTokenExist);
@@ -44,6 +51,11 @@ router.patch("/resetPassword/:resetToken", resetPassword);
 router.post("/checkUsername", checkUsernameExist);
 
 router.use(protect);
+router
+  .route("/moderators")
+  .get(restrictTo("admin"), getAllModerators)
+  .post(restrictTo("admin"), createModerator);
+router.get("/isActive", isActive);
 router.get("/isModerator", isModerator);
 router.patch("/updateMe", uploadUserPhoto, saveUserPhoto, updateMe);
 router.get("/followingUsers", getMyFollowings);
@@ -61,6 +73,13 @@ router
   .delete(restrictTo("user"), unBlockUser);
 
 router.route("/updateMyPassword").patch(updatePassword);
+
+router
+  .route("/:userId/activateModerator")
+  .patch(restrictTo("admin"), activateModerator);
+router
+  .route("/:userId/deactivateModerator")
+  .patch(restrictTo("admin"), deactivateModerator);
 
 router.use(restrictTo("admin", "moderator"));
 router.route("/:userId/ban").patch(banUser);

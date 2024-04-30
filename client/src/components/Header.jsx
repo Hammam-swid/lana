@@ -34,7 +34,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 
 // eslint-disable-next-line react/prop-types
-function Header() {
+function Header({ notification }) {
   const user = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const theme = useSelector((state) => state.theme);
@@ -58,7 +58,7 @@ function Header() {
     };
     getNotiList();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [showNotiList]);
+  }, [showNotiList, notification]);
   const isNotified = notiList.filter((noti) => !noti.seen).length;
   const nav = useNavigate();
   const dispatch = useDispatch();
@@ -315,16 +315,15 @@ function Header() {
               onClick={() => setOptions(false)}
               className="absolute left-2 top-full sm:mt-[-10px] rounded-md bg-slate-100 dark:bg-slate-800 p-3 w-52 *:flex *:justify-between *:py-4 *:px-2 *:rounded-md *:font-bold *:cursor-pointer dark:hover:*:bg-slate-900"
             >
-              {user.role === "supervisor" ||
-                (user.role === "admin" && (
-                  <li>
-                    <Link to={"dashboard"}>لوحة التحكم</Link>
-                    <FontAwesomeIcon
-                      className="text-2xl hover:text-green-500 "
-                      icon={faToolbox}
-                    />
-                  </li>
-                ))}
+              {(user.role === "moderator" || user.role === "admin") && (
+                <li>
+                  <Link to={"dashboard"}>لوحة التحكم</Link>
+                  <FontAwesomeIcon
+                    className="text-2xl hover:text-green-500 "
+                    icon={faToolbox}
+                  />
+                </li>
+              )}
               <li>
                 <Link to={`settings/${user.username}`}>الإعدادات</Link>
                 <FontAwesomeIcon
@@ -337,9 +336,19 @@ function Header() {
                   setModalData({
                     message: "هل أنت متأكد من أنك تريد تسجيل الخروج؟",
                     hide: () => setModalData({}),
-                    action: () => {
-                      dispatch(setLogout());
-                      nav("/login");
+                    action: async () => {
+                      try {
+                        const res = await axios({
+                          method: "GET",
+                          url: "/api/v1/users/logout",
+                        });
+                        if (res.status === 200) {
+                          dispatch(setLogout());
+                          nav("/login");
+                        }
+                      } catch (error) {
+                        console.log(error);
+                      }
                     },
                   });
                 }}

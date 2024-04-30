@@ -98,7 +98,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
               <span>
                 <FontAwesomeIcon
                   icon={faCheckCircle}
-                  className="text-xl text-green-500"
+                  className="ms-1 align-middle text-green-500"
                 />
               </span>
             )}
@@ -283,7 +283,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
                 {comment.user.username === user.username ||
                 user.username === postUser.username ||
                 user.role === "admin" ||
-                user.role === "supervisor" ? (
+                user.role === "moderator" ? (
                   <li>
                     <button
                       className="flex justify-between items-center w-full"

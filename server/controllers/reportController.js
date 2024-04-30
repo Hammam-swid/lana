@@ -2,6 +2,7 @@ const catchAsync = require("../utils/catchAsync");
 const Report = require("../models/reportsModel");
 const AppError = require("../utils/AppError");
 const Post = require("../models/postModel");
+const Notification = require("../models/notificationModel");
 
 exports.getReports = catchAsync(async (req, res, next) => {
   let reports = await Report.find()
@@ -48,7 +49,11 @@ exports.getPostId = catchAsync(async (req, res, next) => {
 
 exports.setReportSeen = catchAsync(async (req, res, next) => {
   const { reportId } = req.params;
-  const report = await Report.findByIdAndUpdate(reportId, { seen: true });
+  const report = await Report.findByIdAndUpdate(
+    reportId,
+    { seen: true },
+    { new: true }
+  );
   if (!report) {
     return next(new AppError("هذا التقرير غير موجود", 404));
   }

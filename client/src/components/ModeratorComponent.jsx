@@ -5,10 +5,8 @@ import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import Modal from "./Modal";
 import Message from "./Message";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckCircle } from "@fortawesome/free-solid-svg-icons";
 
-function UserComponent({ gotUser }) {
+function ModeratorComponent({ gotUser }) {
   const token = useSelector((state) => state.token);
   const [user, setUser] = useState(gotUser);
   const [modalData, setModalData] = useState({});
@@ -27,28 +25,28 @@ function UserComponent({ gotUser }) {
           </Link>
           <div className="flex flex-col justify-between h-full py-1">
             <Link className="font-bold" to={`/profile/${user.username}`}>
-              <p>
-                {user.fullName}{" "}
-                <span>
-                  {user.verified && <FontAwesomeIcon className="text-green-500 align-middle" icon={faCheckCircle} />}
-                </span>
-              </p>
+              <p>{user.fullName}</p>
               <p dir="ltr" className="text-gray-500 font-normal text-right">
                 @{user.username}
               </p>
             </Link>
-            <p
-              className={`${
-                user.state === "active" ? "text-green-500" : "text-red-500"
-              }`}
-            >
-              {user.state === "active"
-                ? "فعال"
-                : user.state === "nonactive"
-                ? "غير مفعل"
-                : user.state === "banned"
-                ? "محظور"
-                : ""}
+            <p>
+              <span
+                className={`${
+                  user.state === "active" ? "text-green-500" : "text-red-500"
+                }`}
+              >
+                {user.state === "active"
+                  ? "فعال "
+                  : user.state === "nonactive"
+                  ? "غير مفعل "
+                  : user.state === "banned"
+                  ? "محظور "
+                  : ""}
+              </span>
+              <span className="ms-5 font-bold">
+                {user.role === "admin" ? " مدير النظام" : "مشرف النظام"}
+              </span>
             </p>
           </div>
         </div>
@@ -64,19 +62,15 @@ function UserComponent({ gotUser }) {
                     ? "هل أنت متأكد من أنك تريد إلغاء تفعيل هذا الحساب؟"
                     : user.state === "nonactive"
                     ? "هل أنت متأكد من أنك تريد تفعيل هذا الحساب؟"
-                    : user.state === "banned"
-                    ? "هل أنت متأكد من أنك تريد إلغاء حظر هذا الحساب؟"
                     : "",
                 hide: () => setModalData({}),
                 action: async () => {
                   try {
                     let route =
                       user.state === "active"
-                        ? "deactivate"
+                        ? "deactivateModerator"
                         : user.state === "nonactive"
-                        ? "activate"
-                        : user.state === "banned"
-                        ? "unBan"
+                        ? "activateModerator"
                         : "";
                     const res = await axios({
                       method: "PATCH",
@@ -91,8 +85,6 @@ function UserComponent({ gotUser }) {
                           ? "تم إلغاء التفعيل بنجاح"
                           : user.state === "nonactive"
                           ? "تم التفعيل بنجاح"
-                          : user.state === "banned"
-                          ? "تم إلغاء الحظر بنجاح"
                           : ""
                       );
                     }
@@ -128,4 +120,4 @@ function UserComponent({ gotUser }) {
   );
 }
 
-export default UserComponent;
+export default ModeratorComponent;

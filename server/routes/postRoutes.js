@@ -24,33 +24,34 @@ const router = express.Router();
 
 // router.use(protect)
 //  استقبال طلب على المسار / ي
+router.use(protect);
 router
   .route("/")
-  .get(protect, getPosts)
-  .post(protect, restrictTo("user"), uploadPostImages, scanPost, createPost);
+  .get(getPosts)
+  .post(restrictTo("user"), uploadPostImages, scanPost, createPost);
 
 router
   .route("/:postId")
-  .delete(protect, deletePost)
-  .get(protect, getPost)
-  .patch(protect, restrictTo("user"), uploadPostImages, scanPost, updatePost);
+  .delete(deletePost)
+  .get(getPost)
+  .patch(restrictTo("user"), uploadPostImages, scanPost, updatePost);
 
 router.use(restrictTo("user"));
-router.route("/:postId/like").patch(protect, likePost);
-router.route("/:postId/dislike").patch(protect, dislikePost);
-router.route("/:postId/cancelReaction").patch(protect, cancelReaction);
+router.route("/:postId/like").patch(likePost);
+router.route("/:postId/dislike").patch(dislikePost);
+router.route("/:postId/cancelReaction").patch(cancelReaction);
 
-router.route("/:postId/comment").post(protect, commentOnPost);
+router.route("/:postId/comment").post(commentOnPost);
 
 router
   .route("/:postId/comment/:commentId")
-  .delete(protect, deleteComment)
-  .patch(protect, updateComment);
+  .delete(deleteComment)
+  .patch(updateComment);
 
-router.route("/comment/:commentId/like").post(protect, likeComment);
-router.route("/comment/:commentId/dislike").post(protect, dislikeComment);
+router.route("/comment/:commentId/like").post(likeComment);
+router.route("/comment/:commentId/dislike").post(dislikeComment);
 router
   .route("/comment/:commentId/cancelReaction")
-  .delete(protect, cancelCommentReaction);
+  .delete(cancelCommentReaction);
 
 module.exports = router;

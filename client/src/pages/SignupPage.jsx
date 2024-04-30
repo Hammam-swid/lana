@@ -173,7 +173,7 @@ function SignupPage() {
                     {(() => {
                       let options = [];
                       let limit;
-                      console.log(formik.values)
+                      console.log(formik.values);
                       if (
                         [1, 3, 5, 7, 8, 10, 12].includes(+formik.values.month)
                       )
@@ -182,7 +182,7 @@ function SignupPage() {
                         limit = 30;
                       else if (+formik.values.month === 2)
                         limit = +formik?.values?.year % 4 === 0 ? 29 : 28;
-                      else limit = 31
+                      else limit = 31;
                       for (let i = 1; i <= limit; i++) {
                         options.push(
                           <option key={`day-${i}`} value={i}>
@@ -236,28 +236,42 @@ function SignupPage() {
                     })()}
                   </select>
                 </div>
-                <div className="text-lg py-6">
+                <div className="text-lg py-6 flex gap-4 items-center">
                   <label className="font-bold">الجنس: </label>
-                  <input
-                    type="radio"
-                    name="gender"
-                    id="male"
-                    value="male"
-                    checked={formik.values.gender === "male"}
-                    className="ms-5"
-                    onChange={formik.handleChange}
-                  />
-                  <label htmlFor="male">ذكر</label>
-                  <input
-                    type="radio"
-                    name="gender"
-                    id="female"
-                    value="female"
-                    className="ms-7"
-                    checked={formik.values.gender === "female"}
-                    onChange={formik.handleChange}
-                  />
-                  <label htmlFor="female">أنثى</label>
+                  <div>
+                    <input
+                      type="radio"
+                      name="gender"
+                      id="male"
+                      value="male"
+                      checked={formik.values.gender === "male"}
+                      className="peer hidden"
+                      onChange={formik.handleChange}
+                    />
+                    <label
+                      htmlFor="male"
+                      className="peer-checked:font-bold py-1 cursor-pointer px-4 block bg-green-500 bg-opacity-20 peer-checked:bg-opacity-70 rounded-full duration-200"
+                    >
+                      ذكر
+                    </label>
+                  </div>
+                  <div>
+                    <input
+                      type="radio"
+                      name="gender"
+                      id="female"
+                      value="female"
+                      className="peer hidden"
+                      checked={formik.values.gender === "female"}
+                      onChange={formik.handleChange}
+                    />
+                    <label
+                      htmlFor="female"
+                      className="peer-checked:font-bold py-1 cursor-pointer px-4 block bg-green-500 bg-opacity-20 peer-checked:bg-opacity-70 rounded-full duration-200"
+                    >
+                      أنثى
+                    </label>
+                  </div>
                 </div>
                 {formik.errors.gender && formik.touched.gender && (
                   <div className="text-red-400">{formik.errors.gender}</div>

@@ -20,9 +20,13 @@ const io = new Server(server, {
 app.set("socket-clients", []);
 
 io.on("connection", (socket) => {
-  socket.on("userLoggedIn", (username) => {
+  socket.on("userLoggedIn", (user) => {
     const socketClients = app.get("socket-clients");
-    socketClients.push({ id: socket.id, username });
+    socketClients.push({
+      id: socket.id,
+      username: user.username,
+      role: user.role,
+    });
     app.set("socket-clients", socketClients);
     console.log(socketClients);
   });

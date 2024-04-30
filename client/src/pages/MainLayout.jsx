@@ -28,7 +28,7 @@ function MainLayout() {
       auth: { username: user.username },
     });
     socket.on("connect", () => {
-      socket.emit("userLoggedIn", user.username);
+      socket.emit("userLoggedIn", {username: user.username, role: user.role});
       socket.on("notification", (notification) => {
         console.log(newNotification);
         setNewNotification(notification);
@@ -45,15 +45,14 @@ function MainLayout() {
         {newNotification && (
           <motion.div
             initial={{
-              y: window.visualViewport.width > 640 ? 100 : -200,
-              x: "50%",
+              y: 100,
             }}
-            animate={{ y: 0, x: "50" }}
-            drag={window.visualViewport.width < 640 && 'y'}
+            animate={{ y: 0 }}
+            // drag={window.visualViewport.width < 640 && 'y'}
             dragConstraints={{ bottom: 0, right: 0, left: 0 }}
-            exit={{ y: window.visualViewport.width > 640 ? 120 : -200, x:'50%' }}
+            exit={{ y: 100 }}
             onClick={() => setNewNotification(null)}
-            className="fixed z-50 top-5 rounded-md right-1/2 dark:bg-slate-900 w-fit  sm:mx-0 sm:top-auto sm:bottom-5 sm:right-5"
+            className="fixed z-50 top-5 rounded-md right-1/2 bg-slate-100 dark:bg-slate-900 w-fit  sm:mx-0 sm:top-auto sm:bottom-5 sm:right-5"
           >
             <Link
               onClick={async () => {

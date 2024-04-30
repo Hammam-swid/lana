@@ -7,9 +7,11 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faEye, faEyeSlash } from "@fortawesome/free-solid-svg-icons";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import Message from "../components/Message";
 
 function LoginPage() {
   const theme = useSelector((state) => state.theme);
+  const [message, setMessage] = useState("");
   const nav = useNavigate();
   useEffect(() => {
     if (theme === "dark") document.body.classList.add("dark");
@@ -44,7 +46,10 @@ function LoginPage() {
           return nav("/");
         }
       } catch (error) {
+        setMessage(error.response.data.message);
         console.log(error);
+      } finally {
+        setTimeout(setMessage, 3000, "");
       }
     },
   });
@@ -138,6 +143,7 @@ function LoginPage() {
           </Link>
         </p>
       </form>
+      <Message message={message} error={message} />
     </div>
   );
 }

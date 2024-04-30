@@ -74,9 +74,10 @@ exports.login = catchAsync(async (req, res, next) => {
       new AppError("الرجاء إدخال البريد الإلكتروني وكلمة المرور", 400)
     );
   }
-  const user = await User.findOne({ email: email.toLowerCase(), state: "active" }).select(
-    "+password"
-  );
+  const user = await User.findOne({
+    email: email.toLowerCase(),
+    state: "active",
+  }).select("+password");
   if (!user || !(await user.comparePassword(password, user.password))) {
     return next(
       new AppError("البريد الإلكتروني أو كلمة المرور غير صحيحة", 404)
@@ -102,6 +103,14 @@ exports.login = catchAsync(async (req, res, next) => {
     data: { user },
   });
 });
+
+exports.logout = (req, res, next) => {
+  res.cookie("jwt", "", {
+    httpOnly: true,
+    expires: new Date(Date.now() + 10000),
+  });
+  res.status(200).json({ status: "success" });
+};
 
 exports.forgotPassword = catchAsync(async (req, res, next) => {
   const { email } = req.body;
@@ -233,4 +242,16 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
     token,
     user,
   });
+});
+
+exports.createModerator = catchAsync(async (req, res, next) => {
+  const { email, username, password, fullName, role } = req.body;
+  const moderator = await User.create({
+    email,
+    username,
+    password,
+    fullName,
+    role,
+  });
+  res.status(201).json({ status: "success", moderator });
 });
