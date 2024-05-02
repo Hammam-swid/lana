@@ -40,6 +40,7 @@ import {
   usersPageLoader,
 } from "./utils/loaders";
 import ModeratorsPage from "./pages/ModeratorsPage";
+import VerifyAccountPage from "./pages/VerifyAccountPage";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -116,6 +117,7 @@ function App() {
         >
           <Route index element={<ProfileSettings />} />
           <Route path="change-password" element={<ChangePasswordPage />} />
+          <Route path="verify-account" element={<VerifyAccountPage />} />
           <Route
             path="blocked-users"
             element={<BlockedUsers />}

@@ -4,10 +4,7 @@ import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { updateTheme, updateUser } from "../store/authSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import {
-  faCircleNotch,
-  faMoon,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCircleNotch, faMoon } from "@fortawesome/free-solid-svg-icons";
 
 function ProfileSettings() {
   const user = useSelector((state) => state.user);
@@ -87,7 +84,7 @@ function ProfileSettings() {
                   : "/img/users/default.jpg"
               }
               alt={`صورة ${user.fullName}`}
-              className="object-cover w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden outline outline-4 outline-green-500"
+              className="object-cover cursor-pointer w-32 h-32 sm:w-40 sm:h-40 rounded-full overflow-hidden outline outline-4 outline-green-500"
             />
           </label>
         </div>
@@ -110,7 +107,9 @@ function ProfileSettings() {
           }}
           onBlur={formik.handleBlur}
         />
-        <label htmlFor="fullName">الاسم الكامل</label>
+        <label htmlFor="fullName" className="font-bold">
+          الاسم الكامل:
+        </label>
         <input
           type="text"
           name="fullName"
@@ -190,33 +189,47 @@ function ProfileSettings() {
             })()}
           </select>
         </div>
-        <div className="text-lg py-6">
+        <div className="text-lg py-6 flex gap-3">
           <label className="font-bold">الجنس: </label>
-          <input
-            type="radio"
-            name="gender"
-            id="male"
-            value="male"
-            checked={formik.values.gender === "male"}
-            className="ms-5"
-            onChange={formik.handleChange}
-          />
-          <label htmlFor="male">ذكر</label>
-          <input
-            type="radio"
-            name="gender"
-            id="female"
-            value="female"
-            className="ms-7"
-            checked={formik.values.gender === "female"}
-            onChange={formik.handleChange}
-          />
-          <label htmlFor="female">أنثى</label>
+          <div>
+            <input
+              type="radio"
+              name="gender"
+              id="male"
+              value="male"
+              checked={formik.values.gender === "male"}
+              className="peer hidden"
+              onChange={formik.handleChange}
+            />
+            <label
+              htmlFor="male"
+              className="peer-checked:font-bold py-1 cursor-pointer px-4 block bg-green-500 bg-opacity-20 peer-checked:bg-opacity-70 rounded-full duration-200"
+            >
+              ذكر
+            </label>
+          </div>
+          <div>
+            <input
+              type="radio"
+              name="gender"
+              id="female"
+              value="female"
+              className="peer hidden"
+              checked={formik.values.gender === "female"}
+              onChange={formik.handleChange}
+            />
+            <label
+              htmlFor="female"
+              className="peer-checked:font-bold py-1 cursor-pointer px-4 block bg-green-500 bg-opacity-20 peer-checked:bg-opacity-70 rounded-full duration-200"
+            >
+              أنثى
+            </label>
+          </div>
         </div>
         <button
           disabled={formik.isSubmitting}
           type="submit"
-          className="p-3 mt-5 rounded-sm font-bold text-lg bg-gradient-to-b from-green-400 to-green-600"
+          className="p-3 mt-5 rounded-md font-bold text-lg bg-gradient-to-b from-green-400 to-green-600"
         >
           {!formik.isSubmitting ? (
             "تعديل البيانات"
@@ -272,9 +285,6 @@ function ProfileSettings() {
             <FontAwesomeIcon icon={faMoon} />
           </button>
         </div>
-        <button className="p-3 bg-green-500 rounded-md font-bold mt-5 w-fit block mr-auto">
-          طلب توثيق الحساب
-        </button>
       </div>
     </>
   );

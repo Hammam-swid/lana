@@ -10,7 +10,7 @@ const verifyingRequestSchema = new mongoose.Schema({
     type: String,
     required: [true, "يجب أن يكون هناك رابط لصفحة الحساب"],
   },
-  photoUrl: {
+  image: {
     type: String,
     required: [true, "يجب إرسال صورة الوثيقة للتحقق منها"],
   },

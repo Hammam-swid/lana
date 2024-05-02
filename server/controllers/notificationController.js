@@ -3,11 +3,19 @@ const AppError = require("../utils/AppError");
 const catchAsync = require("../utils/catchAsync");
 
 exports.getMyNotifications = catchAsync(async (req, res, next) => {
-  const notifications = await Notification.find({
-    recipientUsername: req.user.username,
-  })
-    .sort("-createdAt seen")
-    .limit(50);
+  let notifications;
+  if (req.user.role === "user")
+    notifications = await Notification.find({
+      recipientUsername: req.user.username,
+    })
+      .sort("-createdAt seen")
+      .limit(50);
+  else
+    notifications = await Notification.find({
+      recipientUsername: "moderators",
+    })
+      .sort("-createdAt seen")
+      .limit(50);
   res.status(200).json({
     status: "success",
     result: notifications.length,

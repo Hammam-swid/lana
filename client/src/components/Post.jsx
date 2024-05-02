@@ -170,6 +170,7 @@ function Post(props) {
                                 console.log(res);
                                 setMessage("تم حذف المنشور بنجاح");
                                 setTimeout(setMessage, 3000, "");
+                                nav(".", { replace: true });
                               } catch (error) {
                                 console.log(error);
                               }

@@ -1,8 +1,5 @@
 /* eslint-disable react/prop-types */
-import {
-  faCircleNotch,
-  faXmarkCircle,
-} from "@fortawesome/free-solid-svg-icons";
+import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useFormik } from "formik";

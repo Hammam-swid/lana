@@ -29,6 +29,32 @@ exports.createReport = catchAsync(async (req, res, next) => {
     status: "success",
     report,
   });
+  const notification = await Notification.create({
+    recipientUsername: "moderators",
+    senderUsername: req.user.username,
+    createdAt: Date.now(),
+    returnUrl: "/dashboard",
+    type: "report",
+    message: `لقد قام ${req.user.fullName} بالإبلاغ عن ${
+      reportedPost
+        ? "منشور"
+        : reportedUser
+        ? "مستخدم"
+        : reportedComment
+        ? "تعليق"
+        : "شيء ما"
+    }`,
+  });
+  const io = req.app.get("socket.io");
+  const socketClients = req.app.get("socket-clients");
+
+  io.to(
+    ...socketClients
+      .filter(
+        (client) => client.role === "admin" || client.role === "moderator"
+      )
+      .map((client) => client.id)
+  ).emit("notification", notification);
 });
 
 exports.deleteReport = catchAsync(async (req, res, next) => {

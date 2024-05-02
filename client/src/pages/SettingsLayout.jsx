@@ -1,5 +1,6 @@
 import {
   faBars,
+  faCheckCircle,
   faKey,
   faLock,
   faUser,
@@ -50,6 +51,20 @@ function SettingsLayout() {
               >
                 <span>إعدادات الملف الشخصي</span>
                 <FontAwesomeIcon icon={faUser} />
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="verify-account"
+                className={({ isActive }) =>
+                  `p-3 rounded-md flex justify-between items-center ${
+                    isActive &&
+                    "text-green-500 font-bold bg-slate-200 dark:bg-slate-950"
+                  }`
+                }
+              >
+                <span>توثيق الحساب</span>
+                <FontAwesomeIcon icon={faCheckCircle} />
               </NavLink>
             </li>
             <li>

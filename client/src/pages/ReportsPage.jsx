@@ -1,7 +1,12 @@
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { Suspense, useState } from "react";
-import { Await, useLoaderData, useSearchParams } from "react-router-dom";
+import {
+  Await,
+  useLoaderData,
+  useNavigate,
+  useSearchParams,
+} from "react-router-dom";
 import Modal from "../components/Modal";
 import axios from "axios";
 import { useSelector } from "react-redux";
@@ -16,6 +21,7 @@ function ReportsPage() {
   const [modalData, setModalData] = useState({});
   const [message, setMessage] = useState("");
   const [messageError, setMessageError] = useState(false);
+  const nav = useNavigate();
   const showModal = (reportId) =>
     setModalData({
       message: "هل أنت متأكد من أنك تريد حذف هذا البلاغ؟",
@@ -29,6 +35,7 @@ function ReportsPage() {
           });
           if (res.status === 204) {
             setMessage("تم حذف البلاغ بنجاح");
+            nav(".");
           }
         } catch (error) {
           console.log(error);

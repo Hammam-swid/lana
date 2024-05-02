@@ -8,19 +8,26 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 
 import PostForm from "../components/PostForm";
+import { useSelector } from "react-redux";
 
 function HomePage() {
   // const [posts, setPosts] = useState([]);
   const promiseData = useLoaderData();
-
+  const user = useSelector((state) => state.user);
   return (
     <>
-      <div className="max-w-[25rem] md:max-w-[30rem] w-full mx-auto mt-5 p-6">
-        <PostForm />
-      </div>
+      {user.role === "user" && (
+        <div className="max-w-[25rem] md:max-w-[30rem] w-full mx-auto mt-5 p-6">
+          <PostForm />
+        </div>
+      )}
       <div className="flex flex-col md:flex-row-reverse gap-5 items-center md:items-start bg-slate-200 dark:bg-slate-950">
-        <div className="md:w-1/3 p-6 md:mt-[-120px] self-start sm:self-center w-full overflow-x-scroll md:self-start">
-          <h2 className="font-bold text-3xl mb-5">المتابَعون</h2>
+        <div
+          className={`md:w-1/3 p-6 md:mt-[-120px] ${
+            user.role === "user" ? "visible" : "hidden md:block md:invisible"
+          } self-start sm:self-center w-full overflow-x-scroll md:self-start`}
+        >
+          <h2 className="font-bold text-3xl mb-5">الأشخاص الذين تتابعهم</h2>
           <ul className="flex gap-7 overflow-x-scroll  md:flex-col">
             <Suspense
               fallback={

@@ -17,6 +17,7 @@ import {
   faMoon,
   faCircleNotch,
   faToolbox,
+  faFlag,
 } from "@fortawesome/free-solid-svg-icons";
 import { setLogout, updateTheme } from "../store/authSlice";
 import {
@@ -81,7 +82,7 @@ function Header({ notification }) {
   });
   return (
     <>
-      <header className=" min-h-20 w-screen sticky sm:top-0 bg-slate-100 shadow-md dark:bg-slate-900 z-50 flex justify-center sm:justify-between items-center py-2 px-6 sm:px-6 flex-wrap sm:flex-nowrap">
+      <header className="min-h-20 w-screen sticky sm:top-0 bg-slate-100 shadow-md dark:bg-slate-900 z-50 flex justify-center sm:justify-between items-center py-2 px-6 sm:px-6 flex-wrap sm:flex-nowrap">
         <div className="flex  justify-between relative items-center gap-5 w-full sm:w-fit mb-5 sm:mb-0">
           <Link
             to="/"
@@ -227,6 +228,8 @@ function Header({ notification }) {
                             <FontAwesomeIcon icon={faCommentSlash} />
                           ) : noti.type === "follow" ? (
                             <FontAwesomeIcon icon={faUserPlus} />
+                          ) : noti.type === "report" ? (
+                            <FontAwesomeIcon icon={faFlag} />
                           ) : (
                             ""
                           )}

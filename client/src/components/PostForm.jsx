@@ -12,12 +12,14 @@ import {
 import ImagePreview from "./ImagePreview";
 import Message from "./Message";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 function PostForm() {
   const token = useSelector((state) => state.token);
   const user = useSelector((state) => state.user);
   const [imagePreview, setImagePreview] = useState([]);
   const [message, setMessage] = useState("");
+  const nav = useNavigate();
   const formik = useFormik({
     initialValues: { content: "", images: [], video: "" },
     validationSchema: Yup.object({
@@ -41,6 +43,7 @@ function PostForm() {
         console.log(res);
         setMessage("تم نشر المنشور بنجاح");
         setTimeout(setMessage, 3000, "");
+        nav(".", { replace: true });
         // setPosts((prevPosts) => prevPosts.unshift(res.data.post));
       } catch (error) {
         console.log(error);

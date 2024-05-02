@@ -6,6 +6,7 @@ import { useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCommentSlash,
+  faFlag,
   faMessage,
   faThumbsDown,
   faThumbsUp,
@@ -28,7 +29,7 @@ function MainLayout() {
       auth: { username: user.username },
     });
     socket.on("connect", () => {
-      socket.emit("userLoggedIn", {username: user.username, role: user.role});
+      socket.emit("userLoggedIn", { username: user.username, role: user.role });
       socket.on("notification", (notification) => {
         console.log(newNotification);
         setNewNotification(notification);
@@ -90,6 +91,8 @@ function MainLayout() {
                   <FontAwesomeIcon icon={faCommentSlash} />
                 ) : newNotification.type === "follow" ? (
                   <FontAwesomeIcon icon={faUserPlus} />
+                ) : newNotification.type === "report" ? (
+                  <FontAwesomeIcon icon={faFlag} />
                 ) : (
                   ""
                 )}
