@@ -20,6 +20,7 @@ import Modal from "../components/Modal";
 import Message from "../components/Message";
 import { AnimatePresence, motion } from "framer-motion";
 import ReportModal from "../components/ReportModal";
+import WarningForm from "../components/WarningForm";
 
 function ProfilePage() {
   const dataPromise = useLoaderData();
@@ -239,6 +240,7 @@ function ProfilePage() {
           hide={() => setShowReport(false)}
           reportedUser={userId}
         />
+        <WarningForm show={true} />
       </>
     );
   }

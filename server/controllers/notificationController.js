@@ -14,7 +14,7 @@ exports.getMyNotifications = catchAsync(async (req, res, next) => {
     notifications = await Notification.find({
       recipientUsername: "moderators",
     })
-      .sort("-createdAt seen")
+      .sort("seen -createdAt")
       .limit(50);
   res.status(200).json({
     status: "success",
@@ -26,7 +26,13 @@ exports.getMyNotifications = catchAsync(async (req, res, next) => {
 exports.seeNotification = catchAsync(async (req, res, next) => {
   const { notiId } = req.params;
   const noti = await Notification.findOneAndUpdate(
-    { _id: notiId, recipientUsername: req.user.username },
+    {
+      _id: notiId,
+      recipientUsername:
+        req.user.role === "admin" || req.user.role === "moderator"
+          ? "moderators"
+          : req.user.username,
+    },
     {
       seen: true,
     },

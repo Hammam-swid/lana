@@ -21,7 +21,7 @@ function ModeratorsPage() {
       <div className="mb-5 flex justify-between ">
         <div>
           <input
-            className="p-2 rounded-md dark:bg-slate-900 outline-none focus:outline-2 focus:outline-green-500 me-2"
+            className="p-2 rounded-md bg-slate-100 dark:bg-slate-900 outline-none focus:outline-2 focus:outline-green-500 me-2"
             type="text"
             value={search}
             onChange={(e) => setSearch(e.target.value)}

@@ -23,7 +23,7 @@ function VerifyAccountPage() {
         }}
         onBlur={formik.handleBlur}
         accept="image/*,.pdf"
-        className="hidden"
+        className=""
       />
       <label htmlFor="image" className="text-3xl text-green-500 cursor-pointer">
         <FontAwesomeIcon icon={faImage} />

@@ -14,7 +14,7 @@ function UsersPage() {
       <h1 className="text-3xl font-bold mb-5">المستخدمون</h1>
       <div className="mb-5">
         <input
-          className="p-2 rounded-md dark:bg-slate-900 outline-none focus:outline-2 focus:outline-green-500 me-2"
+          className="p-2 rounded-md bg-slate-100 dark:bg-slate-900 outline-none focus:outline-2 focus:outline-green-500 me-2"
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}

@@ -86,6 +86,15 @@ const userSchema = new mongoose.Schema({
       ref: "User",
     },
   ],
+  warnings: [
+    {
+      createdAt: Date,
+      type: String,
+      reason: String,
+      message: String,
+      seen: Boolean,
+    }
+  ]
 });
 
 userSchema.pre("save", function (next) {
