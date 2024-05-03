@@ -34,6 +34,7 @@ function ProfilePage() {
   const [message, setMessage] = useState("");
   const [errorMessage, setErrorMessage] = useState("");
   const [showReport, setShowReport] = useState(false);
+  const [showWarning, setShowWarning] = useState(false);
   let userId;
   function renderUser(user, posts) {
     userId = user._id;
@@ -135,7 +136,7 @@ function ProfilePage() {
                       </>
                     ) : (
                       <>
-                        <li>
+                        <li onClick={() => setShowWarning(true)}>
                           <span>تحذير الحساب</span>
                           <FontAwesomeIcon
                             icon={faTriangleExclamation}
@@ -240,7 +241,11 @@ function ProfilePage() {
           hide={() => setShowReport(false)}
           reportedUser={userId}
         />
-        <WarningForm show={true} />
+        <WarningForm
+          show={showWarning}
+          hide={() => setShowWarning(false)}
+          userId={userId}
+        />
       </>
     );
   }

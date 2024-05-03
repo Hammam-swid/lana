@@ -1,6 +1,7 @@
 const crypto = require("crypto");
 const mongoose = require("mongoose");
 const bcrypt = require("bcrypt");
+const AppError = require("../utils/AppError");
 
 const userSchema = new mongoose.Schema({
   fullName: {
@@ -89,12 +90,13 @@ const userSchema = new mongoose.Schema({
   warnings: [
     {
       createdAt: Date,
-      type: String,
+      type: { type: String },
       reason: String,
       message: String,
-      seen: Boolean,
-    }
-  ]
+      moderator: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
+      seen: { type: Boolean, default: false },
+    },
+  ],
 });
 
 userSchema.pre("save", function (next) {
@@ -110,6 +112,18 @@ userSchema.pre("save", async function (next) {
     next();
   } catch (err) {
     next(err);
+  }
+});
+
+userSchema.post("save", function (doc) {
+  const last3MonthsWarnings = doc.warnings.filter(
+    (warning) =>
+      new Date(warning.createdAt).getTime() >
+      Date.now() - 3 * 30 * 24 * 60 * 60 * 1000
+  ).length;
+  if (last3MonthsWarnings >= 3) {
+    doc.state = "banned";
+    doc.save();
   }
 });
 

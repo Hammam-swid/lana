@@ -36,6 +36,7 @@ const {
   getAllModerators,
   activateModerator,
   deactivateModerator,
+  warnUser,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -83,6 +84,7 @@ router
 
 router.use(restrictTo("admin", "moderator"));
 router.route("/:userId/ban").patch(banUser);
+router.route("/:userId/warning").patch(warnUser);
 router.route("/:userId/activate").patch(activateUser);
 router.route("/:userId/deactivate").patch(deactivateUser);
 router.route("/:userId/unBan").patch(unBanUser);

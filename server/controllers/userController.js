@@ -434,3 +434,35 @@ exports.activateModerator = catchAsync(async (req, res, next) => {
     user,
   });
 });
+
+exports.warnUser = catchAsync(async (req, res, next) => {
+  const { userId } = req.params;
+  const { type, reason, message } = req.body;
+  const user = await User.findOne({
+    _id: userId,
+    state: "active",
+    role: "user",
+  });
+  if (!user) {
+    return next(
+      new AppError(
+        "هذا المستخدم غير موجود أو تم حظره أو إلغاء تفعيل حسابه",
+        404
+      )
+    );
+  }
+  user.warnings.push({
+    type,
+    reason,
+    message,
+    moderator: req.user._id,
+    createdAt: Date.now(),
+  });
+  await user.save();
+  res.status(200).json({
+    status: "success",
+    message: `تم إرسال التحذير إلى المستخدم بنجاح${
+      user.state === "banned" ? " وتم حظره بعد ذلك" : ""
+    }`,
+  });
+});
