@@ -1,5 +1,5 @@
 import { Suspense, useState } from "react";
-import { Await, useLoaderData } from "react-router-dom";
+import { Await, useLoaderData, useNavigate } from "react-router-dom";
 import Modal from "../components/Modal";
 import Message from "../components/Message";
 import axios from "axios";
@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 
 function BlockedUsers() {
+  const nav = useNavigate();
   const token = useSelector((state) => state.token);
   const promiseData = useLoaderData();
   const [modalData, setModalData] = useState({});
@@ -17,7 +18,10 @@ function BlockedUsers() {
       <Suspense
         fallback={
           <div>
-            <FontAwesomeIcon icon={faCircleNotch} className="text-xl text-green-500 animate-spin"/>
+            <FontAwesomeIcon
+              icon={faCircleNotch}
+              className="text-xl text-green-500 animate-spin"
+            />
           </div>
         }
       >
@@ -53,6 +57,7 @@ function BlockedUsers() {
                             if (res.status === 200) {
                               setMessage("تم إلغاء الحظر بنجاح");
                               setTimeout(setMessage, 3000, "");
+                              nav(".", { replace: true });
                             }
                           } catch (error) {
                             console.log(error);

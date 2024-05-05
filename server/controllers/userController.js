@@ -7,6 +7,7 @@ const Email = require("../utils/email");
 const Post = require("../models/postModel");
 const sharp = require("sharp");
 const Notification = require("../models/notificationModel");
+const VerifyingRequest = require("../models/verifyingRequestModel");
 
 const multerFilter = (req, file, cb) => {
   if (file.mimetype.startsWith("image")) {
@@ -493,5 +494,23 @@ exports.setWarningSeen = catchAsync(async (req, res, next) => {
   await req.user.save();
   res.status(200).json({
     status: "success",
+  });
+});
+
+exports.uploadVerificationFile = upload.single("verificationFile");
+
+exports.createVerifyingRequest = catchAsync(async (req, res, next) => {
+  const { verificationFile, description } = req.body;
+  const filteredBody = filterObj(req.body, "description");
+  filteredBody.userId = req.user._id;
+  filteredBody.profileUrl = `/profile/${req.user.username}`;
+  filteredBody.createdAt = Date.now();
+  if (req.file) filteredBody.verificationFile = req.file.filename;
+  const verifyingRequest = VerifyingRequest.create({
+    userId: req.user._id,
+    createdAt: Date.now(),
+    verificationFile,
+    description,
+    profileUrl: `/profile/${req.user.username}`,
   });
 });

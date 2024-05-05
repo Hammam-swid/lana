@@ -5,32 +5,47 @@ import { useFormik } from "formik";
 function VerifyAccountPage() {
   const formik = useFormik({
     initialValues: {
-      image: "",
+      verificationFile: "",
+      description: "",
     },
     onSubmit: (values) => console.log(values),
   });
   return (
     <form
       onSubmit={formik.handleSubmit}
-      className="p-6 max-w-[40rem] mx-auto flex flex-col justify-center items-center h-full"
+      className="p-6 max-w-[40rem] mx-auto flex flex-col justify-center gap-5 h-full"
     >
+      <p className="font-bold">ملف التوثيق:</p>
       <input
         type="file"
-        name="image"
-        id="image"
+        name="verificationFile"
+        id="verificationFile"
         onChange={(e) => {
-          formik.setFieldValue("image", e.target.files[0]);
+          formik.setFieldValue("verificationFile", e.target.files[0]);
         }}
         onBlur={formik.handleBlur}
         accept="image/*,.pdf"
         className=""
       />
-      <label htmlFor="image" className="text-3xl text-green-500 cursor-pointer">
+      <p className="text-gray-500">يمكنك رفع صورة أو ملف pdf</p>
+      {/* <label htmlFor="verificationFile" className="text-3xl text-green-500 cursor-pointer">
         <FontAwesomeIcon icon={faImage} />
+      </label> */}
+      <label htmlFor="description" className="font-bold">
+        الوصف:
       </label>
+      <textarea
+        name="description"
+        id="description"
+        onChange={formik.handleChange}
+        onBlur={formik.handleBlur}
+        value={formik.values.description}
+        className="resize-none rounded-md h-20 p-3 outline outline-2 focus:outline-green-500 outline-green-800 dark:bg-slate-900"
+      />
       <button
+        disabled={formik.isSubmitting}
         type="submit"
-        className="bg-gradient-to-b from-green-400 to-green-600 w-full p-3 font-bold text-lg rounded-md"
+        className="mt-8 bg-gradient-to-b from-green-400 to-green-600 w-full p-3 font-bold text-lg rounded-md"
       >
         {formik.isSubmitting ? (
           <FontAwesomeIcon
