@@ -466,3 +466,32 @@ exports.warnUser = catchAsync(async (req, res, next) => {
     }`,
   });
 });
+
+exports.getWarnings = (req, res, next) => {
+  const { user } = req;
+  if (user.warnings.length > 0) {
+    user.warnings = user.warnings.filter((warning) => !warning.seen);
+    user.warnings[0].moderator = undefined;
+  }
+  res.status(200).json({
+    warning: user.warnings[0],
+    status: "success",
+  });
+};
+
+exports.setWarningSeen = catchAsync(async (req, res, next) => {
+  const { warningId } = req.params;
+  console.log(warningId);
+  const warning = req.user.warnings.find(
+    (warning) => warning._id.toString() === warningId && !warning.seen
+  );
+  console.log(warning);
+  if (!warning) {
+    return next(new AppError("هذا التحذير غير موجود", 404));
+  }
+  warning.seen = true;
+  await req.user.save();
+  res.status(200).json({
+    status: "success",
+  });
+});

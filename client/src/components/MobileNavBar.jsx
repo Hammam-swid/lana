@@ -67,7 +67,7 @@ function MobileNavBar({ options, updateOptions, notification }) {
             to={`/profile/${user.username}`}
             className={({ isActive }) =>
               `block rounded-full ${
-                isActive ? "border-2 border-green-500" : ""
+                isActive ? "outline outline-2 outline-green-500" : ""
               } `
             }
           >

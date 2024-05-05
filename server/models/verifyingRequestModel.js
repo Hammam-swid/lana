@@ -10,9 +10,16 @@ const verifyingRequestSchema = new mongoose.Schema({
     type: String,
     required: [true, "يجب أن يكون هناك رابط لصفحة الحساب"],
   },
-  image: {
+  // صورة أو ملف ()
+  verificationFile: {
     type: String,
     required: [true, "يجب إرسال صورة الوثيقة للتحقق منها"],
+  },
+  seen: { type: Boolean, default: false },
+  description: String,
+  createdAt: {
+    type: Date,
+    default: Date.now(),
   },
 });
 

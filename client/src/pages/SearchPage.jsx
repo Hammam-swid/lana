@@ -47,7 +47,7 @@ function SearchPage() {
                     <Link
                       to={`/profile/${user.username}`}
                       key={user._id}
-                      className="flex p-2 rounded-md items-center gap-2 bg-slate-100 dark:bg-slate-900"
+                      className="flex p-2 rounded-md items-center gap-2 min-w-72 bg-slate-100 dark:bg-slate-900"
                     >
                       <img
                         src={`/img/users/${user.photo}`}

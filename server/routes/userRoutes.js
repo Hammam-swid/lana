@@ -37,6 +37,8 @@ const {
   activateModerator,
   deactivateModerator,
   warnUser,
+  getWarnings,
+  setWarningSeen,
 } = require("../controllers/userController");
 
 const router = express.Router();
@@ -63,7 +65,11 @@ router.get("/followingUsers", getMyFollowings);
 router.get("/blockedUsers", getMyBlockedUsers);
 router.post("/deactivateMe", deactivateMe);
 router.patch("/completeDeactivateMe", completeDeactivateMe);
+router.route("/warnings").get(getWarnings);
 router.route("/:username").get(getUser);
+
+router.route("/warnings/:warningId").patch(restrictTo("user"), setWarningSeen);
+
 router
   .route("/:userId/follow")
   .post(restrictTo("user"), followUser)

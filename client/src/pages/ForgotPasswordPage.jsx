@@ -28,9 +28,10 @@ function ForgotPasswordPage() {
     },
   });
   return (
-    <div className="flex-grow flex justify-center items-center">
-      <form className="w-96 flex flex-col gap-3" onSubmit={formik.handleSubmit}>
-        <label htmlFor="email">البريد الإلكتروني: </label>  
+    <div className="flex-grow flex justify-center items-center px-5">
+      <form className="w-full max-w-96 flex flex-col gap-3" onSubmit={formik.handleSubmit}>
+        <h1 className="text-2xl font-bold mb-8 text-center">نسيتَ كلمة المرور؟</h1>
+        <label htmlFor="email">البريد الإلكتروني: </label>
         <input
           type="email"
           name="email"

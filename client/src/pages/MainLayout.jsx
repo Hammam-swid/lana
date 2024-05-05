@@ -14,12 +14,14 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { AnimatePresence, motion } from "framer-motion";
 import axios from "axios";
+import Warning from "../components/Warning";
 
 function MainLayout() {
   const user = useSelector((state) => state.user);
   const theme = useSelector((state) => state.theme);
   const token = useSelector((state) => state.token);
   const [newNotification, setNewNotification] = useState(null);
+  const [warning, setWarning] = useState(null);
   useEffect(() => {
     if (theme === "dark") document.body.classList.add("dark");
     else document.body.classList.remove("dark");
@@ -39,6 +41,24 @@ function MainLayout() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   // console.log(window.visualViewport.width);
+  useEffect(() => {
+    const getWarnings = async () => {
+      try {
+        const res = await axios({
+          method: "GET",
+          url: `/api/v1/users/warnings`,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log(res);
+        if (res.data.warning) {
+          setWarning(res.data.warning);
+        }
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getWarnings();
+  }, [token, user]);
   return (
     <>
       <Header notification={newNotification} />
@@ -102,6 +122,7 @@ function MainLayout() {
         )}
       </AnimatePresence>
       <Outlet />
+      <Warning warning={warning} hide={() => setWarning(null)} />
     </>
   );
 }

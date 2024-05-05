@@ -55,6 +55,9 @@ function ResetPasswordPage() {
         onSubmit={formik.handleSubmit}
         className="flex flex-col gap-3 w-full max-w-[35rem] p-3"
       >
+        <h1 className="text-2xl font-bold text-center mb-8">
+          استعادة كلمة المرور
+        </h1>
         <label htmlFor="email">البريد الإلكتروني: </label>
         <input
           type="email"

@@ -372,8 +372,9 @@ exports.deletePost = catchAsync(async (req, res, next) => {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
 
+  console.log('hello');
   if (
-    req.user.id !== post.user.toString() &&
+    req.user._id.toString() !== post.user.toString() &&
     req.user.role !== "admin" &&
     req.user.role !== "moderator"
   ) {

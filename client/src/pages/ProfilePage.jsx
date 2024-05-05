@@ -266,9 +266,14 @@ function ProfilePage() {
             if (thisUser?.following?.includes(data.user)) {
               setIsFollowed(true);
             }
-            const showedPosts = data.posts.map((post) => (
-              <Post key={post._id} post={post} />
-            ));
+            const showedPosts =
+              data.posts.length > 0 ? (
+                data.posts.map((post) => <Post key={post._id} post={post} />)
+              ) : (
+                <div className="text-xl text-center text-gray-500">
+                  لا توجد مناشير
+                </div>
+              );
             return (
               <>
                 {renderUser(data.user, data.posts)}
