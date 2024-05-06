@@ -95,7 +95,7 @@ function PostForm() {
             )}
           </button>
         </div>
-        <div className="flex flex-row-reverse gap-2 py-2 px-8 relative ">
+        <div className="flex flex-row-reverse gap-2 px-8 relative ">
           {imagePreview.length > 0 && (
             <>
               {imagePreview.map((image, index) => (
@@ -111,38 +111,41 @@ function PostForm() {
             </>
           )}
         </div>
-      </div>
-      <div className="flex justify-end mt-2">
-        <label htmlFor="image" className="cursor-pointer">
-          <FontAwesomeIcon icon={faImage} className="text-green-500 text-2xl" />
-        </label>
-        <input
-          type="file"
-          className="hidden"
-          name="images"
-          multiple
-          disabled={formik.isSubmitting}
-          onChange={async (e) => {
-            setImagePreview([]);
-            const updateImages = async () => {
-              for (let i = 0; i < formik.values.images.length; i++) {
-                const reader = new FileReader();
-                reader.onload = () => {
-                  if (reader.readyState === 2) {
-                    setImagePreview((prev) => [...prev, reader.result]);
-                  }
-                };
-                reader.readAsDataURL(formik.values.images[i]);
-              }
-            };
-            formik.values.images = e.target.files;
-            await updateImages();
-          }}
-          onBlur={formik.handleBlur}
-          // value={formik.values.images}
-          id="image"
-          accept="image/*"
-        />
+        <div className="flex justify-end px-2">
+          <label htmlFor="image" className="cursor-pointer">
+            <FontAwesomeIcon
+              icon={faImage}
+              className="text-green-500 text-2xl"
+            />
+          </label>
+          <input
+            type="file"
+            className="hidden"
+            name="images"
+            multiple
+            disabled={formik.isSubmitting}
+            onChange={async (e) => {
+              setImagePreview([]);
+              const updateImages = async () => {
+                for (let i = 0; i < formik.values.images.length; i++) {
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    if (reader.readyState === 2) {
+                      setImagePreview((prev) => [...prev, reader.result]);
+                    }
+                  };
+                  reader.readAsDataURL(formik.values.images[i]);
+                }
+              };
+              formik.values.images = e.target.files;
+              await updateImages();
+            }}
+            onBlur={formik.handleBlur}
+            // value={formik.values.images}
+            id="image"
+            accept="image/*"
+          />
+        </div>
       </div>
       <Message message={message} show={message} />
     </form>

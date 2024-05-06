@@ -1,6 +1,7 @@
 import {
   faCheck,
   faCommentSlash,
+  faFlag,
   faMessage,
   faThumbsDown,
   faThumbsUp,
@@ -91,6 +92,8 @@ function NotificationsPage() {
                           <FontAwesomeIcon icon={faCommentSlash} />
                         ) : noti.type === "follow" ? (
                           <FontAwesomeIcon icon={faUserPlus} />
+                        ) : noti.type === "report" ? (
+                          <FontAwesomeIcon icon={faFlag} />
                         ) : (
                           ""
                         )}
