@@ -41,6 +41,7 @@ import {
 } from "./utils/loaders";
 import ModeratorsPage from "./pages/ModeratorsPage";
 import VerifyAccountPage from "./pages/VerifyAccountPage";
+import DeleteAccountPage from "./pages/DeleteAccountPage";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -123,6 +124,7 @@ function App() {
             element={<BlockedUsers />}
             loader={blockedUsersLoader}
           />
+          <Route path="delete-account" element={<DeleteAccountPage />} />
           <Route
             path="deactivate-account"
             element={<DeactivateAccountPage />}

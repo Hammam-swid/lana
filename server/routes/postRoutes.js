@@ -16,6 +16,8 @@ const {
   likeComment,
   dislikeComment,
   cancelCommentReaction,
+  uploadVideo,
+  scanVideos,
 } = require("../controllers/postController");
 const { protect, restrictTo } = require("../controllers/authController");
 
@@ -29,6 +31,8 @@ router
   .route("/")
   .get(getPosts)
   .post(restrictTo("user"), uploadPostImages, scanPost, createPost);
+
+router.route("/video").post(uploadVideo, scanVideos);
 
 router
   .route("/:postId")

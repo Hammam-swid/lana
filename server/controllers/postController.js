@@ -1,15 +1,21 @@
 const Post = require("../models/postModel");
 const Notification = require("../models/notificationModel");
 const catchAsync = require("../utils/catchAsync");
+const FormData = require("form-data");
 const AppError = require("../utils/AppError");
+const fs = require("fs");
+const SightengineClient = require("sightengine");
+const { Readable } = require("stream");
+const streamBuffers = require("stream-buffers");
 const {
   GoogleGenerativeAI,
   HarmCategory,
   HarmBlockThreshold,
 } = require("@google/generative-ai");
-const aws = require("aws-sdk");
 const multer = require("multer");
 const sharp = require("sharp");
+const axios = require("axios");
+const { encode } = require("querystring");
 
 const multerStorage = multer.memoryStorage();
 const multerFilter = (req, file, cb) => {
@@ -372,7 +378,7 @@ exports.deletePost = catchAsync(async (req, res, next) => {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }
 
-  console.log('hello');
+  console.log("hello");
   if (
     req.user._id.toString() !== post.user.toString() &&
     req.user.role !== "admin" &&
@@ -916,15 +922,34 @@ exports.cancelCommentReaction = catchAsync(async (req, res, next) => {
   next(new AppError("لم تتفاعل مع هذا التعليق بالفعل", 400));
 });
 
-// exports.scanImageVideos = catchAsync((async) => (req, res, next) => {});
+const uploadVideo = multer({
+  storage: multer.memoryStorage(),
+});
 
-// aws.config.update({
-//   accessKeyId: ''
-// })
-// const rek = new aws.Rekognition();
+exports.uploadVideo = uploadVideo.single("video");
 
-// console.log(rek.config.params)
+exports.scanVideos = catchAsync(async (req, res, next) => {
+  // console.log(req.file);
+  const data = new FormData({ encoding: "multipart/form-data" });
+  const client = new SightengineClient(
+    "505150620",
+    "n8kScfHGJMb4wUDnAjXPnpiG3WaPsg7k"
+  );
+  const response = await client.check(["nudity"]).video(req.file.buffer);
+  // const response = await client.checkVideoSync(req.file.buffer);
+  // data.append("media", fs.createReadStream(req.file));
+  // data.append("models", "nudity-2.0");
+  // data.append("api_user", "505150620");
+  // data.append("api_secret", "n8kScfHGJMb4wUDnAjXPnpiG3WaPsg7k");
 
-// // rek.detectModerationLabels((error, data) => {
-// //   console.log(error, data);
-// // });
+  // const response = await axios({
+  //   method: "POST",
+  //   url: "https://api.sightengine.com/1.0/check.json",
+  //   data: data,
+  //   headers: { ...data.getHeaders() },
+  // });
+  console.log(response);
+  res.status(200).json({
+    status: "success",
+  });
+});

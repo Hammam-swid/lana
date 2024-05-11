@@ -129,6 +129,30 @@ exports.forgotPassword = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.deleteAccountRequest = catchAsync(async (req, res, next) => {
+  const { password } = req.body;
+  const user = await User.findOne({
+    email: req.user.email,
+    state: "active",
+  }).select("+password");
+  if (!user) {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  if (!(await user.comparePassword(password, user.password))) {
+    return next(new AppError("كلمة المرور غير صحيحة", 400));
+  }
+  const verificationCode = crypto.randomInt(100000, 999999);
+  user.verificationCode = verificationCode;
+  user.verificationCodeEx = Date.now() + 5 * 60 * 1000;
+  await new Email(user).sendConfirmDeactivate();
+  res.status(200).json({
+    status: "success",
+    message: "تم إرسال رمز التحقق إلى بريد الإلكتروني",
+  });
+});
+
+exports.completeDeleteAccount = catchAsync(async (req, res, next) => {});
+
 exports.isTokenExist = catchAsync(async (req, res, next) => {
   const { resetToken } = req.params;
   const hashedToken = crypto

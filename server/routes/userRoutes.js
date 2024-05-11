@@ -11,6 +11,7 @@ const {
   isTokenExist,
   createModerator,
   logout,
+  deleteAccountRequest,
 } = require("../controllers/authController");
 const {
   getUser,
@@ -67,6 +68,7 @@ router.post("/deactivateMe", deactivateMe);
 router.patch("/completeDeactivateMe", completeDeactivateMe);
 router.route("/warnings").get(getWarnings);
 router.route("/:username").get(getUser);
+router.route("/deleteAccount").post(deleteAccountRequest);
 
 router.route("/warnings/:warningId").patch(restrictTo("user"), setWarningSeen);
 

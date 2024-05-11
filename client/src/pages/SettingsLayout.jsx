@@ -3,6 +3,7 @@ import {
   faCheckCircle,
   faKey,
   faLock,
+  faTrash,
   faUser,
   faUserLock,
 } from "@fortawesome/free-solid-svg-icons";
@@ -107,6 +108,20 @@ function SettingsLayout() {
               >
                 <span>إلغاء تفعيل الحساب</span>
                 <FontAwesomeIcon icon={faKey} className="text-red-500" />
+              </NavLink>
+            </li>
+            <li>
+              <NavLink
+                to="delete-account"
+                className={({ isActive }) =>
+                  `p-3 rounded-md flex justify-between items-center ${
+                    isActive &&
+                    "text-green-500 font-bold bg-slate-200 dark:bg-slate-950"
+                  }`
+                }
+              >
+                <span>حذف الحساب</span>
+                <FontAwesomeIcon icon={faTrash} className="text-red-500" />
               </NavLink>
             </li>
           </ul>

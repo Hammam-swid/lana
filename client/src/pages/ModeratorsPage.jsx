@@ -17,7 +17,7 @@ function ModeratorsPage() {
   const regex = new RegExp(`^${search}|${search}$|(.*)${search}(.*)$`, "i");
   return (
     <div className="w-full p-6">
-      <h1 className="text-3xl font-bold mb-5">المستخدمون</h1>
+      <h1 className="text-3xl font-bold mb-5">المشرفون والمدراء</h1>
       <div className="mb-5 flex justify-between ">
         <div>
           <input
