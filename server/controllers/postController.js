@@ -31,7 +31,7 @@ const upload = multer({
 
 const filterSortPosts = (posts, req) => {
   const newPosts = posts
-    .filter((post) => post.user.state === "active")
+    .filter((post) => post?.user?.state === "active")
     .map((post) => {
       const commentsScore = post.comments.length * 0.2;
       const reactionsScore = post.reactions.length * 0.3;
@@ -46,7 +46,7 @@ const filterSortPosts = (posts, req) => {
       post.score = commentsScore + reactionsScore + timeScore;
       post.comments = post.comments.filter(
         (comment) =>
-          comment.user.state === "active" &&
+          comment.user?.state === "active" &&
           !req.user.blockedUsers
             .map((user) => user.toString())
             .includes(comment.user._id.toString()) &&

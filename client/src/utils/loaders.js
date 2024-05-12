@@ -115,6 +115,27 @@ export const reportsPageLoader = () => {
   return defer({ reports: getReports() });
 };
 
+export const verifyingRequestsLoader = () => {
+  const getRequests = async () => {
+    try {
+      const { token } = store.getState();
+      console.log(`this token in line 122 ${token}`);
+      const res = await axios({
+        method: "GET",
+        url: "/api/v1/users/verifyingRequest",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log(res);
+      if (res.status === 200) return res.data.verifyingRequests;
+    } catch (error) {
+      console.log(error);
+      return null;
+    }
+  };
+  console.log("error");
+  return defer({ verifyingRequests: getRequests() });
+};
+
 export const usersPageLoader = () => {
   const getUsers = async () => {
     try {

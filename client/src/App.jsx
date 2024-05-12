@@ -38,10 +38,12 @@ import {
   searchPageLoader,
   settingsLayoutLoader,
   usersPageLoader,
+  verifyingRequestsLoader,
 } from "./utils/loaders";
 import ModeratorsPage from "./pages/ModeratorsPage";
 import VerifyAccountPage from "./pages/VerifyAccountPage";
 import DeleteAccountPage from "./pages/DeleteAccountPage";
+import VerifyingRequestsPage from "./pages/VerifyingRequestsPage";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -77,6 +79,11 @@ function App() {
           loader={dashboardLoader}
         >
           <Route index element={<ReportsPage />} loader={reportsPageLoader} />
+          <Route
+            path="verifying-requests"
+            element={<VerifyingRequestsPage />}
+            loader={verifyingRequestsLoader}
+          />
           <Route
             path="users"
             element={<UsersPage />}

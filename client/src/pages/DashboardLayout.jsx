@@ -1,3 +1,4 @@
+import { faCheckCircle } from "@fortawesome/free-regular-svg-icons";
 import { faFlag, faUserTie, faUsers } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useSelector } from "react-redux";
@@ -21,6 +22,19 @@ function DashboardLayout() {
           >
             <span>إدارة البلاغات</span>
             <FontAwesomeIcon icon={faFlag} />
+          </NavLink>
+          <NavLink
+            to={"verifying-requests"}
+            end
+            className={({ isActive }) =>
+              `flex justify-between items-center rounded-md hover:bg-slate-200 dark:hover:bg-slate-950 ${
+                isActive &&
+                "text-green-500 font-bold dark:bg-slate-950 bg-slate-200"
+              } p-3 duration-200`
+            }
+          >
+            <span>طلبات التوثيق</span>
+            <FontAwesomeIcon icon={faCheckCircle} />
           </NavLink>
           <NavLink
             to={"users"}

@@ -1,14 +1,40 @@
-import { faCircleNotch, faImage } from "@fortawesome/free-solid-svg-icons";
+import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import axios from "axios";
 import { useFormik } from "formik";
+import { useSelector } from "react-redux";
+import * as Yup from "yup";
 
 function VerifyAccountPage() {
+  const token = useSelector((state) => state.token);
   const formik = useFormik({
     initialValues: {
       verificationFile: "",
       description: "",
     },
-    onSubmit: (values) => console.log(values),
+    validationSchema: Yup.object({
+      verificationFile: Yup.mixed().required("يجب إدخال ملف"),
+      description: Yup.string().min(10, "يجب أن يحتوي الوصف على عشرة أحرف"),
+    }),
+    onSubmit: async (values) => {
+      try {
+        const { description, verificationFile } = values;
+        const formData = new FormData();
+        console.log(values);
+        formData.append("verificationFile", verificationFile);
+        formData.append("description", description);
+        console.log(formData.get("verificationFile"));
+        const res = await axios({
+          method: "POST",
+          url: "/api/v1/users/verifyingRequest",
+          data: formData,
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+      }
+    },
   });
   return (
     <form
@@ -27,7 +53,10 @@ function VerifyAccountPage() {
         accept="image/*,.pdf"
         className=""
       />
-      <p className="text-gray-500">يمكنك رفع صورة أو ملف pdf</p>
+      {formik.errors.verificationFile && formik.touched.verificationFile && (
+        <p className="text-red-400">{formik.errors.verificationFile}</p>
+      )}
+      {/* <p className="text-gray-500">يمكنك رفع صورة أو ملف pdf</p> */}
       {/* <label htmlFor="verificationFile" className="text-3xl text-green-500 cursor-pointer">
         <FontAwesomeIcon icon={faImage} />
       </label> */}

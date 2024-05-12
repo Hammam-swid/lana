@@ -15,6 +15,11 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/fallback/, ""),
       },
+      "/verificationFiles": {
+        target: "http://localhost:3000",
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/fallback/, ""),
+      },
       "/socket": {
         target: "http://localhost:3000",
         changeOrigin: true,

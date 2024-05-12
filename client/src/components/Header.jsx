@@ -335,6 +335,7 @@ function Header({ notification }) {
                 />
               </li>
               <li
+                className="cursor-pointer"
                 onClick={() => {
                   setModalData({
                     message: "هل أنت متأكد من أنك تريد تسجيل الخروج؟",
@@ -356,7 +357,7 @@ function Header({ notification }) {
                   });
                 }}
               >
-                <label>تسجيل الخروج</label>
+                <label className="cursor-pointer">تسجيل الخروج</label>
                 <FontAwesomeIcon
                   className="text-2xl hover:text-red-500 duration-100"
                   icon={faArrowRightFromBracket}

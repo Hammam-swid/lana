@@ -81,20 +81,20 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
           if (options) setOptions(false);
         }}
       >
-        <Link to={`/profile/${comment.user.username}`}>
+        <Link to={`/profile/${comment.user?.username}`}>
           <img
-            src={`/img/users/${comment.user.photo}`}
-            alt={`صورة ${comment.user.fullName}`}
+            src={`/img/users/${comment.user?.photo}`}
+            alt={`صورة ${comment.user?.fullName}`}
             className="w-10 h-10 rounded-full overflow-hidden object-cover"
           />
         </Link>
         <div className="dark:bg-slate-900 bg-slate-100 p-3 rounded-md flex-1 relative">
           <Link
-            to={`/profile/${comment.user.username}`}
+            to={`/profile/${comment.user?.username}`}
             className="font-bold mb-2"
           >
-            {comment.user.fullName}
-            {comment.user.verified && (
+            {comment?.user?.fullName}
+            {comment.user?.verified && (
               <span>
                 <FontAwesomeIcon
                   icon={faCheckCircle}
@@ -280,7 +280,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
                 className="dark:bg-slate-800 bg-slate-300 shadow-md absolute z-20 left-0 top-8 p-3 rounded-md dark:hover:*:bg-slate-900 hover:*:bg-green-200 *:p-2 *:rounded-md"
                 onClick={() => setOptions(false)}
               >
-                {comment.user.username === user.username ||
+                {comment.user?.username === user.username ||
                 user.username === postUser.username ||
                 user.role === "admin" ||
                 user.role === "moderator" ? (
@@ -327,7 +327,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
                     </button>
                   </li>
                 )}
-                {user.username === comment.user.username && (
+                {user.username === comment.user?.username && (
                   <li>
                     <button
                       onClick={() => setEdited(true)}

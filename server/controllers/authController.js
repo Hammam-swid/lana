@@ -5,6 +5,7 @@ const { promisify } = require("util");
 const catchAsync = require("../utils/catchAsync");
 const AppError = require("../utils/AppError");
 const Email = require("../utils/email");
+const Post = require("../models/postModel");
 
 const createToken = (payload) => {
   return jwt.sign(payload, process.env.JWT_SECRET, {
@@ -144,6 +145,7 @@ exports.deleteAccountRequest = catchAsync(async (req, res, next) => {
   const verificationCode = crypto.randomInt(100000, 999999);
   user.verificationCode = verificationCode;
   user.verificationCodeEx = Date.now() + 5 * 60 * 1000;
+  await user.save();
   await new Email(user).sendConfirmDeactivate();
   res.status(200).json({
     status: "success",
@@ -151,7 +153,25 @@ exports.deleteAccountRequest = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.completeDeleteAccount = catchAsync(async (req, res, next) => {});
+exports.completeDeleteAccount = catchAsync(async (req, res, next) => {
+  const { verificationCode } = req.body;
+  const user = await User.findOne({
+    email: req.user.email,
+    verificationCode,
+    verificationCodeEx: { $gt: Date.now() },
+  });
+  if (!user) {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  const postsResult = await Post.deleteMany({ user: req.user._id });
+  console.log(postsResult);
+  const userResult = await User.deleteOne({ _id: user._id });
+  console.log(userResult);
+  res.status(200).json({
+    status: "success",
+    message: "تم حذف الحساب بنجاح",
+  });
+});
 
 exports.isTokenExist = catchAsync(async (req, res, next) => {
   const { resetToken } = req.params;

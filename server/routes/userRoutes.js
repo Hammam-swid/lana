@@ -12,6 +12,7 @@ const {
   createModerator,
   logout,
   deleteAccountRequest,
+  completeDeleteAccount,
 } = require("../controllers/authController");
 const {
   getUser,
@@ -41,6 +42,12 @@ const {
   getWarnings,
   setWarningSeen,
 } = require("../controllers/userController");
+const {
+  uploadVerificationFile,
+  createVerifyingRequest,
+  saveVerificationFile,
+  getAllVerifyingRequests,
+} = require("../controllers/verificationRequestController");
 
 const router = express.Router();
 
@@ -67,8 +74,15 @@ router.get("/blockedUsers", getMyBlockedUsers);
 router.post("/deactivateMe", deactivateMe);
 router.patch("/completeDeactivateMe", completeDeactivateMe);
 router.route("/warnings").get(getWarnings);
+router
+  .route("/verifyingRequest")
+  .post(uploadVerificationFile, createVerifyingRequest)
+  .get(restrictTo("admin", "moderator"), getAllVerifyingRequests);
+router
+  .route("/deleteAccount")
+  .post(deleteAccountRequest)
+  .delete(completeDeleteAccount);
 router.route("/:username").get(getUser);
-router.route("/deleteAccount").post(deleteAccountRequest);
 
 router.route("/warnings/:warningId").patch(restrictTo("user"), setWarningSeen);
 

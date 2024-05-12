@@ -497,20 +497,3 @@ exports.setWarningSeen = catchAsync(async (req, res, next) => {
   });
 });
 
-exports.uploadVerificationFile = upload.single("verificationFile");
-
-exports.createVerifyingRequest = catchAsync(async (req, res, next) => {
-  const { verificationFile, description } = req.body;
-  const filteredBody = filterObj(req.body, "description");
-  filteredBody.userId = req.user._id;
-  filteredBody.profileUrl = `/profile/${req.user.username}`;
-  filteredBody.createdAt = Date.now();
-  if (req.file) filteredBody.verificationFile = req.file.filename;
-  const verifyingRequest = VerifyingRequest.create({
-    userId: req.user._id,
-    createdAt: Date.now(),
-    verificationFile,
-    description,
-    profileUrl: `/profile/${req.user.username}`,
-  });
-});

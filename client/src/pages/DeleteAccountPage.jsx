@@ -7,13 +7,16 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import { useState } from "react";
-import { useSelector } from "react-redux";
-import { useSearchParams } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import axios from "axios";
 import Message from "../components/Message";
+import { setLogout } from "../store/authSlice";
 
 function DeleteAccountPage() {
+  const dispatch = useDispatch();
+  const nav = useNavigate();
   const user = useSelector((state) => state.user);
   const token = useSelector((state) => state.token);
   const [showPassword, setShowPassword] = useState(false);
@@ -38,21 +41,32 @@ function DeleteAccountPage() {
         .max(999999, "يجب أن يتكون رمز التحقق من 6 أرقام فقط"),
     }),
     onSubmit: async (values) => {
-      const { password } = values;
+      const { password, verificationCode } = values;
       try {
         const res = await axios({
-          method: "POST",
+          method: isSent ? "DELETE" : "POST",
           url: "/api/v1/users/deleteAccount",
           headers: { Authorization: `Bearer ${token}` },
-          data: { password },
+          data: isSent ? { verificationCode } : { password },
         });
         console.log(res);
         setMessage(res?.data?.message);
-        setIsSent(true);
-        setParams((prev) => {
-          prev.set("email", user.email);
-          return prev;
-        });
+        if (!isSent) {
+          setIsSent(true);
+          setParams((prev) => {
+            prev.set("email", user.email);
+            return prev;
+          });
+        } else {
+          axios({
+            method: "GET",
+            url: "/api/v1/users/logout",
+          }).then(() => {
+            dispatch(setLogout());
+            nav("/login");
+          });
+          setMessage("تم حذف الحساب بنجاح");
+        }
       } catch (error) {
         console.log(error);
       } finally {
