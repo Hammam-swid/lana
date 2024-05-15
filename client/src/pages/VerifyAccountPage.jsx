@@ -26,7 +26,7 @@ function VerifyAccountPage() {
         console.log(formData.get("verificationFile"));
         const res = await axios({
           method: "POST",
-          url: "/api/v1/users/verifyingRequest",
+          url: "/api/v1/verifyingRequests",
           data: formData,
           headers: { Authorization: `Bearer ${token}` },
         });

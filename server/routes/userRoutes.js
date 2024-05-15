@@ -74,10 +74,7 @@ router.get("/blockedUsers", getMyBlockedUsers);
 router.post("/deactivateMe", deactivateMe);
 router.patch("/completeDeactivateMe", completeDeactivateMe);
 router.route("/warnings").get(getWarnings);
-router
-  .route("/verifyingRequest")
-  .post(uploadVerificationFile, createVerifyingRequest)
-  .get(restrictTo("admin", "moderator"), getAllVerifyingRequests);
+
 router
   .route("/deleteAccount")
   .post(deleteAccountRequest)

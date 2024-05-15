@@ -122,7 +122,7 @@ export const verifyingRequestsLoader = () => {
       console.log(`this token in line 122 ${token}`);
       const res = await axios({
         method: "GET",
-        url: "/api/v1/users/verifyingRequest",
+        url: "/api/v1/verifyingRequests",
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log(res);

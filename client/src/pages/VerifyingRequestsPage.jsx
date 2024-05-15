@@ -1,8 +1,6 @@
-import { Suspense, useState } from "react";
-import { Await, Link, useLoaderData } from "react-router-dom";
-import { Document, Page, pdfjs } from "react-pdf";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faArrowRight } from "@fortawesome/free-solid-svg-icons";
+import { Suspense } from "react";
+import { Await, useLoaderData } from "react-router-dom";
+import { pdfjs } from "react-pdf";
 import VerifyingRequestPreview from "../components/VerifyingRequestPreview";
 
 pdfjs.GlobalWorkerOptions.workerSrc = new URL(
@@ -15,7 +13,7 @@ function VerifyingRequestsPage() {
   return (
     <div className="flex flex-col gap-5 p-6 w-full">
       <h1 className="text-3xl font-bold ">طلبات التوثيق</h1>
-      <div className="grid grid-cols-3 w-full gap-5">
+      <div className="grid grid-cols-2 w-full gap-5">
         <Suspense fallback={<>جار التحميل...</>}>
           <Await resolve={promiseData.verifyingRequests}>
             {(requests) =>

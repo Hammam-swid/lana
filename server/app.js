@@ -18,6 +18,7 @@ const postRouter = require("./routes/postRoutes");
 const userRouter = require("./routes/userRoutes");
 const searchRouter = require("./routes/searchRoutes");
 const reportRouter = require("./routes/reportRoutes");
+const verifyingRequestRouter = require("./routes/verifyingRequestRoutes");
 const notificationRouter = require("./routes/notificationRoutes");
 
 app.use(helmet({ crossOriginResourcePolicy: true }));
@@ -50,6 +51,7 @@ app.use("/api/v1/users", userRouter);
 app.use("/api/v1/search", searchRouter);
 app.use("/api/v1/reports", reportRouter);
 app.use("/api/v1/notifications", notificationRouter);
+app.use("/api/v1/verifyingRequests", verifyingRequestRouter);
 
 app.all("*", (req, res) => {
   res.status(404).json({ status: "fail" });

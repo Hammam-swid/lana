@@ -351,7 +351,7 @@ exports.getPost = catchAsync(async (req, res, next) => {
     ],
   })
     .populate("user", "username photo fullName verified")
-    .populate("comments.user", "username photo fullName state");
+    .populate("comments.user", "username photo fullName state verified");
   if (!post) {
     return next(new AppError("هذا المنشور غير موجود", 404));
   }

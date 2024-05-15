@@ -19,6 +19,7 @@ import {
   faToolbox,
   faFlag,
 } from "@fortawesome/free-solid-svg-icons";
+import { faCheckCircle } from "@fortawesome/free-regular-svg-icons";
 import { setLogout, updateTheme } from "../store/authSlice";
 import {
   useEffect,
@@ -196,7 +197,9 @@ function Header({ notification }) {
                         }
                       }}
                       to={noti.returnUrl}
-                      className="p-2 bg-slate-200 dark:bg-slate-950 block rounded-md"
+                      className={`p-2 bg-slate-200 dark:bg-slate-950 block rounded-md ${
+                        noti.seen ? "text-gray-500" : "font-bold"
+                      }`}
                       key={noti._id}
                     >
                       <p>
@@ -230,6 +233,8 @@ function Header({ notification }) {
                             <FontAwesomeIcon icon={faUserPlus} />
                           ) : noti.type === "report" ? (
                             <FontAwesomeIcon icon={faFlag} />
+                          ) : noti.type === "verifying" ? (
+                            <FontAwesomeIcon icon={faCheckCircle} />
                           ) : (
                             ""
                           )}

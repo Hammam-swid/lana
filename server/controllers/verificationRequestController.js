@@ -1,8 +1,10 @@
 const multer = require("multer");
 const catchAsync = require("../utils/catchAsync");
 const VerifyingRequest = require("../models/verifyingRequestModel");
+const User = require("../models/userModel");
 const AppError = require("../utils/AppError");
 const sharp = require("sharp");
+const Notification = require("../models/notificationModel");
 
 const multerFilter = (req, file, cb) => {
   if (
@@ -82,4 +84,58 @@ exports.getAllVerifyingRequests = catchAsync(async (req, res, next) => {
     result: verifyingRequests.length,
     verifyingRequests,
   });
+});
+
+exports.setVerifyingRequestSeen = catchAsync(async (req, res, next) => {
+  const { verifyingRequestId } = req.params;
+  const verifyingRequest = await VerifyingRequest.findByIdAndUpdate(
+    verifyingRequestId,
+    { seen: true },
+    { new: true }
+  );
+  res.status(200).json({
+    status: "success",
+    verifyingRequest,
+  });
+});
+
+exports.acceptVerifyingRequest = catchAsync(async (req, res, next) => {
+  const { verifyingRequestId } = req.params;
+  const verifyingRequest = await VerifyingRequest.findById(verifyingRequestId);
+  if (!verifyingRequest) {
+    return next(new AppError("هذا الطلب غير موجود", 404));
+  }
+  const user = await User.findById(verifyingRequest.userId);
+  if (!user) {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  user.verified = true;
+  verifyingRequest.seen = true;
+  await user.save();
+  await verifyingRequest.save();
+  console.log(verifyingRequest.profileUrl.split("/"));
+  res
+    .status(200)
+    .json({
+      status: "success",
+      message: "تم توثيق حساب هذا المستخدم بنجاح",
+      verifyingRequest,
+    });
+  // إرسال إشعار للمستخدم الموثق حسابه
+  const notification = await Notification.create({
+    senderUsername: "",
+    recipientUsername: verifyingRequest.profileUrl.split("/profile/")[1],
+    createdAt: Date.now(),
+    returnUrl: verifyingRequest.profileUrl,
+    type: "verifying",
+    message: "تم توثيق حسابك بنجاح",
+  });
+
+  const io = req.app.get("socket.io");
+  const socketClients = req.app.get("socket-clients");
+  io.to(
+    ...socketClients
+      .filter((client) => client.username === notification.recipientUsername)
+      .map((client) => client.id)
+  ).emit("notification", notification);
 });
