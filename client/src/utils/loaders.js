@@ -240,6 +240,7 @@ export const postPageLoader = ({ params }) => {
       });
       if (res.data.status === "success") return res.data.post;
     } catch (error) {
+      console.log(error);
       return error;
     }
   };

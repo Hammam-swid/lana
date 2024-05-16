@@ -357,7 +357,7 @@ exports.getPost = catchAsync(async (req, res, next) => {
   }
   post.comments = post.comments.filter(
     (comment) =>
-      comment.user.state === "active" &&
+      comment.user?.state === "active" &&
       !req.user.blockedUsers
         .map((user) => user.toString())
         .includes(comment.user._id.toString()) &&

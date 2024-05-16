@@ -15,6 +15,7 @@ import {
 import { AnimatePresence, motion } from "framer-motion";
 import axios from "axios";
 import Warning from "../components/Warning";
+import { faCheckCircle } from "@fortawesome/free-regular-svg-icons";
 
 function MainLayout() {
   const user = useSelector((state) => state.user);
@@ -96,7 +97,8 @@ function MainLayout() {
               <span
                 className={`ms-2 ${
                   newNotification.type === "dislike" ||
-                  newNotification.type === "deleteComment"
+                  newNotification.type === "deleteComment" ||
+                  newNotification.type === "verifyingRejected" 
                     ? "bg-red-500"
                     : "bg-green-500"
                 } py-1 px-2 inline-block rounded-full`}
@@ -113,6 +115,8 @@ function MainLayout() {
                   <FontAwesomeIcon icon={faUserPlus} />
                 ) : newNotification.type === "report" ? (
                   <FontAwesomeIcon icon={faFlag} />
+                ) : newNotification.type.startsWith("verifying") ? (
+                  <FontAwesomeIcon icon={faCheckCircle} />
                 ) : (
                   ""
                 )}

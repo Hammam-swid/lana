@@ -134,7 +134,7 @@ function VerifyingRequestPreview({ request }) {
                   url: `/api/v1/verifyingRequests/${request._id}/ok`,
                   headers: { Authorization: `Bearer ${token}` },
                 });
-                console.log(res)
+                console.log(res);
               } catch (error) {
                 console.log(error);
               }
@@ -143,7 +143,22 @@ function VerifyingRequestPreview({ request }) {
           >
             موافقة
           </button>
-          <button className="p-2 bg-gradient-to-b from-red-500 to-red-700 font-bold text-white rounded-md ms-2">
+          <button
+            onClick={async () => {
+              try {
+                const res = await axios({
+                  method: "delete",
+                  url: `/api/v1/verifyingRequests/${request._id}`,
+                  headers: { Authorization: `Bearer ${token}` },
+                });
+                console.log(res);
+                nav(".");
+              } catch (error) {
+                console.log(error);
+              }
+            }}
+            className="p-2 bg-gradient-to-b from-red-500 to-red-700 font-bold text-white rounded-md ms-2"
+          >
             رفض
           </button>
         </div>

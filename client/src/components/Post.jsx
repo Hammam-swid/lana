@@ -105,19 +105,19 @@ function Post(props) {
       >
         <div className="flex justify-between items-center relative">
           <Link
-            to={`/profile/${post.user.username}`}
+            to={`/profile/${post?.user?.username}`}
             className="flex items-center gap-3"
           >
             <div>
               <img
-                src={`/img/users/${post.user.photo}`}
+                src={`/img/users/${post.user?.photo}`}
                 alt={`صورة ${props?.user?.fullName}`}
                 className="w-10 h-10 rounded-full overflow-hidden object-cover"
               />
             </div>
             <h3 className="font-bold">
-              {post.user.fullName}{" "}
-              {post.user.verified && (
+              {post.user?.fullName}{" "}
+              {post.user?.verified && (
                 <span>
                   <FontAwesomeIcon
                     icon={faCheckCircle}
@@ -153,7 +153,7 @@ function Post(props) {
                 >
                   {user.role === "admin" ||
                   user.role === "moderator" ||
-                  user.username === post.user.username ? (
+                  user.username === post.user?.username ? (
                     <li>
                       <button
                         onClick={() =>

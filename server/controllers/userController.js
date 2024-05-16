@@ -45,7 +45,7 @@ exports.getUser = catchAsync(async (req, res, next) => {
     user,
     posts: posts.map((post) => {
       post.comments = post.comments.filter(
-        (comment) => comment.user.state === "active"
+        (comment) => comment.user?.state === "active"
       );
       return post;
     }),

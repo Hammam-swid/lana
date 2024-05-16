@@ -216,7 +216,8 @@ function Header({ notification }) {
                         <span
                           className={`block text-white ${
                             noti.type === "dislike" ||
-                            noti.type === "deleteComment"
+                            noti.type === "deleteComment" ||
+                            noti.type === "verifyingRejected"
                               ? "bg-red-500"
                               : "bg-green-500"
                           } rounded-full px-2 py-1`}
@@ -233,7 +234,7 @@ function Header({ notification }) {
                             <FontAwesomeIcon icon={faUserPlus} />
                           ) : noti.type === "report" ? (
                             <FontAwesomeIcon icon={faFlag} />
-                          ) : noti.type === "verifying" ? (
+                          ) : noti.type.startsWith("verifying") ? (
                             <FontAwesomeIcon icon={faCheckCircle} />
                           ) : (
                             ""

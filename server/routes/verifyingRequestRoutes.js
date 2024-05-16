@@ -5,6 +5,7 @@ const {
   getAllVerifyingRequests,
   setVerifyingRequestSeen,
   acceptVerifyingRequest,
+  rejectVerifyingRequest,
 } = require("../controllers/verificationRequestController");
 const { restrictTo, protect } = require("../controllers/authController");
 
@@ -19,6 +20,9 @@ router
 
 router.use(restrictTo("admin", "moderator"));
 
-router.route("/:verifyingRequestId").patch(setVerifyingRequestSeen);
+router
+  .route("/:verifyingRequestId")
+  .patch(setVerifyingRequestSeen)
+  .delete(rejectVerifyingRequest);
 router.patch("/:verifyingRequestId/ok", acceptVerifyingRequest);
 module.exports = router;

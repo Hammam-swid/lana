@@ -114,21 +114,52 @@ exports.acceptVerifyingRequest = catchAsync(async (req, res, next) => {
   await user.save();
   await verifyingRequest.save();
   console.log(verifyingRequest.profileUrl.split("/"));
-  res
-    .status(200)
-    .json({
-      status: "success",
-      message: "تم توثيق حساب هذا المستخدم بنجاح",
-      verifyingRequest,
-    });
+  res.status(200).json({
+    status: "success",
+    message: "تم توثيق حساب هذا المستخدم بنجاح",
+    verifyingRequest,
+  });
   // إرسال إشعار للمستخدم الموثق حسابه
   const notification = await Notification.create({
-    senderUsername: "",
+    senderUsername: "moderators",
     recipientUsername: verifyingRequest.profileUrl.split("/profile/")[1],
     createdAt: Date.now(),
     returnUrl: verifyingRequest.profileUrl,
-    type: "verifying",
+    type: "verifyingAccepted",
     message: "تم توثيق حسابك بنجاح",
+  });
+
+  const io = req.app.get("socket.io");
+  const socketClients = req.app.get("socket-clients");
+  io.to(
+    ...socketClients
+      .filter((client) => client.username === notification.recipientUsername)
+      .map((client) => client.id)
+  ).emit("notification", notification);
+});
+
+exports.rejectVerifyingRequest = catchAsync(async (req, res, next) => {
+  // حذف الطلب من قاعدة البيانات
+  /* 
+    مع العلم أن الصور والملفات لن تمسح من الخادم
+    ويمكن الوصول إليها عن طريق معرف المستخدم
+  */
+  const { verifyingRequestId } = req.params;
+  const verifyingRequest = await VerifyingRequest.findByIdAndDelete(
+    verifyingRequestId
+  );
+  res.status(200).json({
+    status: "success",
+    message: "تم رفض الطلب بنجاح",
+  });
+  // إرسال إشعار للمستخدم صاحب الطلب بأنه قد رفض
+  const notification = await Notification.create({
+    senderUsername: "moderators",
+    recipientUsername: verifyingRequest.profileUrl.split("/profile/")[1],
+    createdAt: Date.now(),
+    returnUrl: verifyingRequest.profileUrl,
+    type: "verifyingRejected",
+    message: "تم رفض توثيق حسابك لعدم استيفائك للشروط المطلوبة",
   });
 
   const io = req.app.get("socket.io");
