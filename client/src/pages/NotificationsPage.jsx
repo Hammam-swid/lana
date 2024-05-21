@@ -7,6 +7,7 @@ import {
   faThumbsUp,
   faUserPlus,
 } from "@fortawesome/free-solid-svg-icons";
+import { faCheckCircle } from "@fortawesome/free-regular-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { Suspense, useState } from "react";
@@ -60,7 +61,9 @@ function NotificationsPage() {
                       }
                     }}
                     to={noti.returnUrl}
-                    className="p-2 bg-slate-200 dark:bg-slate-950 block rounded-md"
+                    className={`p-2 bg-slate-200 dark:bg-slate-950 block rounded-md ${
+                      noti.seen ? "text-gray-500" : "font-bold shadow-md"
+                    }`}
                     key={noti._id}
                   >
                     <p>
@@ -77,7 +80,8 @@ function NotificationsPage() {
                       <span
                         className={`block text-white ${
                           noti.type === "dislike" ||
-                          noti.type === "deleteComment"
+                          noti.type === "deleteComment" ||
+                          noti.type === "verifyingRejected"
                             ? "bg-red-500"
                             : "bg-green-500"
                         } rounded-full px-2 py-1`}
@@ -94,6 +98,8 @@ function NotificationsPage() {
                           <FontAwesomeIcon icon={faUserPlus} />
                         ) : noti.type === "report" ? (
                           <FontAwesomeIcon icon={faFlag} />
+                        ) : noti.type.startsWith("verifying") ? (
+                          <FontAwesomeIcon icon={faCheckCircle} />
                         ) : (
                           ""
                         )}

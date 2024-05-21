@@ -24,6 +24,7 @@ const { protect, restrictTo } = require("../controllers/authController");
 // إنشاء موجه فرعي خاص بالمناشير
 const router = express.Router();
 
+router.route("/video").post(uploadVideo, scanVideos);
 // router.use(protect)
 //  استقبال طلب على المسار / ي
 router.use(protect);
@@ -31,8 +32,6 @@ router
   .route("/")
   .get(getPosts)
   .post(restrictTo("user"), uploadPostImages, scanPost, createPost);
-
-router.route("/video").post(uploadVideo, scanVideos);
 
 router
   .route("/:postId")

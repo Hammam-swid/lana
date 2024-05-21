@@ -11,7 +11,10 @@
   "author": "Hammam-Swaid and Omar-Gana",
   "license": "ISC",
   "dependencies": {
+    "@google-cloud/storage": "^7.11.0",
+    "@google-cloud/video-intelligence": "^5.2.0",
     "@google/generative-ai": "^0.2.1",
+    "aws-sdk": "^2.1621.0",
     "axios": "^1.6.8",
     "bcrypt": "^5.1.1",
     "compression": "^1.7.4",

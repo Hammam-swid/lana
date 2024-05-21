@@ -11,24 +11,18 @@ import { useState } from "react";
 import { Document, Page } from "react-pdf";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
+import Modal from "./Modal";
 
 function VerifyingRequestPreview({ request }) {
   const token = useSelector((state) => state.token);
   const nav = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
   const [numOfPages, setNumOfPages] = useState(0);
+  const [modalData, setModalData] = useState({});
   console.log(request.profileUrl.split("/profile/"));
   return (
     <div className="dark:bg-slate-900 bg-slate-100 rounded-md h-[32rem] p-3 shadow-md flex flex-col justify-between">
-      {/* <h3 className="text-xl font-bold text-center mb-5">
-        <span>طلب توثيق</span>
-        <FontAwesomeIcon icon={faCheckCircle} className="align-middle ms-2"/>
-      </h3> */}
       {request.verificationFile.split(".")[1] === "pdf" ? (
-        // <iframe
-        //   className="w-64 aspect-square"
-        //   src={`/verificationFiles/${request.verificationFile}`}
-        // />
         <>
           <div className="max-h-96 overflow-y-scroll overflow-x-hidden w-full rounded-md outline outline-2 outline-green-500 dark:outline-none">
             <Document
@@ -39,7 +33,7 @@ function VerifyingRequestPreview({ request }) {
               onLoadError={(error) => console.log(error)}
             >
               <Page
-                width={620}
+                width={500}
                 className={"h-fit w-fit overflow-hidden"}
                 pageNumber={currentPage}
                 renderAnnotationLayer={false}
@@ -127,42 +121,59 @@ function VerifyingRequestPreview({ request }) {
             تعليم كمقروء
           </button>
           <button
-            onClick={async () => {
-              try {
-                const res = await axios({
-                  method: "PATCH",
-                  url: `/api/v1/verifyingRequests/${request._id}/ok`,
-                  headers: { Authorization: `Bearer ${token}` },
-                });
-                console.log(res);
-              } catch (error) {
-                console.log(error);
-              }
-            }}
+            onClick={() =>
+              setModalData({
+                message: "هل أنت متأكد من أنك تريد الموافقة على هذا الطلب؟",
+                hide: () => setModalData({}),
+                action: async () => {
+                  try {
+                    const res = await axios({
+                      method: "PATCH",
+                      url: `/api/v1/verifyingRequests/${request._id}/ok`,
+                      headers: { Authorization: `Bearer ${token}` },
+                    });
+                    console.log(res);
+                  } catch (error) {
+                    console.log(error);
+                  }
+                },
+              })
+            }
             className="p-2 bg-gradient-to-b from-green-500 to-green-700 font-bold text-white rounded-md ms-2"
           >
             موافقة
           </button>
           <button
-            onClick={async () => {
-              try {
-                const res = await axios({
-                  method: "delete",
-                  url: `/api/v1/verifyingRequests/${request._id}`,
-                  headers: { Authorization: `Bearer ${token}` },
-                });
-                console.log(res);
-                nav(".");
-              } catch (error) {
-                console.log(error);
-              }
-            }}
+            onClick={() =>
+              setModalData({
+                message: "هل أنت متأكد من أنك تريد رفض هذا الطلب؟",
+                hide: () => setModalData({}),
+                action: async () => {
+                  try {
+                    const res = await axios({
+                      method: "delete",
+                      url: `/api/v1/verifyingRequests/${request._id}`,
+                      headers: { Authorization: `Bearer ${token}` },
+                    });
+                    console.log(res);
+                    nav(".");
+                  } catch (error) {
+                    console.log(error);
+                  }
+                },
+              })
+            }
             className="p-2 bg-gradient-to-b from-red-500 to-red-700 font-bold text-white rounded-md ms-2"
           >
             رفض
           </button>
         </div>
       </div>
+      <Modal
+        message={modalData.message}
+        action={modalData.action}
+        hide={modalData.hide}
+      />
     </div>
   );
 }

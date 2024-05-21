@@ -5,17 +5,24 @@ const FormData = require("form-data");
 const AppError = require("../utils/AppError");
 const fs = require("fs");
 const SightengineClient = require("sightengine");
-const { Readable } = require("stream");
-const streamBuffers = require("stream-buffers");
+const AWS = require("aws-sdk");
 const {
   GoogleGenerativeAI,
   HarmCategory,
   HarmBlockThreshold,
 } = require("@google/generative-ai");
+const { Storage } = require("@google-cloud/storage");
+const videoInt = require("@google-cloud/video-intelligence").v1p2beta1;
 const multer = require("multer");
 const sharp = require("sharp");
 const axios = require("axios");
 const { encode } = require("querystring");
+
+AWS.config.update({
+  accessKeyId: process.env.AWS_ACCESS_KEY,
+  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
+  region: process.env.AWS_REGION,
+});
 
 const multerStorage = multer.memoryStorage();
 const multerFilter = (req, file, cb) => {
@@ -928,28 +935,89 @@ const uploadVideo = multer({
 
 exports.uploadVideo = uploadVideo.single("video");
 
+const videoClient = new videoInt.VideoIntelligenceServiceClient({
+  authClient: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+});
 exports.scanVideos = catchAsync(async (req, res, next) => {
-  // console.log(req.file);
-  const data = new FormData({ encoding: "multipart/form-data" });
-  const client = new SightengineClient(
-    "505150620",
-    "n8kScfHGJMb4wUDnAjXPnpiG3WaPsg7k"
-  );
-  const response = await client.check(["nudity"]).video(req.file.buffer);
-  // const response = await client.checkVideoSync(req.file.buffer);
-  // data.append("media", fs.createReadStream(req.file));
-  // data.append("models", "nudity-2.0");
-  // data.append("api_user", "505150620");
-  // data.append("api_secret", "n8kScfHGJMb4wUDnAjXPnpiG3WaPsg7k");
+  // const Rekognition = new AWS.Rekognition();
+  console.log("waiting...");
+  // await Rekognition.startContentModeration(
+  //   { Video: req.file.buffer },
+  //   (err, data) => console.log(err, data)
+  // );
+  // Rekognition.startStreamProcessor(
+  //   {
+  //     Name: "first",
+  //     StopSelector
+  //   },
+  //   (err, data) => console.log(err, data)
+  // );
+  // Rekognition.createProject({ ProjectName: "lana-social" }, (err, data) =>
+  //   console.log(err, data)
+  // );
 
-  // const response = await axios({
-  //   method: "POST",
-  //   url: "https://api.sightengine.com/1.0/check.json",
-  //   data: data,
-  //   headers: { ...data.getHeaders() },
+  // const storage = new Storage({
+  //   authClient: {},
+  //   projectId: "top-footing-422517-r1",
   // });
-  console.log(response);
+  // const [buckets] = await storage.getBuckets();
+  // console.log("Buckets:");
+
+  // for (const bucket of buckets) {
+  //   console.log(`- ${bucket.name}`);
+  // }
+  // console.log("Listed all storage buckets.");
+
+  //////////////////////////////////
+
+  // client.auth.fromAPIKey(process.env.GOOGLE_CLOUD_API_KEY);
+  // console.log(await client.auth.getCredentials());
+  // key: process.env.GOOGLE_CLOUD_API_KEY,
+  const [operation] = await videoClient.annotateVideo({
+    inputContent: req.file.buffer,
+    features: ["LABEL_DETECTION", "EXPLICIT_CONTENT_DETECTION"],
+  });
+  const [operationResult] = await operation.promise();
+  const shotLabels = operationResult.annotationResults[0].shotLabelAnnotations;
+  const segmentLabels =
+    operationResult.annotationResults[0].segmentLabelAnnotations;
+  console.log(operationResult);
+  const shotCategories = shotLabels.map((label) => label.entity.description);
+  const segmentCategories = segmentLabels.map(
+    (label) => label.entity.description
+  );
+  const explicitLabels =
+    operationResult.annotationResults[0].explicitAnnotation;
+  // const explicitsCategories = explicitLabels.map(
+  //   (label) => label.entity.description
+  // );
+
+  // explicitLabels.frames.forEach((frame) => {
+  //   if (
+  //     ["POSSIBLE", "LIKELY", "VERY_LIKELY"].includes(
+  //       frame.pornographyLikelihood
+  //     )
+  //   ) {
+  //     return next(new AppError("هذا المحتوى غير مسموح به على المنصة", 400));
+  //   }
+  // });
+  const moderataion = explicitLabels.frames.reduce(
+    (prev, current) =>
+      current.pornographyLikelihood > 3
+        ? prev + 1
+        : current.pornographyLikelihood === 3
+        ? prev + 0.25
+        : prev + 0,
+    0
+  );
+  if (moderataion >= 1) {
+    return next(new AppError("هذا المحتوى غير مسموح به على المنصة", 400));
+  }
   res.status(200).json({
     status: "success",
+    shotCategories,
+    segmentCategories,
+    explicitLabels,
+    explicit: explicitLabels.frames.map((frame) => frame.pornographyLikelihood),
   });
 });

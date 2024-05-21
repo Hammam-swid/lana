@@ -37,7 +37,7 @@ exports.getUser = catchAsync(async (req, res, next) => {
   }
   const posts = await Post.find({ user: user._id })
     .populate("user", "username photo fullName verified")
-    .populate("comments.user", "username photo fullName state")
+    .populate("comments.user", "username photo fullName state verified")
     .sort("-createdAt");
 
   res.status(200).json({
@@ -496,4 +496,3 @@ exports.setWarningSeen = catchAsync(async (req, res, next) => {
     status: "success",
   });
 });
-
