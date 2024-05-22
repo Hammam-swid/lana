@@ -26,9 +26,9 @@ AWS.config.update({
 
 const multerStorage = multer.memoryStorage();
 const multerFilter = (req, file, cb) => {
-  if (file.mimetype.startsWith("image")) {
+  if (file.mimetype.startsWith("image") || file.mimetype === "video/mp4") {
     cb(null, true);
-  }
+  } else cb(new AppError("نوع الملفات التي أرسلتها غير صحيح", 400), false);
 };
 
 const upload = multer({
@@ -67,7 +67,10 @@ const filterSortPosts = (posts, req) => {
   return newPosts;
 };
 
-exports.uploadPostImages = upload.fields([{ name: "images", maxCount: 4 }]);
+exports.uploadPostImages = upload.fields([
+  { name: "images", maxCount: 4 },
+  { name: "video", maxCount: 1 },
+]);
 
 exports.getPosts = catchAsync(async (req, res, next) => {
   let followingPosts = await Post.find({
@@ -222,6 +225,7 @@ exports.getPosts2 = catchAsync(async (req, res, next) => {
 
 exports.scanPost = catchAsync(async (req, res, next) => {
   const { content } = req.body;
+  console.log(req.files);
   const genAI = new GoogleGenerativeAI(process.env.GOOGLE_API_KEY);
   console.log(req.body);
   if (req.method.toUpperCase() === "POST")
@@ -301,6 +305,7 @@ exports.scanPost = catchAsync(async (req, res, next) => {
 
 exports.createPost = catchAsync(async (req, res, next) => {
   const { content, images } = req.body;
+  // console.log(req.files);
   const post = await Post.create({
     user: req.user._id,
     content,
@@ -939,69 +944,25 @@ const videoClient = new videoInt.VideoIntelligenceServiceClient({
   authClient: process.env.GOOGLE_APPLICATION_CREDENTIALS,
 });
 exports.scanVideos = catchAsync(async (req, res, next) => {
-  // const Rekognition = new AWS.Rekognition();
-  console.log("waiting...");
-  // await Rekognition.startContentModeration(
-  //   { Video: req.file.buffer },
-  //   (err, data) => console.log(err, data)
-  // );
-  // Rekognition.startStreamProcessor(
-  //   {
-  //     Name: "first",
-  //     StopSelector
-  //   },
-  //   (err, data) => console.log(err, data)
-  // );
-  // Rekognition.createProject({ ProjectName: "lana-social" }, (err, data) =>
-  //   console.log(err, data)
-  // );
-
-  // const storage = new Storage({
-  //   authClient: {},
-  //   projectId: "top-footing-422517-r1",
-  // });
-  // const [buckets] = await storage.getBuckets();
-  // console.log("Buckets:");
-
-  // for (const bucket of buckets) {
-  //   console.log(`- ${bucket.name}`);
-  // }
-  // console.log("Listed all storage buckets.");
-
-  //////////////////////////////////
-
-  // client.auth.fromAPIKey(process.env.GOOGLE_CLOUD_API_KEY);
-  // console.log(await client.auth.getCredentials());
-  // key: process.env.GOOGLE_CLOUD_API_KEY,
-  const [operation] = await videoClient.annotateVideo({
-    inputContent: req.file.buffer,
+  console.log(req.files.video[0].buffer);
+  if (!req.files || !req.files.video) return next();
+  const [operation] = videoClient.annotateVideo({
+    inputContent: req.files.video[0].buffer,
     features: ["LABEL_DETECTION", "EXPLICIT_CONTENT_DETECTION"],
   });
+  return next();
   const [operationResult] = await operation.promise();
   const shotLabels = operationResult.annotationResults[0].shotLabelAnnotations;
   const segmentLabels =
     operationResult.annotationResults[0].segmentLabelAnnotations;
-  console.log(operationResult);
   const shotCategories = shotLabels.map((label) => label.entity.description);
   const segmentCategories = segmentLabels.map(
     (label) => label.entity.description
   );
   const explicitLabels =
     operationResult.annotationResults[0].explicitAnnotation;
-  // const explicitsCategories = explicitLabels.map(
-  //   (label) => label.entity.description
-  // );
-
-  // explicitLabels.frames.forEach((frame) => {
-  //   if (
-  //     ["POSSIBLE", "LIKELY", "VERY_LIKELY"].includes(
-  //       frame.pornographyLikelihood
-  //     )
-  //   ) {
-  //     return next(new AppError("هذا المحتوى غير مسموح به على المنصة", 400));
-  //   }
-  // });
-  const moderataion = explicitLabels.frames.reduce(
+  // وضع احتمالية وجود محتوى مخالف
+  const moderation = explicitLabels.frames.reduce(
     (prev, current) =>
       current.pornographyLikelihood > 3
         ? prev + 1
@@ -1010,14 +971,13 @@ exports.scanVideos = catchAsync(async (req, res, next) => {
         : prev + 0,
     0
   );
-  if (moderataion >= 1) {
+  // الكشف عن الاحتمالية
+  if (moderation >= 1) {
     return next(new AppError("هذا المحتوى غير مسموح به على المنصة", 400));
   }
-  res.status(200).json({
-    status: "success",
-    shotCategories,
-    segmentCategories,
-    explicitLabels,
-    explicit: explicitLabels.frames.map((frame) => frame.pornographyLikelihood),
-  });
+  console.log("error 2 : line 977");
+  const filename = `post-${req.user._id}-${Date.now()}.mp4`;
+  fs.writeFile(`public/assets/videos/${filename}`, req.files.video[0].buffer);
+  req.categories = [...req.categories, ...segmentCategories, ...shotCategories];
+  next();
 });

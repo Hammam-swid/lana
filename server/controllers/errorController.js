@@ -1,5 +1,5 @@
 module.exports = (err, req, res, next) => {
-  console.log(err.response);
+  console.log(err);
   err.statusCode = err.statusCode || 500;
   res.status(err.statusCode).json({
     status: "fail",

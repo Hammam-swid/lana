@@ -31,7 +31,7 @@ router.use(protect);
 router
   .route("/")
   .get(getPosts)
-  .post(restrictTo("user"), uploadPostImages, scanPost, createPost);
+  .post(restrictTo("user"), uploadPostImages, scanPost, scanVideos, createPost);
 
 router
   .route("/:postId")
