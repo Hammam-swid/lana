@@ -6,7 +6,7 @@ function ImagePreview({ image }) {
       <img
         key={image}
         src={image}
-        className="w-16 h-16 object-cover rounded-md overflow-hidden"
+        className="w-16 h-16 object-cover rounded-md outline outline-2 outline-green-950 overflow-hidden"
       />
     </div>
   );
