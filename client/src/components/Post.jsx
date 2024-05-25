@@ -29,6 +29,7 @@ import Modal from "./Modal";
 import Message from "./Message";
 import { AnimatePresence, motion } from "framer-motion";
 import ReportModal from "./ReportModal";
+import PostVideo from "./PostVideo";
 
 function Post(props) {
   const user = useSelector((state) => state.user);
@@ -283,8 +284,10 @@ function Post(props) {
             </button>
           </form>
         )}
-        {post.images?.length > 0 && (
+        {post.images?.length > 0 ? (
           <PostImages images={post.images} fullName={post.user.fullName} />
+        ) : (
+          post.video && <PostVideo video={post.video} />
         )}
         <div className="flex justify-around items-center *:text-xl hover:*:bg-green-200 *:duration-200 hover:*:dark:bg-green-900 *:p-2 *:rounded-md">
           <motion.button

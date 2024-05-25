@@ -12,6 +12,7 @@ const postSchema = new mongoose.Schema({
     trim: true,
   },
   images: [String],
+  video: String,
   createdAt: {
     type: Date,
     default: Date.now(),

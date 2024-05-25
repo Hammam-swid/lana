@@ -3,6 +3,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
+import { Link } from "react-router-dom";
 
 function ForgotPasswordPage() {
   const formik = useFormik({
@@ -61,6 +62,9 @@ function ForgotPasswordPage() {
             "إرسال"
           )}
         </button>
+        <Link to={"/activate-account"} className="text-green-500 underline">
+          تفعيل حساب موجود
+        </Link>
       </form>
     </div>
   );

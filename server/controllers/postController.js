@@ -3,7 +3,7 @@ const Notification = require("../models/notificationModel");
 const catchAsync = require("../utils/catchAsync");
 const FormData = require("form-data");
 const AppError = require("../utils/AppError");
-const fs = require("fs");
+const fs = require("fs/promises");
 const SightengineClient = require("sightengine");
 const AWS = require("aws-sdk");
 const {
@@ -304,12 +304,13 @@ exports.scanPost = catchAsync(async (req, res, next) => {
 });
 
 exports.createPost = catchAsync(async (req, res, next) => {
-  const { content, images } = req.body;
-  // console.log(req.files);
+  const { content, images, video } = req.body;
+  console.log(req.video);
   const post = await Post.create({
     user: req.user._id,
     content,
     images,
+    video,
     createdAt: Date.now(),
     categories: req.categories,
   });
@@ -944,13 +945,15 @@ const videoClient = new videoInt.VideoIntelligenceServiceClient({
   authClient: process.env.GOOGLE_APPLICATION_CREDENTIALS,
 });
 exports.scanVideos = catchAsync(async (req, res, next) => {
-  console.log(req.files.video[0].buffer);
+  console.log(req.files.video[0]);
   if (!req.files || !req.files.video) return next();
-  const [operation] = videoClient.annotateVideo({
-    inputContent: req.files.video[0].buffer,
+  const videoBuffer = req.files.video[0].buffer;
+  const [operation] = await videoClient.annotateVideo({
+    inputContent: videoBuffer,
     features: ["LABEL_DETECTION", "EXPLICIT_CONTENT_DETECTION"],
   });
-  return next();
+  console.log("success");
+  // return next();
   const [operationResult] = await operation.promise();
   const shotLabels = operationResult.annotationResults[0].shotLabelAnnotations;
   const segmentLabels =
@@ -977,7 +980,11 @@ exports.scanVideos = catchAsync(async (req, res, next) => {
   }
   console.log("error 2 : line 977");
   const filename = `post-${req.user._id}-${Date.now()}.mp4`;
-  fs.writeFile(`public/assets/videos/${filename}`, req.files.video[0].buffer);
+  await fs.writeFile(
+    `public/assets/videos/${filename}`,
+    req.files.video[0].buffer
+  );
   req.categories = [...req.categories, ...segmentCategories, ...shotCategories];
+  req.body.video = filename;
   next();
 });

@@ -47,9 +47,7 @@ function SignupPage() {
       gender: Yup.string().required("يجب إدخال الجنس"),
     }),
     onSubmit: async (values) => {
-      const dateOfBirth = new Date(
-        [values.day, values.month, values.year].join("-")
-      );
+      const dateOfBirth = new Date(values.year, values.month - 1, values.day);
       if (dateOfBirth && dateOfBirth !== "Invalid Date")
         values.dateOfBirth = dateOfBirth;
       try {

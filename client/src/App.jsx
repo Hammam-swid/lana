@@ -44,6 +44,7 @@ import ModeratorsPage from "./pages/ModeratorsPage";
 import VerifyAccountPage from "./pages/VerifyAccountPage";
 import DeleteAccountPage from "./pages/DeleteAccountPage";
 import VerifyingRequestsPage from "./pages/VerifyingRequestsPage";
+import ActivateAccountPage from "./pages/ActivateAccountPage";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -52,6 +53,11 @@ function App() {
       <Route
         path="/forgot-password"
         element={<ForgotPasswordPage />}
+        loader={loginLoader}
+      />
+      <Route
+        path="/activate-account"
+        element={<ActivateAccountPage />}
         loader={loginLoader}
       />
       <Route
