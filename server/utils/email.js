@@ -50,6 +50,9 @@ class Email {
   async sendConfirmDeactivate() {
     await this.send("confirmSignUp", "تأكيد عملية إلغاء تفعيل الحساب");
   }
+  async sendConfirmActivate() {
+    await this.send("confirmSignUp", "تأكيد عملية تفعيل الحساب");
+  }
 }
 
 module.exports = Email;

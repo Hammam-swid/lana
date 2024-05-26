@@ -41,6 +41,8 @@ const {
   warnUser,
   getWarnings,
   setWarningSeen,
+  activateMe,
+  completeActivateMe,
 } = require("../controllers/userController");
 const {
   uploadVerificationFile,
@@ -60,6 +62,8 @@ router.post("/forgotPassword", forgotPassword);
 router.get("/tokenExist/:resetToken", isTokenExist);
 router.patch("/resetPassword/:resetToken", resetPassword);
 router.post("/checkUsername", checkUsernameExist);
+router.post("/activateMe", activateMe);
+router.patch("/completeActivateMe", completeActivateMe);
 
 router.use(protect);
 router

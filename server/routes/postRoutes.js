@@ -18,6 +18,7 @@ const {
   cancelCommentReaction,
   uploadVideo,
   scanVideos,
+  getTrendingPosts,
 } = require("../controllers/postController");
 const { protect, restrictTo } = require("../controllers/authController");
 
@@ -32,6 +33,8 @@ router
   .route("/")
   .get(getPosts)
   .post(restrictTo("user"), uploadPostImages, scanPost, scanVideos, createPost);
+
+router.get("/trending", getTrendingPosts);
 
 router
   .route("/:postId")

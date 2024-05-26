@@ -174,6 +174,24 @@ export const moderatorsPageLoader = () => {
   return defer({ moderators: getModerators() });
 };
 
+export const trendingPageLoader = () => {
+  const getTrendingPosts = async () => {
+    try {
+      const { token } = store.getState();
+      const res = await axios({
+        method: "GET",
+        url: "/api/v1/posts/trending",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  getTrendingPosts();
+  return null;
+};
+
 export const searchPageLoader = ({ request }) => {
   const getSearchResult = async () => {
     console.log(true);

@@ -1,11 +1,8 @@
 const Post = require("../models/postModel");
 const Notification = require("../models/notificationModel");
 const catchAsync = require("../utils/catchAsync");
-const FormData = require("form-data");
 const AppError = require("../utils/AppError");
 const fs = require("fs/promises");
-const SightengineClient = require("sightengine");
-const AWS = require("aws-sdk");
 const {
   GoogleGenerativeAI,
   HarmCategory,
@@ -15,14 +12,6 @@ const { Storage } = require("@google-cloud/storage");
 const videoInt = require("@google-cloud/video-intelligence").v1p2beta1;
 const multer = require("multer");
 const sharp = require("sharp");
-const axios = require("axios");
-const { encode } = require("querystring");
-
-AWS.config.update({
-  accessKeyId: process.env.AWS_ACCESS_KEY,
-  secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-  region: process.env.AWS_REGION,
-});
 
 const multerStorage = multer.memoryStorage();
 const multerFilter = (req, file, cb) => {
@@ -101,6 +90,23 @@ exports.getPosts = catchAsync(async (req, res, next) => {
     status: "success",
     result: posts.length,
     posts,
+  });
+});
+
+exports.getTrendingPosts = catchAsync(async (req, res, next) => {
+  const posts = await Post.find({
+    $nor: [
+      { user: { $in: req.user.blockedUsers } },
+      { user: { $in: req.user.blockerUsers } },
+    ],
+    "reactions.createdAt": { $gt: Date.now() - 3 * 24 * 60 * 60 * 1000 },
+  })
+    .populate("user", "username photo fullName state verified _id")
+    .populate("comments.user", "username photo fullName state verified _id");
+  res.status(200).json({
+    status: "success",
+    posts,
+    result: posts.length,
   });
 });
 

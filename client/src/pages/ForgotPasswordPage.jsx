@@ -63,7 +63,7 @@ function ForgotPasswordPage() {
           )}
         </button>
         <Link to={"/activate-account"} className="text-green-500 underline">
-          تفعيل حساب موجود
+          تفعيل حساب
         </Link>
       </form>
     </div>

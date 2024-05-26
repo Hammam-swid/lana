@@ -37,6 +37,7 @@ import {
   resetPasswordLoader,
   searchPageLoader,
   settingsLayoutLoader,
+  trendingPageLoader,
   usersPageLoader,
   verifyingRequestsLoader,
 } from "./utils/loaders";
@@ -45,6 +46,7 @@ import VerifyAccountPage from "./pages/VerifyAccountPage";
 import DeleteAccountPage from "./pages/DeleteAccountPage";
 import VerifyingRequestsPage from "./pages/VerifyingRequestsPage";
 import ActivateAccountPage from "./pages/ActivateAccountPage";
+import TrendingPage from "./pages/TrendingPage";
 function App() {
   const routes = createRoutesFromElements(
     <>
@@ -101,7 +103,11 @@ function App() {
             loader={moderatorsPageLoader}
           />
         </Route>
-        <Route path="trending" element={<h1>صفحة المحتوى الرائج</h1>} />
+        <Route
+          path="trending"
+          element={<TrendingPage />}
+          loader={trendingPageLoader}
+        />
         <Route
           path="search"
           element={<SearchPage />}

@@ -106,6 +106,46 @@ exports.updateMe = catchAsync(async (req, res, next) => {
   });
 });
 
+exports.activateMe = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+  if (!user) {
+    return next(new AppError("هذا المستخدم غير موجود", 404));
+  }
+  if (user.state !== "nonactive") {
+    return next(new AppError("لا يمكنك تفعيل هذا الحساب", 400));
+  }
+  user.verificationCode = crypto.randomInt(100000, 999999);
+  user.verificationCodeEx = Date.now() + 5 * 60 * 1000;
+  await user.save();
+  await new Email(user).sendConfirmActivate();
+  res.status(200).json({
+    status: "success",
+    message: "تم إرسال رسالة إلى البريد الإلكتروني",
+  });
+});
+
+exports.completeActivateMe = catchAsync(async (req, res, next) => {
+  const { verificationCode, email } = req.body;
+  const user = await User.findOne({
+    email,
+    verificationCode,
+    verificationCodeEx: { $gt: Date.now() },
+    state: "nonactive",
+  });
+  if (!user) {
+    return next(
+      new AppError("هذا المستخدم غير موجود، أو رمز التحقق منتهي الصلاحية", 404)
+    );
+  }
+  user.state = "active";
+  await user.save();
+  res.status(200).json({
+    status: "success",
+    message: "تم تفعيل حسابك بنجاح، الرجاء تسجيل الدخول",
+  });
+});
+
 exports.deactivateMe = catchAsync(async (req, res, next) => {
   const verificationCode = crypto.randomInt(100000, 999999);
   req.user.verificationCode = verificationCode;
