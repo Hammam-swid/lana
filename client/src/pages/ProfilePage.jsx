@@ -107,6 +107,7 @@ function ProfilePage() {
                                       Authorization: `Bearer ${token}`,
                                     },
                                   });
+                                  console.log(res)
                                   if (res.status === 200) {
                                     setMessage("تم حظر هذا المستخدم بنجاح");
                                     setTimeout(setMessage, 3000, "");

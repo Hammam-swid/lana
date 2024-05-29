@@ -78,7 +78,7 @@ function HomePage() {
         <main className="w-screen sm:w-2/3 xl:w-[45rem] bg-slate-200 dark:bg-slate-950 p-3">
           <Suspense
             fallback={
-              <div className="h-screen flex justify-center text-green-500 text-8xl">
+              <div className="h-screen flex justify-center text-green-500 text-7xl">
                 <FontAwesomeIcon
                   icon={faCircleNotch}
                   className="animate-spin"

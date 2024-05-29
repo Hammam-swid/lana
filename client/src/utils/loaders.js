@@ -184,12 +184,12 @@ export const trendingPageLoader = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       console.log(res);
+      return res.data.posts;
     } catch (error) {
       console.log(error);
     }
   };
-  getTrendingPosts();
-  return null;
+  return defer({ posts: getTrendingPosts() });
 };
 
 export const searchPageLoader = ({ request }) => {

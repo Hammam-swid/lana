@@ -116,7 +116,7 @@ userSchema.pre("save", async function (next) {
 });
 
 userSchema.post("save", function (doc) {
-  const last3MonthsWarnings = doc.warnings.filter(
+  const last3MonthsWarnings = doc.warnings?.filter(
     (warning) =>
       new Date(warning.createdAt).getTime() >
       Date.now() - 3 * 30 * 24 * 60 * 60 * 1000

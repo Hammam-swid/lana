@@ -30,7 +30,9 @@ const filterSortPosts = (posts, req) => {
     .filter((post) => post?.user?.state === "active")
     .map((post) => {
       const commentsScore = post.comments.length * 0.2;
-      const reactionsScore = post.reactions.length * 0.3;
+      const reactionsScore =
+        post.reactions.filter((reaction) => reaction.type === "like").length *
+        0.3;
       const timeScore =
         new Date(post.createdAt).getTime() >
         Date.now() - 3 * 24 * 60 * 60 * 1000
@@ -93,16 +95,55 @@ exports.getPosts = catchAsync(async (req, res, next) => {
   });
 });
 
+const filterSortTrendingPosts = (posts, req) => {
+  const newPosts = posts
+    .filter((post) => post?.user?.state === "active")
+    .map((post) => {
+      const commentScore =
+        post.comments.filter(
+          (comment) =>
+            new Date(comment.createdAt).getTime() >
+            Date.now() - 3 * 24 * 60 * 60 * 1000
+        ).length * 0.2;
+
+      const reactionScore =
+        post.reactions
+          .filter(
+            (reaction) =>
+              new Date(reaction.createdAt).getTime() >
+              Date.now() - 3 * 24 * 60 * 60 * 1000
+          )
+          .filter((reaction) => reaction.type === "like").length * 0.3;
+      post.score = commentScore + reactionScore;
+      post.comments = post.comments.filter(
+        (comment) =>
+          comment.user?.state === "active" &&
+          !req.user.blockedUsers
+            .map((user) => user.toString())
+            .includes(comment.user._id.toString()) &&
+          !req.user.blockerUsers
+            .map((user) => user.toString())
+            .includes(comment.user._id.toString())
+      );
+      return post;
+    });
+  return newPosts;
+};
+
 exports.getTrendingPosts = catchAsync(async (req, res, next) => {
-  const posts = await Post.find({
+  let posts = await Post.find({
     $nor: [
       { user: { $in: req.user.blockedUsers } },
       { user: { $in: req.user.blockerUsers } },
     ],
-    "reactions.createdAt": { $gt: Date.now() - 3 * 24 * 60 * 60 * 1000 },
+    $or: [
+      { "reactions.createdAt": { $gt: Date.now() - 3 * 24 * 60 * 60 * 1000 } },
+      { "comments.createdAt": { $gt: Date.now() - 3 * 24 * 60 * 60 * 1000 } },
+    ],
   })
     .populate("user", "username photo fullName state verified _id")
     .populate("comments.user", "username photo fullName state verified _id");
+  posts = filterSortTrendingPosts(posts, req);
   res.status(200).json({
     status: "success",
     posts,
@@ -464,7 +505,7 @@ exports.likePost = catchAsync(async (req, res, next) => {
   post = await post.populate("user", "username fullName photo verified");
   post.comments = post.comments.filter(
     (comment) =>
-      comment.user.state === "active" &&
+      comment.user?.state === "active" &&
       !req.user.blockedUsers
         .map((user) => user.toString())
         .includes(comment.user._id.toString()) &&
@@ -535,7 +576,7 @@ exports.dislikePost = catchAsync(async (req, res, next) => {
 
   post.comments = post.comments.filter(
     (comment) =>
-      comment.user.state === "active" &&
+      comment.user?.state === "active" &&
       !req.user.blockedUsers
         .map((user) => user.toString())
         .includes(comment.user._id.toString()) &&
@@ -590,7 +631,7 @@ exports.cancelReaction = catchAsync(async (req, res, next) => {
     post = await post.populate("user", "username fullName photo verified");
     post.comments = post.comments.filter(
       (comment) =>
-        comment.user.state === "active" &&
+        comment.user?.state === "active" &&
         !req.user.blockedUsers
           .map((user) => user.toString())
           .includes(comment.user._id.toString()) &&
@@ -628,7 +669,7 @@ exports.commentOnPost = catchAsync(async (req, res, next) => {
     comments: post.comments
       .filter(
         (comment) =>
-          comment.user.state === "active" &&
+          comment.user?.state === "active" &&
           !req.user.blockedUsers
             .map((user) => user.toString())
             .includes(comment.user._id.toString()) &&
@@ -739,7 +780,7 @@ exports.updateComment = catchAsync(async (req, res, next) => {
     status: "success",
     comments: post.comments.filter(
       (comment) =>
-        comment.user.state === "active" &&
+        comment.user?.state === "active" &&
         !req.user.blockedUsers
           .map((user) => user.toString())
           .includes(comment.user._id.toString()) &&

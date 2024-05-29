@@ -9,9 +9,11 @@ import {
 } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { useState } from "react";
+import { useSelector } from "react-redux";
 import { NavLink, Outlet } from "react-router-dom";
 
 function SettingsLayout() {
+  const user = useSelector((state) => state.user);
   const [showAside, setShowAside] = useState(false);
   return (
     <div
@@ -56,12 +58,14 @@ function SettingsLayout() {
             </li>
             <li>
               <NavLink
+                onClick={(e) => user.verified && e.preventDefault()}
                 to="verify-account"
+                title={user.verified && "حسابك موثق بالفعل"}
                 className={({ isActive }) =>
                   `p-3 rounded-md flex justify-between items-center ${
                     isActive &&
                     "text-green-500 font-bold bg-slate-200 dark:bg-slate-950"
-                  }`
+                  } ${user.verified && "text-gray-400 dark:text-gray-500"}`
                 }
               >
                 <span>توثيق الحساب</span>
