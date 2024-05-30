@@ -94,6 +94,12 @@ function Post(props) {
   const updateComments = (newComments) => {
     setPost((prevPost) => ({ ...prevPost, comments: [...newComments] }));
   };
+  const likesCount = post.reactions?.filter(
+    (reaction) => reaction.type === "like"
+  ).length;
+  const dislikesCount = post.reactions?.filter(
+    (reaction) => reaction.type === "dislike"
+  ).length;
   return (
     <>
       <div
@@ -291,7 +297,7 @@ function Post(props) {
         )}
         <div className="flex justify-around items-center *:text-xl hover:*:bg-green-200 *:duration-200 hover:*:dark:bg-green-900 *:p-2 *:rounded-md">
           <motion.button
-            whileTap={{ scale: 0.8 }}
+            whileTap={{ scale: 0.9 }}
             onClick={async () => {
               try {
                 let route = "like";
@@ -311,6 +317,7 @@ function Post(props) {
                 });
                 if (res.data.status === "success") setPost(res.data.post);
                 setIsDisliked(false);
+                setIsLiked(false);
               } catch (error) {
                 setIsLiked(false);
                 console.log(error);
@@ -329,14 +336,11 @@ function Post(props) {
               }`}
             />
             <span className="text-xl ms-2">
-              {
-                post.reactions?.filter((reaction) => reaction.type === "like")
-                  .length
-              }
+              {isLiked ? likesCount + 1 : likesCount}
             </span>
           </motion.button>
           <motion.button
-            whileTap={{ scale: 0.8 }}
+            whileTap={{ scale: 0.9 }}
             onClick={async () => {
               try {
                 let route = "dislike";
@@ -357,6 +361,7 @@ function Post(props) {
                 console.log(res.data.post);
                 if (res.data.status === "success") setPost(res.data.post);
                 setIsLiked(false);
+                setIsDisliked(false);
               } catch (err) {
                 setIsDisliked(false);
                 console.log(err.message);
@@ -374,11 +379,7 @@ function Post(props) {
               }`}
             />
             <span className="text-xl ms-2">
-              {
-                post.reactions?.filter(
-                  (reaction) => reaction.type === "dislike"
-                ).length
-              }
+              {isDisliked ? dislikesCount + 1 : dislikesCount}
             </span>
           </motion.button>
           <button onClick={() => setComments((prevComments) => !prevComments)}>

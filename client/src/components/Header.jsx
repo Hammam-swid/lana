@@ -308,7 +308,7 @@ function Header({ notification }) {
           </NavLink>
           <button
             className={`text-2xl hover:text-green-500 duration-100 px-2 rounded ${
-              options && "text-green-500 dark:bg-green-900"
+              options && "text-green-500 bg-green-100 dark:bg-green-900"
             }`}
             onClick={updateOptions}
           >
@@ -317,30 +317,30 @@ function Header({ notification }) {
         </div>
         <AnimatePresence>
           {options && (
-            <motion.ul
+            <motion.div
               animate={{ scaleY: 1, y: 0 }}
               initial={{ scaleY: 0, y: -100 }}
               exit={{ scale: 0, originY: 0, originX: 0.2, y: -50 }}
               onClick={() => setOptions(false)}
-              className="absolute left-2 top-full sm:mt-[-10px] rounded-md bg-slate-100 dark:bg-slate-800 p-3 w-52 *:flex *:justify-between *:py-4 *:px-2 *:rounded-md *:font-bold *:cursor-pointer dark:hover:*:bg-slate-900"
+              className="absolute left-2 top-full sm:mt-[-10px] rounded-md bg-slate-100 dark:bg-slate-800 p-3 w-52 *:flex *:justify-between *:py-4 *:px-2 *:rounded-md *:font-bold *:cursor-pointer dark:hover:*:bg-slate-900 hover:*:bg-green-200"
             >
               {(user.role === "moderator" || user.role === "admin") && (
-                <li>
-                  <Link to={"dashboard"}>لوحة التحكم</Link>
+                <Link to={"dashboard"}>
+                  <span>لوحة التحكم</span>
                   <FontAwesomeIcon
                     className="text-2xl hover:text-green-500 "
                     icon={faToolbox}
                   />
-                </li>
+                </Link>
               )}
-              <li>
-                <Link to={`settings/${user.username}`}>الإعدادات</Link>
+              <Link to={`settings/${user.username}`}>
+                <span>الإعدادات</span>
                 <FontAwesomeIcon
                   className="text-2xl hover:text-green-500 duration-100 hover:animate-spin"
                   icon={faGear}
                 />
-              </li>
-              <li
+              </Link>
+              <div
                 className="cursor-pointer"
                 onClick={() => {
                   setModalData({
@@ -368,8 +368,8 @@ function Header({ notification }) {
                   className="text-2xl hover:text-red-500 duration-100"
                   icon={faArrowRightFromBracket}
                 />
-              </li>
-            </motion.ul>
+              </div>
+            </motion.div>
           )}
         </AnimatePresence>
       </header>

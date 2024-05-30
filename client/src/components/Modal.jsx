@@ -19,16 +19,16 @@ function Modal({ action, message, hide }) {
             }
           }}
           id="overlay"
-          className="fixed z-50 top-0 start-0 w-screen h-screen bg-black  bg-opacity-60 flex justify-center items-center"
+          className="px-5 py-3 fixed z-50 top-0 start-0 w-screen h-screen bg-black  bg-opacity-60 flex justify-center items-end md:items-center"
         >
           <motion.div
             animate={{ scale: 1 }}
             initial={{ scale: 0 }}
             // exit={{ opacity: 0 }}
-            className="bg-white dark:bg-slate-900 min-w-80 max-w-96 w-1/2 h-40 p-3 rounded-lg flex flex-col justify-between"
+            className="bg-white dark:bg-slate-900 min-w-80 w-full md:max-w-96 h-fit p-3 rounded-lg flex flex-col justify-between"
           >
             <h2 className="text-2xl font-bold">{message}</h2>
-            <div className="flex flex-row-reverse *:font-bold">
+            <div className="flex flex-col mt-5 gap-3 md:flex-row-reverse *:font-bold *:text-lg">
               <button
                 className="bg-red-500 px-4 py-2 rounded relative bottom-0"
                 onClick={() => {
@@ -40,7 +40,7 @@ function Modal({ action, message, hide }) {
                 نعم
               </button>
               <button
-                className="bg-slate-500 dark:bg-slate-700 px-6 py-2 rounded mx-5"
+                className="bg-slate-500 dark:bg-slate-700 px-6 py-2 rounded"
                 onClick={() => {
                   hide();
                   document.body.style.overflow = "auto";

@@ -5,6 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { updateTheme, updateUser } from "../store/authSlice";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleNotch, faMoon } from "@fortawesome/free-solid-svg-icons";
+import Message from "../components/Message";
 
 function ProfileSettings() {
   const user = useSelector((state) => state.user);
@@ -12,6 +13,8 @@ function ProfileSettings() {
   const theme = useSelector((state) => state.theme);
   const dispatch = useDispatch();
   const [image, setImage] = useState(null);
+  const [message, setMessage] = useState("");
+  const [messageError, setMessageError] = useState(false);
   const formik = useFormik({
     initialValues: {
       photo: user?.photo,
@@ -25,7 +28,7 @@ function ProfileSettings() {
         ? new Date(user.dateOfBirth).getFullYear()
         : "year",
     },
-    onSubmit: async (values) => {
+    onSubmit: async (values, helpers) => {
       const { fullName, photo, day, month, year, gender } = values;
       try {
         const formData = new FormData();
@@ -59,7 +62,15 @@ function ProfileSettings() {
           });
           if (res.data.status === "success") {
             dispatch(updateUser({ user: res.data.user }));
+            setMessage("تم تعديل البيانات بنجاح");
+            setTimeout(setMessage, 3000, "");
+            helpers.setValues({ photo: res.data.user.photo });
           }
+        } else {
+          setMessage("يجب تعديل البيانات قبل إرسالها");
+          setMessageError(true);
+          setTimeout(setMessage, 3000, "");
+          setTimeout(setMessageError, 3500, false);
         }
       } catch (error) {
         console.log(error);
@@ -286,6 +297,7 @@ function ProfileSettings() {
           </button>
         </div>
       </div>
+      <Message message={message} error={messageError} />
     </>
   );
 }

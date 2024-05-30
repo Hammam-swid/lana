@@ -115,6 +115,9 @@ function WarningForm({ show, hide, userId }) {
                   </label>
                 </div>
               </div>
+              {formik.errors.type && formik.touched.type && (
+                <p className="text-red-400">{formik.errors.type}</p>
+              )}
               <label className="font-bold">السبب</label>
               <div className="flex gap-3 flex-wrap">
                 {(() =>
@@ -140,6 +143,10 @@ function WarningForm({ show, hide, userId }) {
                     )
                   ))()}
               </div>
+              {formik.errors.reason && formik.touched.reason && (
+                <p className="text-red-400">{formik.errors.reason}</p>
+              )}
+
               <label htmlFor="message" className="font-bold">
                 رسالة:
               </label>
@@ -151,6 +158,10 @@ function WarningForm({ show, hide, userId }) {
                 value={formik.values.message}
                 className="resize-none bg-slate-300 dark:bg-slate-800 rounded-md focus:outline-none p-3 h-24"
               />
+              {formik.errors.message && formik.touched.message && (
+                <p className="text-red-400">{formik.errors.message}</p>
+              )}
+
               <button
                 type="submit"
                 className="bg-gradient-to-b from-green-500 to-green-700 py-2 text-xl font-bold rounded-md text-green-50 mt-8"

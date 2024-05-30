@@ -54,7 +54,7 @@ app.use("/api/v1/notifications", notificationRouter);
 app.use("/api/v1/verifyingRequests", verifyingRequestRouter);
 
 app.all("*", (req, res) => {
-  res.status(404).json({ status: "fail" });
+  res.status(404).json({ status: "fail", message: "هذا المسار غير موجود" });
 });
 
 app.use(globalErrorHandler);

@@ -40,11 +40,11 @@ exports.searchUserPosts = catchAsync(async (req, res, next) => {
     result: users.length + posts.length,
     users,
     posts: posts
-      .filter((post) => post.user.state === "active")
+      .filter((post) => post.user?.state === "active")
       .map((post) => {
         post.comments = post.comments.filter(
           (comment) =>
-            comment.user.state === "active" &&
+            comment.user?.state === "active" &&
             !req.user.blockedUsers
               .map((user) => user.toString())
               .includes(comment.user._id.toString()) &&

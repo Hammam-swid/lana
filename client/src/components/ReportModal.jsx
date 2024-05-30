@@ -31,9 +31,10 @@ function ReportModal({
     },
     validationSchema: Yup.object({
       reason: Yup.string().required("يجب إدخال سبب للبلاغ"),
-      description: Yup.string().required(
-        "يجب إدخال وصف نصي يوضح الغرض من البلاغ"
-      ),
+      description: Yup.string()
+        .required("يجب إدخال وصف نصي يوضح الغرض من البلاغ")
+        .min(50, "يجب أن يحتوي الوصف على 50 حرفاً على الأقل")
+        .max(150, "يجب ألا يتخطى الوصف 150 حرفاً"),
     }),
     onSubmit: async (values, helpers) => {
       try {
@@ -119,6 +120,9 @@ function ReportModal({
                     </p>
                   )))()}
               </div>
+              {formik.errors.reason && formik.touched.reason && (
+                <p className="text-red-400">{formik.errors.reason}</p>
+              )}
               <label htmlFor="description" className="font-bold">
                 الوصف:
               </label>
@@ -130,6 +134,9 @@ function ReportModal({
                 value={formik.values.description}
                 className="resize-none bg-slate-300 rounded-md h-20 dark:bg-slate-800 p-3 outline-none focus:outline-none"
               />
+              {formik.errors.description && formik.touched.description && (
+                <p className="text-red-400">{formik.errors.description}</p>
+              )}
               <button
                 type="submit"
                 className="mt-5 bg-gradient-to-b rounded-md from-green-500 to-green-700 font-bold py-1 text-white"

@@ -8,6 +8,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 import { useDispatch } from "react-redux";
 import { setLogout } from "../store/authSlice";
+import Message from "../components/Message";
 
 function DeactivateAccountPage() {
   const [query, setQuery] = useSearchParams();
@@ -18,7 +19,7 @@ function DeactivateAccountPage() {
   const [submitted, setSubmitted] = useState(
     query.get("email") === user.email ? true : false
   );
-  const [message, setMessage] = useState(query.get("message") || "");
+  const [message, setMessage] = useState("");
   const formik = useFormik({
     initialValues: {
       email: user.email,
@@ -29,8 +30,10 @@ function DeactivateAccountPage() {
       email: Yup.string()
         .required("الرجاء إدخال البريد الإلكتروني")
         .email("البريد الإلكتروني غير صحيح"),
-      password: Yup.string(),
-      verificationCode: Yup.number().min(100000).max(999999),
+      password: Yup.string().min(8, "يجب أن تحتوي كلمة السر على 8 أحرف فأكثر"),
+      verificationCode: Yup.number("يجب أن يتكون رمز التحقق من أرقام فقط")
+        .min(100000, "يجب أن يتكون رمز التحقق من 6 أرقام")
+        .max(999999, "يجب أن يتكون رمز التحقق من 6 أرقام"),
     }),
     onSubmit: async (values) => {
       try {
@@ -45,10 +48,10 @@ function DeactivateAccountPage() {
           console.log(res);
           if (res.data.status === "success") {
             setMessage(res.data.message);
+            setTimeout(setMessage, 3000, "");
             setSubmitted(true);
             setQuery((prevQuery) => {
               prevQuery.set("email", user.email);
-              prevQuery.set("message", res.data.message);
               return prevQuery;
             });
           }
@@ -89,7 +92,6 @@ function DeactivateAccountPage() {
         value={formik.values.email}
         className="border-green-500 outline-none border-2 p-3 rounded-lg disabled:text-gray-700 disabled:border-gray-700 dark:bg-slate-900 dark:text-green-100"
       />
-      {message && <p className="font-bold">{message}</p>}
       {submitted && (
         <>
           <label htmlFor="password">كلمة المرور: </label>
@@ -100,12 +102,13 @@ function DeactivateAccountPage() {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.password}
+            required
             className="border-green-500 outline-none border-2 p-3 rounded-lg dark:bg-slate-900 dark:text-green-100"
           />
           {formik.errors.password && formik.touched.password && (
             <p className="text-red-400">{formik.errors.password}</p>
           )}
-          <label htmlFor="verificationCode">رمز التحقق</label>
+          <label htmlFor="verificationCode">رمز التحقق: </label>
           <input
             type="text"
             name="verificationCode"
@@ -113,8 +116,13 @@ function DeactivateAccountPage() {
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}
             value={formik.values.verificationCode}
+            required
             className="border-green-500 outline-none border-2 p-3 rounded-lg dark:bg-slate-900 dark:text-green-100"
           />
+          {formik.errors.verificationCode &&
+            formik.touched.verificationCode && (
+              <p className="text-red-400">{formik.errors.verificationCode}</p>
+            )}
         </>
       )}
       <button
@@ -127,6 +135,7 @@ function DeactivateAccountPage() {
           "إرسال"
         )}
       </button>
+      <Message message={message} />
     </form>
   );
 }

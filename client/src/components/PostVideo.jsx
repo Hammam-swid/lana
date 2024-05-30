@@ -2,7 +2,11 @@
 function PostVideo({ video }) {
   return (
     <div>
-      <video controls className="rounded-md max-h-[35rem] w-full bg-black">
+      <video
+        muted
+        controls
+        className="rounded-md max-h-[35rem] w-full bg-black"
+      >
         <source src={`/videos/${video}`} />
       </video>
     </div>

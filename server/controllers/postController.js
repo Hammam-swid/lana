@@ -992,8 +992,8 @@ const videoClient = new videoInt.VideoIntelligenceServiceClient({
   authClient: process.env.GOOGLE_APPLICATION_CREDENTIALS,
 });
 exports.scanVideos = catchAsync(async (req, res, next) => {
-  console.log(req.files.video[0]);
   if (!req.files || !req.files.video) return next();
+  console.log(req.files.video[0]);
   const videoBuffer = req.files.video[0].buffer;
   const [operation] = await videoClient.annotateVideo({
     inputContent: videoBuffer,
