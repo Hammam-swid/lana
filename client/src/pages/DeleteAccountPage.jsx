@@ -21,6 +21,7 @@ function DeleteAccountPage() {
   const token = useSelector((state) => state.token);
   const [showPassword, setShowPassword] = useState(false);
   const [message, setMessage] = useState("");
+  const [messageError, setMessageError] = useState(false);
   const [params, setParams] = useSearchParams();
   console.log();
   const [isSent, setIsSent] = useState(
@@ -69,13 +70,18 @@ function DeleteAccountPage() {
         }
       } catch (error) {
         console.log(error);
+        setMessage(
+          error.response?.data?.message || "حدث خطأ أثناء تنفيذ العملية"
+        );
+        setMessageError(true);
       } finally {
         setTimeout(setMessage, 3000, "");
+        setTimeout(setMessageError, 3100, false);
       }
     },
   });
   return (
-    <div className="h-full flex justify-center items-center">
+    <div className="h-full flex justify-center items-center p-3">
       <form
         onSubmit={formik.handleSubmit}
         className="flex flex-col max-w-[35rem] w-full gap-4"
@@ -144,7 +150,7 @@ function DeleteAccountPage() {
           )}
         </button>
       </form>
-      <Message message={message} />
+      <Message message={message} error={messageError} />
     </div>
   );
 }

@@ -77,7 +77,7 @@ function DeactivateAccountPage() {
   });
   return (
     <form
-      className="flex flex-col max-w-[35rem] mx-auto gap-5 top-1/2 relative -translate-y-1/2"
+      className="flex flex-col max-w-[35rem] p-3 mx-auto gap-5 top-1/2 relative -translate-y-1/2"
       onSubmit={formik.handleSubmit}
     >
       <label htmlFor="email">البريد الإلكتروني: </label>

@@ -23,7 +23,7 @@ const postSchema = new mongoose.Schema({
     {
       username: {
         type: String,
-        required: [true, "يجب أن يكون التفاعل تابعاً لمستخدم"],
+        required: [true, "يجب أن يكون التفاعل تابعاً لمستخدم معين"],
       },
       type: {
         type: String,

@@ -7,6 +7,7 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleNotch, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 import axios from "axios";
 import * as Yup from "yup";
+import { motion } from "framer-motion";
 
 function Comments(props) {
   const user = useSelector((state) => state.user);
@@ -49,10 +50,14 @@ function Comments(props) {
   };
   const updateComments = (newComments) => {
     setComments(newComments);
-    props.updateComments(newComments)
+    props.updateComments(newComments);
   };
   return (
-    <div className="dark:bg-slate-950 bg-slate-200 p-2 md:p-6 rounded-md flex flex-col gap-5">
+    <motion.div
+      initial={{ scaleY: 0.8 }}
+      animate={{ scaleY: 1, originY: 0 }}
+      className="dark:bg-slate-950 bg-slate-200 p-2 md:p-6 rounded-md flex flex-col gap-5"
+    >
       {comments.length > 0 ? (
         comments.map((comment) => (
           <Comment
@@ -105,7 +110,7 @@ function Comments(props) {
           )}
         </button>
       </form>
-    </div>
+    </motion.div>
   );
 }
 

@@ -46,7 +46,7 @@ function ChangePasswordPage() {
   });
   return (
     <form
-      className="flex flex-col gap-5 max-w-[35rem] mx-auto relative top-1/2 -translate-y-1/2"
+      className="flex flex-col gap-5 p-3 max-w-[35rem] mx-auto relative top-1/2 -translate-y-1/2"
       onSubmit={formik.handleSubmit}
     >
       <label htmlFor="currentPassword">كلمة المرور الحالية:</label>

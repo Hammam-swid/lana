@@ -108,7 +108,7 @@ function Post(props) {
           if (post._id === e.target.id)
             return postOptions && setPostOptions(false);
         }}
-        className="bg-slate-100 shadow-md dark:bg-slate-900 rounded p-6 flex flex-col gap-5 my-5"
+        className="bg-slate-100 shadow-md dark:bg-slate-900 rounded p-4 md:p-6 flex flex-col gap-5 my-5"
       >
         <div className="flex justify-between items-center relative">
           <Link

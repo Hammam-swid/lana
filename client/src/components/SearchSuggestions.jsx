@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 
-function SearchSuggestions({ value, removeValue }) {
+function SearchSuggestions({ value, searchFocus }) {
   const token = useSelector((state) => state.token);
   const [searching, setSearching] = useState(false);
   const [suggestions, setSuggestions] = useState([]);
@@ -36,12 +36,12 @@ function SearchSuggestions({ value, removeValue }) {
   }, [value]);
   return (
     <AnimatePresence>
-      {value && (
+      {value && searchFocus && (
         <motion.div
           initial={{ scale: 0, originX: "50%" }}
           animate={{ scale: 1, originY: "0%", originX: "50%" }}
           exit={{ scale: 0 }}
-          className="absolute z-50 w-80 end-5 md:-end-5 flex bg-slate-100 dark:bg-slate-900 rounded-md top-full p-6 flex-col gap-3"
+          className="shadow-md absolute z-50 w-80 end-5 md:-end-5 flex bg-slate-100 dark:bg-slate-900 rounded-md top-full p-6 flex-col gap-3"
         >
           {searching ? (
             <FontAwesomeIcon
@@ -51,7 +51,6 @@ function SearchSuggestions({ value, removeValue }) {
           ) : suggestions.length > 0 ? (
             suggestions.map((suggest) => (
               <Link
-                onClick={removeValue}
                 to={`/profile/${suggest.username}`}
                 key={suggest._id}
                 className="flex items-center gap-2"

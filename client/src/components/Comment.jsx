@@ -70,6 +70,12 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
       }
     },
   });
+  const likesCount = comment.reactions.filter(
+    (react) => react.type === "like"
+  ).length;
+  const dislikesCount = comment.reactions.filter(
+    (react) => react.type === "dislike"
+  ).length;
   return (
     <>
       <div
@@ -140,6 +146,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
                         updateComments(res.data.comments);
                       console.log(res.data.comments);
                       console.log(res);
+                      setIsLiked(false);
                     } catch (error) {
                       console.log(error);
                       setIsLiked(false);
@@ -156,12 +163,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
                       "text-green-500"
                     }`}
                   />
-                  <span>
-                    {
-                      comment.reactions.filter((react) => react.type === "like")
-                        .length
-                    }
-                  </span>
+                  <span>{isLiked ? likesCount + 1 : likesCount}</span>
                 </button>
                 <button
                   onClick={async () => {
@@ -188,6 +190,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
                         updateComments(res.data.comments);
                       console.log(res.data.comments);
                       console.log(res);
+                      setIsDisliked(false);
                     } catch (error) {
                       console.log(error);
                       setIsDisliked(false);
@@ -204,13 +207,7 @@ function Comment({ comment, removeComment, updateComments, postId, postUser }) {
                       "text-green-500"
                     }`}
                   />
-                  <span>
-                    {
-                      comment.reactions.filter(
-                        (react) => react.type === "dislike"
-                      ).length
-                    }
-                  </span>
+                  <span>{isDisliked ? dislikesCount + 1 : dislikesCount}</span>
                 </button>
                 <p className="text-gray-500">
                   {getTimeDifference(new Date(comment.createdAt))}

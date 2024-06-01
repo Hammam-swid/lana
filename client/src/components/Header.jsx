@@ -44,6 +44,7 @@ function Header({ notification }) {
   const [options, setOptions] = useState(false);
   const [notiList, setNotiList] = useState([]);
   const [showNotiList, setShowNotiList] = useState(false);
+  const [searchFocus, setSearchFocus] = useState(false);
   const ref = useRef(null);
   useEffect(() => {
     const getNotiList = async () => {
@@ -107,8 +108,12 @@ function Header({ notification }) {
               autoSave={""}
               ref={ref}
               placeholder="أدخل للبحث"
+              onFocus={() => setSearchFocus(true)}
               onChange={formik.handleChange}
-              onBlur={formik.handleBlur}
+              onBlur={(e) => {
+                setTimeout(setSearchFocus, 100, false);
+                formik.handleBlur(e);
+              }}
               value={formik.values.search}
               className="peer p-2 duration-100 rounded-md shrink grow-0 bg-slate-200 dark:bg-slate-800 outline-none focus:outline-3 focus:outline-green-500"
             />
@@ -127,10 +132,8 @@ function Header({ notification }) {
               )}
             </button>
             <SearchSuggestions
+              searchFocus={searchFocus}
               value={formik.values.search}
-              removeValue={() => {
-                formik.setValues({ search: "" });
-              }}
             />
           </form>
         </div>

@@ -30,7 +30,7 @@ function Modal({ action, message, hide }) {
             <h2 className="text-2xl font-bold">{message}</h2>
             <div className="flex flex-col mt-5 gap-3 md:flex-row-reverse *:font-bold *:text-lg">
               <button
-                className="bg-red-500 px-4 py-2 rounded relative bottom-0"
+                className="bg-red-500 px-4 py-2 rounded-md relative bottom-0"
                 onClick={() => {
                   action();
                   document.body.style.overflow = "auto";
@@ -40,7 +40,7 @@ function Modal({ action, message, hide }) {
                 نعم
               </button>
               <button
-                className="bg-slate-500 dark:bg-slate-700 px-6 py-2 rounded"
+                className="bg-slate-500 dark:bg-slate-700 px-6 py-2 rounded-md"
                 onClick={() => {
                   hide();
                   document.body.style.overflow = "auto";
