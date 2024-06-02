@@ -1,5 +1,5 @@
 /* eslint-disable react/prop-types */
-import { faWarning } from "@fortawesome/free-solid-svg-icons";
+import { faCircleNotch, faWarning } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useFormik } from "formik";
@@ -25,7 +25,10 @@ function WarningForm({ show, hide, userId }) {
     validationSchema: Yup.object({
       type: Yup.string().required("يجب إدخال النوع"),
       reason: Yup.string().required("يجب إدخال السبب"),
-      message: Yup.string().required("يجب إدخال رسالة توضيحية"),
+      message: Yup.string()
+        .required("يجب إدخال رسالة توضيحية")
+        .min(50, "يجب أن تحتوي الرسالة التوضيحية على 50 حرفاً على الأقل")
+        .max(150, "يجب ألا تتجاوز الرسالة التوضيحية 150 حرفاً"),
     }),
     onSubmit: async (values, helpers) => {
       try {
@@ -163,10 +166,18 @@ function WarningForm({ show, hide, userId }) {
               )}
 
               <button
+                disabled={formik.isSubmitting}
                 type="submit"
                 className="bg-gradient-to-b from-green-500 to-green-700 py-2 text-xl font-bold rounded-md text-green-50 mt-8"
               >
-                إرسال
+                {formik.isSubmitting ? (
+                  <FontAwesomeIcon
+                    icon={faCircleNotch}
+                    className="animate-spin"
+                  />
+                ) : (
+                  "إرسال"
+                )}
               </button>
             </motion.form>
           </motion.div>

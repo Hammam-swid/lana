@@ -55,6 +55,12 @@ function PostForm() {
         helpers.setValues({ video: "", content: "", images: [] });
         // setPosts((prevPosts) => prevPosts.unshift(res.data.post));
       } catch (error) {
+        setMessage(error.response.data.message);
+        setMessageError(true);
+        setTimeout(() => {
+          setMessage("");
+          setMessageError(false);
+        }, 3000);
         console.log(error);
       }
     },

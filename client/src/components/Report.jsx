@@ -43,7 +43,7 @@ function Report({ report, showModal }) {
         </div>
         <div>
           <span>الوصف: </span>
-          <span>{currentReport.description}</span>
+          <span className="break-words">{currentReport.description}</span>
         </div>
       </div>
       <div className="flex flex-row-reverse justify-between">

@@ -5,12 +5,15 @@ import axios from "axios";
 import * as Yup from "yup";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { useDispatch } from "react-redux";
 import { setLogin } from "../store/authSlice";
 import { AnimatePresence, motion } from "framer-motion";
 function SignupPage() {
-  const [created, setCreated] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const [created, setCreated] = useState(
+    searchParams.get("email") ? true : false
+  );
   const dispatch = useDispatch();
   const nav = useNavigate();
 
@@ -59,6 +62,10 @@ function SignupPage() {
         console.log(res);
         if (res.status === 201) {
           setCreated(true);
+          setSearchParams((prev) => {
+            prev.append("email", values.email);
+            return prev;
+          });
         }
       } catch (err) {
         console.log(err);
@@ -76,17 +83,21 @@ function SignupPage() {
         .max(999999, "يجب أن يتكون رمز التحقق من 6 أرقام فقط"),
     }),
     onSubmit: async (values) => {
-      const { verificationCode } = values;
-      const { email } = formik.values;
-      const res = await axios({
-        method: "POST",
-        url: "/api/v1/users/verifySignup",
-        data: { verificationCode, email },
-      });
-      if (res.data.status === "success") {
-        const { token, user } = res.data;
-        dispatch(setLogin({ token, user }));
-        nav("/");
+      try {
+        const { verificationCode } = values;
+        const email = formik.values.email || searchParams.get("email");
+        const res = await axios({
+          method: "POST",
+          url: "/api/v1/users/verifySignup",
+          data: { verificationCode, email },
+        });
+        if (res.data.status === "success") {
+          const { token, user } = res.data;
+          dispatch(setLogin({ token, user }));
+          nav("/");
+        }
+      } catch (error) {
+        console.log(error);
       }
     },
   });
@@ -425,7 +436,9 @@ function FormSteps(props) {
               }
             }
           }}
-          className="bg-green-500 disabled:bg-green-950 disabled:text-gray-500"
+          className={`bg-green-500 ${
+            step === childrenArray.length - 1 && 'invisible'
+          } disabled:bg-green-950 disabled:text-gray-500`}
         >
           {props.isSubmitting ? (
             <span>
