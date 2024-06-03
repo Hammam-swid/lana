@@ -4,8 +4,12 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import { useState } from "react";
+import Message from "../components/Message";
 
 function ForgotPasswordPage() {
+  const [message, setMessage] = useState("");
+  const [messageError, setMessageError] = useState(false);
   const formik = useFormik({
     initialValues: {
       email: "",
@@ -23,8 +27,16 @@ function ForgotPasswordPage() {
           data: values,
         });
         console.log(res);
+        setMessage(res.data.message);
       } catch (error) {
+        setMessage(
+          error.response?.data?.message || "حدث خطأ أثناء تنفيذ العملية"
+        );
+        setMessageError(true);
         console.log(error);
+      } finally {
+        setTimeout(setMessage, 3000, "");
+        setTimeout(setMessageError, 3100, false);
       }
     },
   });
@@ -66,6 +78,7 @@ function ForgotPasswordPage() {
           تفعيل حساب
         </Link>
       </form>
+      <Message message={message} error={messageError} />
     </div>
   );
 }

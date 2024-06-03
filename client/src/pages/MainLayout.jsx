@@ -23,6 +23,14 @@ function MainLayout() {
   const token = useSelector((state) => state.token);
   const [newNotification, setNewNotification] = useState(null);
   const [warning, setWarning] = useState(null);
+  let [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    document.body.onresize = (e) => {
+      console.log(e);
+      setScreenWidth(e.currentTarget.innerWidth);
+    };
+  }, []);
   useEffect(() => {
     if (theme === "dark") document.body.classList.add("dark");
     else document.body.classList.remove("dark");
@@ -67,14 +75,15 @@ function MainLayout() {
         {newNotification && (
           <motion.div
             initial={{
-              y: 100,
+              y: screenWidth > 640 ? 100 : -120,
+              x: screenWidth < 640 ? "50%" : 0,
             }}
-            animate={{ y: 0 }}
+            animate={{ y: 0, x: screenWidth < 640 ? "50%" : 0 }}
             // drag={window.visualViewport.width < 640 && 'y'}
             dragConstraints={{ bottom: 0, right: 0, left: 0 }}
-            exit={{ y: 100 }}
+            exit={{ y: screenWidth > 640 ? 100 : -120 }}
             onClick={() => setNewNotification(null)}
-            className="fixed z-50 top-5 rounded-md right-1/2 bg-slate-100 dark:bg-slate-900 w-fit  sm:mx-0 sm:top-auto sm:bottom-5 sm:right-5"
+            className="fixed z-50 top-5 rounded-md right-1/2 bg-slate-100 dark:bg-slate-900 w-fit min-w-64 sm:mx-0 sm:top-auto sm:bottom-5 sm:right-5"
           >
             <Link
               onClick={async () => {
@@ -93,34 +102,36 @@ function MainLayout() {
               to={newNotification.returnUrl}
             >
               <h3 className="text-xl font-bold">إشعار جديد</h3>
-              {newNotification.message}
-              <span
-                className={`ms-2 ${
-                  newNotification.type === "dislike" ||
-                  newNotification.type === "deleteComment" ||
-                  newNotification.type === "verifyingRejected" 
-                    ? "bg-red-500"
-                    : "bg-green-500"
-                } py-1 px-2 inline-block rounded-full`}
-              >
-                {newNotification.type === "like" ? (
-                  <FontAwesomeIcon icon={faThumbsUp} />
-                ) : newNotification.type === "dislike" ? (
-                  <FontAwesomeIcon icon={faThumbsDown} />
-                ) : newNotification.type === "comment" ? (
-                  <FontAwesomeIcon icon={faMessage} />
-                ) : newNotification.type === "deleteComment" ? (
-                  <FontAwesomeIcon icon={faCommentSlash} />
-                ) : newNotification.type === "follow" ? (
-                  <FontAwesomeIcon icon={faUserPlus} />
-                ) : newNotification.type === "report" ? (
-                  <FontAwesomeIcon icon={faFlag} />
-                ) : newNotification.type.startsWith("verifying") ? (
-                  <FontAwesomeIcon icon={faCheckCircle} />
-                ) : (
-                  ""
-                )}
-              </span>
+              <div className="flex justify-between items-center">
+                <span>{newNotification.message}</span>
+                <span
+                  className={`ms-2 ${
+                    newNotification.type === "dislike" ||
+                    newNotification.type === "deleteComment" ||
+                    newNotification.type === "verifyingRejected"
+                      ? "bg-red-500"
+                      : "bg-green-500"
+                  } py-1 px-2 inline-block rounded-full`}
+                >
+                  {newNotification.type === "like" ? (
+                    <FontAwesomeIcon icon={faThumbsUp} />
+                  ) : newNotification.type === "dislike" ? (
+                    <FontAwesomeIcon icon={faThumbsDown} />
+                  ) : newNotification.type === "comment" ? (
+                    <FontAwesomeIcon icon={faMessage} />
+                  ) : newNotification.type === "deleteComment" ? (
+                    <FontAwesomeIcon icon={faCommentSlash} />
+                  ) : newNotification.type === "follow" ? (
+                    <FontAwesomeIcon icon={faUserPlus} />
+                  ) : newNotification.type === "report" ? (
+                    <FontAwesomeIcon icon={faFlag} />
+                  ) : newNotification.type.startsWith("verifying") ? (
+                    <FontAwesomeIcon icon={faCheckCircle} />
+                  ) : (
+                    ""
+                  )}
+                </span>
+              </div>
             </Link>
           </motion.div>
         )}

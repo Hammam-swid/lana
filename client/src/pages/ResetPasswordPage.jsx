@@ -5,11 +5,13 @@ import { useSearchParams, useParams, useNavigate } from "react-router-dom";
 import * as Yup from "yup";
 import axios from "axios";
 import { useState } from "react";
+import Message from "../components/Message";
 
 function ResetPasswordPage() {
   const nav = useNavigate();
   const params = useParams();
   const [message, setMessage] = useState("");
+  const [messageError, setMessageError] = useState(false);
   const [search] = useSearchParams();
   const formik = useFormik({
     initialValues: {
@@ -30,7 +32,7 @@ function ResetPasswordPage() {
         "كلمة المرور غير متطابقة"
       ),
     }),
-    onSubmit: async (values, helpers) => {
+    onSubmit: async (values) => {
       try {
         const res = await axios({
           method: "PATCH",
@@ -39,12 +41,17 @@ function ResetPasswordPage() {
         });
         if (res.data.status === "success") {
           setMessage(res.data.message);
-          setTimeout(nav, 3000, "/login", { replace: true });
+          setTimeout(nav, 3100, "/login", { replace: true });
         }
       } catch (error) {
         console.log(error);
-        helpers.setErrors({ message: error?.response?.data?.message });
-        setTimeout(nav, 3000, "/forgot-password");
+        setMessage(error?.response?.data?.message);
+        setMessageError(true);
+        if (error.response.status === 404)
+          setTimeout(nav, 3000, "/forgot-password");
+      } finally {
+        setTimeout(setMessage, 3000, "");
+        setTimeout(setMessageError, 3100, false);
       }
     },
   });
@@ -96,11 +103,6 @@ function ResetPasswordPage() {
         {formik.errors.passwordConfirm && formik.touched.passwordConfirm && (
           <p className="text-red-400">{formik.errors.passwordConfirm}</p>
         )}
-        {formik.errors.message ? (
-          <p className="text-red-400 font-bold">{formik.errors.message}</p>
-        ) : (
-          message && <p className="text-green-400 font-bold">{message}</p>
-        )}
         <button
           type="submit"
           className="p-3 mt-5 rounded-sm font-bold text-lg bg-gradient-to-b from-green-400 to-green-600"
@@ -112,6 +114,7 @@ function ResetPasswordPage() {
           )}
         </button>
       </form>
+      <Message message={message} error={messageError}/>
     </div>
   );
 }

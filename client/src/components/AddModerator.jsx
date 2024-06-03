@@ -15,6 +15,7 @@ function AddModerator({ hide, show }) {
     document.body.style.overflow = show && hide ? "hidden" : "auto";
   }, [show, hide]);
   const [message, setMessage] = useState("");
+  const [messageError, setMessageError] = useState(false);
   const formik = useFormik({
     initialValues: {
       fullName: "",
@@ -27,6 +28,16 @@ function AddModerator({ hide, show }) {
       email: Yup.string()
         .required("الرجاء إدخال البريد الإلكتروني")
         .email("الرجاء إدخال البريد الإلكتروني بشكل صحيح"),
+      fullName: Yup.string().required("يجب إدخال الاسم الكامل"),
+      username: Yup.string().required("يجب إدخال اسم المستخدم"),
+      password: Yup.string()
+        .required("يجب إدخال كلمة المرور")
+        .min(8, "يجب أن تحتوي كلمة المرور على 8 أحرف على الأقل")
+        .matches(
+          /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[a-zA-Z]).{8,}$/gm,
+          "كلمة المرور ضعيفة"
+        ),
+      role: Yup.string().required("يجب اختيار وظيفة"),
     }),
     onSubmit: async (values) => {
       try {
@@ -40,8 +51,13 @@ function AddModerator({ hide, show }) {
         setMessage("تمت إضافة مشرف بنجاح");
       } catch (error) {
         console.log(error);
+        setMessage(
+          error.response.data.message || "حدث خطأ أثناء تنفيذ العملية"
+        );
+        setMessageError(true);
       } finally {
         setTimeout(setMessage, 3000, "");
+        setTimeout(setMessageError, 3100, false);
       }
     },
   });
@@ -76,6 +92,9 @@ function AddModerator({ hide, show }) {
                 onBlur={formik.handleBlur}
                 className="w-full bg-slate-300 dark:bg-slate-800 p-2 rounded-md outline-none focus:outline-none"
               />
+              {formik.errors.email && formik.touched.email && (
+                <p className="text-red-400">{formik.errors.email}</p>
+              )}
               <label htmlFor="fullName" className="font-bold">
                 الاسم الكامل:{" "}
               </label>
@@ -88,6 +107,9 @@ function AddModerator({ hide, show }) {
                 onBlur={formik.handleBlur}
                 className="w-full bg-slate-300 dark:bg-slate-800 p-2 rounded-md outline-none focus:outline-none"
               />
+              {formik.errors.fullName && formik.touched.fullName && (
+                <p className="text-red-400">{formik.errors.fullName}</p>
+              )}
               <label htmlFor="username" className="font-bold">
                 اسم المستخدم (username):{" "}
               </label>
@@ -100,6 +122,9 @@ function AddModerator({ hide, show }) {
                 onBlur={formik.handleBlur}
                 className="w-full bg-slate-300 dark:bg-slate-800 p-2 rounded-md outline-none focus:outline-none"
               />
+              {formik.errors.username && formik.touched.username && (
+                <p className="text-red-400">{formik.errors.username}</p>
+              )}
               <label htmlFor="password" className="font-bold">
                 كلمة المرور:{" "}
               </label>
@@ -112,6 +137,9 @@ function AddModerator({ hide, show }) {
                 onBlur={formik.handleBlur}
                 className="w-full bg-slate-300 dark:bg-slate-800 p-2 rounded-md outline-none focus:outline-none"
               />
+              {formik.errors.password && formik.touched.password && (
+                <p className="text-red-400">{formik.errors.password}</p>
+              )}
               <p className="font-bold">الوظيفة: </p>
               <div className="flex gap-3">
                 <div>
@@ -151,6 +179,9 @@ function AddModerator({ hide, show }) {
                   </label>
                 </div>
               </div>
+              {formik.errors.role && formik.touched.role && (
+                <p className="text-red-400">{formik.errors.role}</p>
+              )}
               <button
                 disabled={formik.isSubmitting}
                 type="submit"
@@ -169,7 +200,7 @@ function AddModerator({ hide, show }) {
           </motion.div>
         )}
       </AnimatePresence>
-      <Message message={message} />
+      <Message message={message} error={messageError} />
     </>
   );
 }

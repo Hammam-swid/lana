@@ -12,6 +12,7 @@ import { Document, Page } from "react-pdf";
 import { useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import Modal from "./Modal";
+import Message from "./Message";
 
 function VerifyingRequestPreview({ request }) {
   const token = useSelector((state) => state.token);
@@ -19,12 +20,14 @@ function VerifyingRequestPreview({ request }) {
   const [currentPage, setCurrentPage] = useState(1);
   const [numOfPages, setNumOfPages] = useState(0);
   const [modalData, setModalData] = useState({});
+  const [message, setMessage] = useState("");
+  const [messageError, setMessageError] = useState(false);
   console.log(request.profileUrl.split("/profile/"));
   return (
     <div className="dark:bg-slate-900 bg-slate-100 rounded-md h-[32rem] p-3 shadow-md flex flex-col justify-between">
       {request.verificationFile.split(".")[1] === "pdf" ? (
         <>
-          <div className="max-h-96 overflow-y-scroll overflow-x-hidden w-full rounded-md outline outline-2 outline-green-500 dark:outline-none">
+          <div className="max-h-96 overflow-y-scroll overflow-x-hidden w-full rounded-md outline outline-2 outline-green-500 ">
             <Document
               file={`/verificationFiles/${request.verificationFile}`}
               onLoadSuccess={(doc) => {
@@ -34,7 +37,7 @@ function VerifyingRequestPreview({ request }) {
             >
               <Page
                 width={500}
-                className={"h-fit w-fit overflow-hidden"}
+                className={"h-fit w-fit overflow-hidden mx-auto"}
                 pageNumber={currentPage}
                 renderAnnotationLayer={false}
                 renderTextLayer={false}
@@ -71,10 +74,14 @@ function VerifyingRequestPreview({ request }) {
         </>
       ) : (
         <img
-          className="w-full max-h-96 object-contain rounded-md overflow-y-scroll outline outline-2 outline-green-500 dark:outline-none"
+          className="w-full max-h-96 object-contain rounded-md overflow-y-scroll outline outline-2 outline-green-500"
           src={`/verificationFiles/${request.verificationFile}`}
         />
       )}
+      <div className="my-2">
+        <p className="font-bold">الوصف:</p>
+        {request.description}
+      </div>
       <div className="flex justify-between items-end">
         <div className="hover:*:underline">
           <a
@@ -133,8 +140,17 @@ function VerifyingRequestPreview({ request }) {
                       headers: { Authorization: `Bearer ${token}` },
                     });
                     console.log(res);
+                    setMessage(res.data.message);
                   } catch (error) {
                     console.log(error);
+                    setMessage(
+                      error.response?.data?.message ||
+                        "حدث خطأ أثناء تنفيذ العملية"
+                    );
+                    setMessageError(true);
+                  } finally {
+                    setTimeout(setMessage, 3000, "");
+                    setTimeout(setMessageError, 3100, false);
                   }
                 },
               })
@@ -156,9 +172,20 @@ function VerifyingRequestPreview({ request }) {
                       headers: { Authorization: `Bearer ${token}` },
                     });
                     console.log(res);
-                    nav(".");
+                    setMessage(res.data.message);
+                    setTimeout(() => {
+                      nav(".");
+                      setMessage("");
+                    }, 3000);
                   } catch (error) {
                     console.log(error);
+                    setMessage(
+                      error.response?.data?.message ||
+                        "حدث خطأ أثناء تنفيذ العملية"
+                    );
+                    setMessageError(true);
+                    setTimeout(setMessage, 3000, "");
+                    setTimeout(setMessageError, 3100, false);
                   }
                 },
               })
@@ -174,6 +201,7 @@ function VerifyingRequestPreview({ request }) {
         action={modalData.action}
         hide={modalData.hide}
       />
+      <Message message={message} error={messageError} />
     </div>
   );
 }

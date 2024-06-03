@@ -250,12 +250,14 @@ function Post(props) {
               }}
               className="w-full resize-none dark:bg-slate-800 p-3 rounded-md outline-none"
             />
-            <label
-              htmlFor="images"
-              className="cursor-pointer text-green-500 text-xl p-3"
-            >
-              <FontAwesomeIcon icon={faImage} />
-            </label>
+            {!post.video && (
+              <label
+                htmlFor="images"
+                className="cursor-pointer text-green-500 text-xl p-3"
+              >
+                <FontAwesomeIcon icon={faImage} />
+              </label>
+            )}
             <input
               type="file"
               id="images"

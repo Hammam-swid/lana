@@ -2,11 +2,15 @@ import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import axios from "axios";
 import { useFormik } from "formik";
+import { useState } from "react";
 import { useSelector } from "react-redux";
 import * as Yup from "yup";
+import Message from "../components/Message";
 
 function VerifyAccountPage() {
   const token = useSelector((state) => state.token);
+  const [message, setMessage] = useState("");
+  const [messageError, setMessageError] = useState(false);
   const formik = useFormik({
     initialValues: {
       verificationFile: "",
@@ -14,7 +18,10 @@ function VerifyAccountPage() {
     },
     validationSchema: Yup.object({
       verificationFile: Yup.mixed().required("يجب إدخال ملف"),
-      description: Yup.string().min(10, "يجب أن يحتوي الوصف على عشرة أحرف"),
+      description: Yup.string()
+        .required("يجب إدخال الوصف")
+        .min(50, "يجب أن يحتوي الوصف على 50 حرفاً على")
+        .max(150, "يجب ألا يتجاوز الوصف 150 حرفاً"),
     }),
     onSubmit: async (values) => {
       try {
@@ -31,8 +38,16 @@ function VerifyAccountPage() {
           headers: { Authorization: `Bearer ${token}` },
         });
         console.log(res);
+        setMessage(res.data.message);
       } catch (error) {
+        setMessage(
+          error.response.data.message || "حدث خطأ أثناء تنفيذ العملية"
+        );
+        setMessageError(true);
         console.log(error);
+      } finally {
+        setTimeout(setMessage, 4000, "");
+        setTimeout(setMessageError, 4100, false);
       }
     },
   });
@@ -56,7 +71,7 @@ function VerifyAccountPage() {
       {formik.errors.verificationFile && formik.touched.verificationFile && (
         <p className="text-red-400">{formik.errors.verificationFile}</p>
       )}
-      {/* <p className="text-gray-500">يمكنك رفع صورة أو ملف pdf</p> */}
+      <p className="text-gray-500">يمكنك رفع صورة أو ملف pdf</p>
       {/* <label htmlFor="verificationFile" className="text-3xl text-green-500 cursor-pointer">
         <FontAwesomeIcon icon={faImage} />
       </label> */}
@@ -71,6 +86,9 @@ function VerifyAccountPage() {
         value={formik.values.description}
         className="resize-none rounded-md h-20 p-3 outline outline-2 focus:outline-green-500 outline-green-800 dark:bg-slate-900"
       />
+      {formik.errors.description && formik.touched.description && (
+        <p className="text-red-400">{formik.errors.description}</p>
+      )}
       <button
         disabled={formik.isSubmitting}
         type="submit"
@@ -85,6 +103,7 @@ function VerifyAccountPage() {
           "إرسال"
         )}
       </button>
+      <Message message={message} error={messageError} />
     </form>
   );
 }
