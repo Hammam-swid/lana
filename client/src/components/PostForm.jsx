@@ -98,6 +98,11 @@ function PostForm() {
             } ....؟`}
           />
           <button
+            title={
+              formik.isSubmitting || formik.values.content === ""
+                ? "الرجاء إدخال محتوى نصي"
+                : ""
+            }
             disabled={formik.isSubmitting || formik.values.content === ""}
             className="text-green-500 text-xl disabled:text-green-900 absolute top-1/2 -translate-y-1/2 end-2"
             type="submit"

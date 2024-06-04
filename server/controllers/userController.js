@@ -108,7 +108,7 @@ exports.updateMe = catchAsync(async (req, res, next) => {
 
 exports.activateMe = catchAsync(async (req, res, next) => {
   const { email } = req.body;
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email, role: "user" });
   if (!user) {
     return next(new AppError("هذا المستخدم غير موجود", 404));
   }
@@ -359,6 +359,16 @@ exports.getMyBlockedUsers = catchAsync(async (req, res, next) => {
 
 exports.banUser = catchAsync(async (req, res, next) => {
   const { userId } = req.params;
+  const user = await User.findById({ _id: userId });
+  if (!user) {
+    return next(new AppError("هذا المستخدم غير موجود"));
+  }
+  if (user.role === "admin") {
+    return next(new AppError("لا يمكن حظر هذا المدير من المنصة", 404));
+  }
+  if (user.role === "moderator" && req.user.role !== "admin") {
+    return next(new AppError("لا تملك الصلاحيات لعمل هذه العملية", 403));
+  }
   await User.updateOne({ _id: userId }, { state: "banned" });
   res.status(204).json({
     status: "success",

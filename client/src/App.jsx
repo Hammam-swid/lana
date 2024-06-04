@@ -1,4 +1,5 @@
 import {
+  Link,
   Route,
   RouterProvider,
   createBrowserRouter,
@@ -71,7 +72,23 @@ function App() {
         path="/"
         element={<MainLayout />}
         errorElement={
-          <button onClick={() => window.location.reload()}>تحديث</button>
+          <div className="text-2xl flex h-screen flex-col justify-center items-center gap-3">
+            <h1>حدث خطأ أثناء تحميل الصفحة</h1>
+            <div>
+              <button
+                className="bg-green-500 p-2 rounded-md text-white"
+                onClick={() => window.location.reload()}
+              >
+                تحديث
+              </button>
+              <Link
+                to={"/"}
+                className="bg-green-500 p-2 rounded-md text-white ms-5"
+              >
+                الانتقال إلى الصفحة الرئيسية
+              </Link>
+            </div>
+          </div>
         }
         loader={mainLayoutLoader}
       >
@@ -128,6 +145,7 @@ function App() {
           path="post/:postId"
           element={<PostPage />}
           loader={postPageLoader}
+          // errorElement={<ErrorPage />}
         />
         <Route
           path="settings/:username"

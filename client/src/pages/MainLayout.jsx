@@ -27,7 +27,6 @@ function MainLayout() {
   useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     document.body.onresize = (e) => {
-      console.log(e);
       setScreenWidth(e.currentTarget.innerWidth);
     };
   }, []);

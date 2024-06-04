@@ -107,13 +107,18 @@ function ProfilePage() {
                                       Authorization: `Bearer ${token}`,
                                     },
                                   });
-                                  console.log(res)
+                                  console.log(res);
                                   if (res.status === 200) {
                                     setMessage("تم حظر هذا المستخدم بنجاح");
                                     setTimeout(setMessage, 3000, "");
                                   }
                                 } catch (error) {
                                   console.log(error);
+                                  setErrorMessage(
+                                    error.response.data.message ||
+                                      "حدث خطأ أثناء تنفيذ العملية"
+                                  );
+                                  setTimeout(setErrorMessage, 3000, "");
                                 }
                               },
                             });
@@ -166,6 +171,11 @@ function ProfilePage() {
                                   }
                                 } catch (error) {
                                   console.log(error);
+                                  setErrorMessage(
+                                    error.response.data.message ||
+                                      "حدث خطأ أثناء تنفيذ العملية"
+                                  );
+                                  setTimeout(setErrorMessage, 3000, "");
                                 }
                               },
                             })
