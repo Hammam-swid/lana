@@ -41,6 +41,7 @@ module.exports = (err, req, res, next) => {
   if (err.name === "CastError") error = handleCastErrorDB(err);
   if (err.code === 11000) error = handleDuplicateFieldsDB(err);
   if (err.name === "JsonWebTokenError") error = handleJWTError(err);
+  if (err.name === "TokenExpiredError") error = handleJWTError(err);
   if (err?.response?.candidates[0]?.finishReason === "SAFETY")
     error = handleSafetyError();
   sendErrorProduction(error, res);

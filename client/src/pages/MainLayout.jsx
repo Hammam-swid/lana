@@ -2,7 +2,7 @@ import { Link, Outlet } from "react-router-dom";
 import Header from "../components/Header";
 import io from "socket.io-client";
 import { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faCommentSlash,
@@ -16,6 +16,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import axios from "axios";
 import Warning from "../components/Warning";
 import { faCheckCircle } from "@fortawesome/free-regular-svg-icons";
+import { setLogout } from "../store/authSlice";
 
 function MainLayout() {
   const user = useSelector((state) => state.user);
@@ -24,11 +25,29 @@ function MainLayout() {
   const [newNotification, setNewNotification] = useState(null);
   const [warning, setWarning] = useState(null);
   let [screenWidth, setScreenWidth] = useState(window.innerWidth);
+  const dispatch = useDispatch();
   useEffect(() => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
     document.body.onresize = (e) => {
       setScreenWidth(e.currentTarget.innerWidth);
     };
+  }, []);
+  useEffect(() => {
+    console.log("hello form main layout");
+    console.log(user.role);
+    if (user.role !== "user")
+      window.onclose = () => {
+        const loggingOut = async () => {
+          const res = await axios({
+            method: "GET",
+            url: "/api/v1/users/logout",
+          });
+          console.log(res);
+        };
+        loggingOut();
+        dispatch(setLogout());
+      };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   useEffect(() => {
     if (theme === "dark") document.body.classList.add("dark");

@@ -7,9 +7,9 @@ const AppError = require("../utils/AppError");
 const Email = require("../utils/email");
 const Post = require("../models/postModel");
 
-const createToken = (payload) => {
+const createToken = (payload, role) => {
   return jwt.sign(payload, process.env.JWT_SECRET, {
-    expiresIn: process.env.JWT_EXPIRES,
+    expiresIn: role !== "user" ? "1d" : process.env.JWT_EXPIRES,
   });
 };
 
@@ -52,7 +52,7 @@ exports.verifySignup = catchAsync(async (req, res, next) => {
   user.verificationCode = undefined;
   user.verificationCodeEx = undefined;
   await user.save();
-  const token = createToken({ id: user._id });
+  const token = createToken({ id: user._id }, user.role);
   res.cookie("jwt", token, {
     httpOnly: true,
     expires: new Date(
@@ -84,7 +84,7 @@ exports.login = catchAsync(async (req, res, next) => {
       new AppError("البريد الإلكتروني أو كلمة المرور غير صحيحة", 404)
     );
   }
-  const token = createToken({ id: user._id });
+  const token = createToken({ id: user._id }, user.role);
   res.cookie("jwt", token, {
     httpOnly: true,
     expires: new Date(
@@ -273,7 +273,7 @@ exports.updatePassword = catchAsync(async (req, res, next) => {
   }
   user.password = req.body.password;
   await user.save();
-  const token = createToken({ id: user._id });
+  const token = createToken({ id: user._id }, user.role);
   user.password = undefined;
   // if (user.following) {
   //   await user.populate("following", "username fullName photo verified state");
