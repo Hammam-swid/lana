@@ -41,7 +41,9 @@ export const mainLayoutLoader = () => {
     } catch (error) {
       if (error.response.status === 401 || error.response.status === 403) {
         store.dispatch(setLogout());
-        return redirect("/login");
+        redirect("/login");
+        window.location.reload();
+        return null;
       } else return;
     }
   };

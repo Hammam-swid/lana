@@ -77,9 +77,19 @@ exports.login = catchAsync(async (req, res, next) => {
   }
   const user = await User.findOne({
     email: email.toLowerCase(),
-    state: "active",
   }).select("+password");
-  if (!user || !(await user.comparePassword(password, user.password))) {
+  if (!user) {
+    return next(
+      new AppError("البريد الإلكتروني أو كلمة المرور غير صحيحة", 404)
+    );
+  }
+
+  if (user.state === "nonactive") {
+    return next(new AppError("هذا الحساب غير مفعل", 403));
+  } else if (user.state === "banned")
+    return next(new AppError("هذا الحساب محظور من المنصة", 403));
+
+  if (!(await user.comparePassword(password, user.password))) {
     return next(
       new AppError("البريد الإلكتروني أو كلمة المرور غير صحيحة", 404)
     );
