@@ -45,6 +45,11 @@ const limiter = rateLimit({
   message: "to many requests from this IP",
 });
 
+app.use('*', (req, res, next) => {
+  console.log(req.baseUrl);
+  next()
+})
+
 app.use("/api", limiter);
 
 // توجيه الطلبات باتجاه الموجه الخاص بكل مصدر
