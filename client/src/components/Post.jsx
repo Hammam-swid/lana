@@ -20,7 +20,7 @@ import {
   faCheckCircle,
 } from "@fortawesome/free-solid-svg-icons";
 import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import axios from "axios";
 import Comments from "./Comments";
 import { useFormik } from "formik";
@@ -45,6 +45,17 @@ function Post(props) {
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
   const [showReport, setShowReport] = useState(false);
+  const optionsButton = useRef();
+  console.log(optionsButton.current)
+  useEffect(() => {
+    document.onclick = (ev) => {
+      if (ev.target !== optionsButton.current) {
+        setPostOptions(false);
+        console.log(postOptions)
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   const formik = useFormik({
     initialValues: {
       content: post.content,
@@ -136,6 +147,7 @@ function Post(props) {
           </Link>
           {!edited ? (
             <button
+              ref={optionsButton}
               className="text-xl"
               onClick={() => setPostOptions((prev) => !prev)}
             >

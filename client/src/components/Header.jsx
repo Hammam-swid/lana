@@ -65,6 +65,20 @@ function Header({ notification }) {
   const isNotified = notiList.filter((noti) => !noti.seen).length;
   const nav = useNavigate();
   const dispatch = useDispatch();
+  const optionButton = useRef();
+  const optionIcon = useRef();
+  // console.log(optionIcon.current);
+  useEffect(() => {
+    document.onclick = (ev) => {
+      if (
+        ev.target !== optionButton.current &&
+        ev.target !== optionButton.current.children[0] &&
+        ev.target !== optionButton.current.children[0].children[0]
+      ) {
+        setOptions(false);
+      }
+    };
+  }, []);
   function updateOptions() {
     setOptions((prvOption) => !prvOption);
     setShowNotiList(false);
@@ -310,12 +324,13 @@ function Header({ notification }) {
             />
           </NavLink>
           <button
+            ref={optionButton}
             className={`text-2xl hover:text-green-500 duration-100 px-2 rounded ${
               options && "text-green-500 bg-green-100 dark:bg-green-900"
             }`}
             onClick={updateOptions}
           >
-            <FontAwesomeIcon icon={faBars} />
+            <FontAwesomeIcon ref={optionIcon} icon={faBars} />
           </button>
         </div>
         <AnimatePresence>
