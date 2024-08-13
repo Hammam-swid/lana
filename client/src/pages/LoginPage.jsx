@@ -61,8 +61,8 @@ function LoginPage() {
           className="w-80 md:max-w-96"
           src={
             theme === "dark"
-              ? "./src/assets/darkLanaLogo.svg"
-              : "./src/assets/lanaLogo.svg"
+              ? "/darkLanaLogo.svg"
+              : "/lanaLogo.svg"
           }
           alt="شعار منصة لنا"
         />

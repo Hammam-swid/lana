@@ -108,8 +108,8 @@ function Header({ notification }) {
               className="w-20 h-14"
               src={
                 theme === "dark"
-                  ? "/src/assets/darkLanaLogo.svg"
-                  : "/src/assets/lanaLogo.svg"
+                  ? "/darkLanaLogo.svg"
+                  : "/lanaLogo.svg"
               }
               alt="شعار منصة لنا"
             />
